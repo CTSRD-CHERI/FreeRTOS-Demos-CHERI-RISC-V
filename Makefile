@@ -33,8 +33,7 @@ OBJDUMP = llvm-objdump
 AR      = llvm-ar
 RANLIB  = llvm-ranlib
 CFLAGS  = -mno-relax -mcmodel=medium --sysroot=$(SYSROOT)
-LDFLAGS += --sysroot=$(SYSROOT) -lclang_rt.builtins-riscv64
-# Link with libgcc, until there is a functional compiler-rt
+LDFLAGS += --sysroot=$(SYSROOT) -lclang_rt.builtins-riscv$(RISCV_XLEN)
 LIBS	  += -lc
 else
 CC       = $(TARGET)-gcc
