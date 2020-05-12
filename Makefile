@@ -15,6 +15,7 @@ TOOLCHAIN ?=gcc
 SYSROOT   ?=
 LIBS_PATH ?=
 CFLAGS    ?=
+LDFLAGS   ?=
 LIBS      ?=
 
 EXTENSION ?=
@@ -22,7 +23,6 @@ CHERI_CLEN ?= 2*$(RISCV_XLEN)
 # CHERI is only supported by LLVM/Clang
 ifeq ($(EXTENSION),cheri)
 TOOLCHAIN = llvm
-CFLAGS   += -mno-relax
 endif
 
 ifeq ($(TOOLCHAIN),llvm)
@@ -32,8 +32,8 @@ OBJCOPY = llvm-objcopy
 OBJDUMP = llvm-objdump
 AR      = llvm-ar
 RANLIB  = llvm-ranlib
-CFLAGS  = -mcmodel=medium --sysroot=$(SYSROOT)
-LDFLAGS = -fuse-ld=lld  --sysroot=$(SYSROOT) $(LIBS_PATH)
+CFLAGS  = -mno-relax -mcmodel=medium --sysroot=$(SYSROOT)
+LDFLAGS += --sysroot=$(SYSROOT) -lclang_rt.builtins-riscv64
 # Link with libgcc, until there is a functional compiler-rt
 LIBS	  += -lc
 else
