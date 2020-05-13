@@ -3,6 +3,10 @@
 #include <string.h>
 #include "uart16550.h"
 
+#ifdef CONFIG_ENABLE_CHERI
+#include <cheric.h>
+#endif /* CONFIG_ENABLE_CHERI */
+
 volatile uint8_t* uart16550;
 
 #define UART_REG_QUEUE     0
@@ -38,6 +42,12 @@ int uart16550_txbuffer(uint8_t *ptr, int len) {
 
 void uart16550_init(unsigned long base) {
   uart16550 = (void *) base;
+
+#ifdef CONFIG_ENABLE_CHERI
+  extern void *pvAlmightyDataCap;
+  uart16550 = (uintptr_t) cheri_setoffset(pvAlmightyDataCap, (size_t) base);
+  uart16550 = cheri_csetbounds(uart16550, 0x1000);
+#endif /* CONFIG_ENABLE_CHERI */
 
   // http://wiki.osdev.org/Serial_Ports
   /*
