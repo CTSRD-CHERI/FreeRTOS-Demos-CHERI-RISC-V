@@ -25,8 +25,8 @@ void PLIC_init(
   uint32_t num_priorities) {
 
 #ifdef CONFIG_ENABLE_CHERI
-  extern void* cheri_getmscratchc();
-  this_plic->base_addr = (uintptr_t)cheri_setoffset(cheri_getmscratchc(), base_addr);
+  extern void *pvAlmightyDataCap;
+  this_plic->base_addr = (uintptr_t)cheri_setoffset(pvAlmightyDataCap, base_addr);
 #else
   this_plic->base_addr = base_addr;
 #endif /* CONFIG_ENABLE_CHERI */
