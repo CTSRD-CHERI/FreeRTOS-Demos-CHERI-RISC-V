@@ -84,6 +84,8 @@
  * See http://www.freertos.org/a00110.html.
  *----------------------------------------------------------*/
 //#define configISR_STACK_SIZE_WORDS      500 // NOTE: if using configISR_STACK_SIZE_WORDS the stack alignment assert doesn't pass
+#define configMTIME_BASE_ADDRESS		( configCLINT_BASE_ADDRESS + 0xBFF8UL )
+#define configMTIMECMP_BASE_ADDRESS		( configCLINT_BASE_ADDRESS + 0x4000UL )
 #define configUSE_PREEMPTION 1
 #define configUSE_IDLE_HOOK 1
 #define configUSE_TICK_HOOK 1
@@ -91,8 +93,13 @@
 #define configPERIPH_CLOCK_HZ ((unsigned long)(1000000))
 #define configTICK_RATE_HZ ((TickType_t)1000)
 #define configMAX_PRIORITIES (5)
-#define configMINIMAL_STACK_SIZE ((unsigned long)512) /* Can be as low as 60 but some of the demo tasks that use this constant require it to be higher. */
-#define configTOTAL_HEAP_SIZE ((size_t)(500 * 1024))
+#define configMINIMAL_STACK_SIZE ((uint32_t)512) /* Can be as low as 60 but some of the demo tasks that use this constant require it to be higher. */
+#define configSTACK_DEPTH_TYPE uint32_t //the default ifndef is uint16_t
+#ifdef configCUSTOM_HEAP_SIZE
+    #define configTOTAL_HEAP_SIZE ((size_t)(configCUSTOM_HEAP_SIZE * 1024 * 1024))
+#else
+    #define configTOTAL_HEAP_SIZE ((size_t)(256 * 1024))
+#endif
 #define configMAX_TASK_NAME_LEN (16)
 #define configUSE_TRACE_FACILITY 1
 #define configUSE_16_BIT_TICKS 0
@@ -105,9 +112,27 @@
 #define configUSE_APPLICATION_TASK_TAG 0
 #define configUSE_COUNTING_SEMAPHORES 1
 
-// TODO: the stats are not functional yet
-#define configGENERATE_RUN_TIME_STATS 0
+// TODO: use only for debugging
+#define configGENERATE_RUN_TIME_STATS 1
+#define configRECORD_STACK_HIGH_ADDRESS (1)
+#define INCLUDE_uxTaskGetStackHighWaterMark 1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 1
+
+// See http://www.nadler.com/embedded/newlibAndFreeRTOS.html
+#define configUSE_NEWLIB_REENTRANT 0 // Required for thread-safety of newlib sprintf,
+
+/* Runtime stats definitions */
+// TODO: use only for debugging
+#define configUSE_STATS_FORMATTING_FUNCTIONS 1
+extern uint32_t port_get_current_mtime(void);
+#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS()
+#define portGET_RUN_TIME_COUNTER_VALUE() port_get_current_mtime()
+
+/* Make newlib reentrant */
+// See http://www.nadler.com/embedded/newlibAndFreeRTOS.html
+// Required for thread-safety of newlib sprintf and friends
+// NOTE: this feature is optional
+#define configUSE_NEWLIB_REENTRANT 0
 
 /* Co-routine definitions. */
 #define configUSE_CO_ROUTINES 0
