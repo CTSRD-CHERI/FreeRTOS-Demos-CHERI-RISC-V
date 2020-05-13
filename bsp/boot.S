@@ -71,12 +71,18 @@
 */
 
 #ifdef CONFIG_ENABLE_CHERI
+.extern xISRStackTop
+.extern pvAlmightyDataCap
+.extern pvAlmightyCodeCap
+
 # The CPU starts in hybrid, and the boot initialisation has to be in hybrid.
 .option nocapmode
 #endif /* CONFIG_ENABLE_CHERI */
 
 /* Startup code */
+.text
 .globl boot
+.type boot, @function
 boot:
     li t6, 0x1800
     csrw mstatus, t6
@@ -88,7 +94,6 @@ boot:
     not             t1, t1
     candperm        ct0, ct0, t1
     cspecialrw      cnull, ddc, ct0
-    cspecialrw      cnull, mscratchc, ct0
 
     cspecialrw      ct0, pcc, cnull
     li              t1, ((1<<3) | (1<<5))
@@ -107,7 +112,7 @@ _mstart:
     li	x3, 0
     li	x4, 0
     li	x5, 0
-	li	x6, 0
+    li	x6, 0
     li	x7, 0
     li	x8, 0
     li	x9, 0
@@ -172,27 +177,39 @@ init_stack:
     la              t0, xISRStackTop
     sc              csp, 0(t0)
 
-    # Initialise the captable.
+    cspecialrw      ct0, ddc, cnull # Get DDC.
+    la              t1, pvAlmightyDataCap
+    sc              ct0, 0(t1)
+
     cspecialrw      ct0, pcc, cnull # Get PCC.
-    la              t1, _start_purecap
-    csetoffset      ct0, ct0, t1
     li              t1, 1
     csetflags       ct0, ct0, t1
+    la              t1, pvAlmightyCodeCap
+    sc              ct0, 0(t1)
+
+    # Initialise the captable.
+    # ct0 is still PCC
+    la              t1, _start_purecap
+    csetoffset      ct0, ct0, t1
     cjalr           cra, ct0
 
     # From now on, the DDC is always null.
-    # TODO: DDC is not actually nullified here because we need to work around a
-    # bug in mscratchc. If mscratchc works, we can actually throw away DDC.
     cmove           ct0, cnull
-    #cspecialrw      cnull, ct0, ddc # Write DDC.
+    cspecialrw      cnull, ddc, ct0 # Write DDC.
 
-    # Jump to main in purecap.
+    # Set up mtcc and jump to main in purecap mode.
     cspecialrw      ct0, pcc, cnull # Get PCC.
+
+    li              t1, 1
+    csetflags       ct0, ct0, t1     # set cap mode on
+
+    la              t1, freertos_risc_v_trap_handler
+    csetoffset      ct0, ct0, t1
+    cspecialrw      cnull, mtcc, ct0 # Write MTCC.
+
     la              t1, main
     csetoffset      ct0, ct0, t1
-    li              t1, 1
-    csetflags       ct0, ct0, t1
-    cjalr           cra, ct0
+    cjalr           cra, ct0 # jump to main
 #else
     /* set stack pointer */
     la	sp, _stack
@@ -202,12 +219,13 @@ init_stack:
 
 /* Fills memory blocks */
 fill_block:
-    sw		a2, 0(a0)
     bgeu	a0, a1, fb_end
+    sw		a2, 0(a0)
     addi	a0, a0, 4
     j		fill_block
 fb_end:
     ret
+.size boot, . - boot
 
 #ifdef CONFIG_ENABLE_CHERI
 .option capmode
