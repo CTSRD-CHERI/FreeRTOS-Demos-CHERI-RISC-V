@@ -181,7 +181,7 @@ gen_freertos_header:
 $(PROG).elf  : gen_freertos_header $(OBJS) Makefile
 	@echo Building FreeRTOS/RISC-V for PLATFORM=$(PLATFORM) ARCH=$(ARCH) ABI=$(ABI)
 	@echo Linking....
-	@$(CC) -o $@ $(LDFLAGS) $(OBJS) $(LIBS)
+	$(CC) -o $@ $(LDFLAGS) $(OBJS) $(LIBS) -v
 	#@$(OBJDUMP) -S $(PROG).elf > $(PROG).asm
 	@echo Completed $@
 
