@@ -93,7 +93,7 @@
 #define configPERIPH_CLOCK_HZ ((unsigned long)(1000000))
 #define configTICK_RATE_HZ ((TickType_t)1000)
 #define configMAX_PRIORITIES (5)
-#define configMINIMAL_STACK_SIZE ((uint32_t)512) /* Can be as low as 60 but some of the demo tasks that use this constant require it to be higher. */
+#define configMINIMAL_STACK_SIZE ((uint32_t) 1024) /* Can be as low as 60 but some of the demo tasks that use this constant require it to be higher. */
 #define configSTACK_DEPTH_TYPE uint32_t //the default ifndef is uint16_t
 #ifdef configCUSTOM_HEAP_SIZE
     #define configTOTAL_HEAP_SIZE ((size_t)(configCUSTOM_HEAP_SIZE * 1024 * 1024))
@@ -117,6 +117,7 @@
 #define configRECORD_STACK_HIGH_ADDRESS (1)
 #define INCLUDE_uxTaskGetStackHighWaterMark 1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 1
+#define configPORT_ALLOW_APP_EXCEPTION_HANDLERS 1
 
 // See http://www.nadler.com/embedded/newlibAndFreeRTOS.html
 #define configUSE_NEWLIB_REENTRANT 0 // Required for thread-safety of newlib sprintf,

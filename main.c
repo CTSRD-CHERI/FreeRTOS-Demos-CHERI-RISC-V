@@ -52,6 +52,9 @@ _start_purecap(void) {
 #if mainDEMO_TYPE == 1
 #pragma message "Demo type 1: Basic Blinky"
 extern void main_blinky(void);
+#elif mainDEMO_TYPE == 3
+#pragma message "Demo type 3: Tests"
+extern void main_tests(void);
 #else
 #error "Unsupported demo type"
 #endif
@@ -117,6 +120,10 @@ int main(void) {
 #if mainDEMO_TYPE == 1
   {
     main_blinky();
+  }
+#elif mainDEMO_TYPE == 3
+  {
+    main_tests();
   }
 #else
 #error "Unsupported Demo"
