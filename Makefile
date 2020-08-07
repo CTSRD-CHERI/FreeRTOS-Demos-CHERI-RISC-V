@@ -191,15 +191,15 @@ PORT_OBJ = $(PORT_SRC:.c=.o)
 DEMO_OBJ = $(DEMO_SRC:.c=.o)
 PORT_ASM_OBJ = $(PORT_ASM:.S=.o)
 CRT0_OBJ = $(CRT0:.S=.o)
-#OBJS = $(CRT0_OBJ) $(PORT_ASM_OBJ) $(PORT_OBJ) $(RTOS_OBJ) $(DEMO_OBJ) $(APP_OBJ)
-OBJS = $(CRT0_OBJ) $(PORT_ASM_OBJ) $(PORT_OBJ) $(RTOS_OBJ) $(APP_OBJ)
+OBJS = $(CRT0_OBJ) $(PORT_ASM_OBJ) $(PORT_OBJ) $(RTOS_OBJ) $(DEMO_OBJ) $(APP_OBJ)
+#OBJS = $(CRT0_OBJ) $(PORT_ASM_OBJ) $(PORT_OBJ) $(RTOS_OBJ) $(APP_OBJ)
 
-DEMO_COMP = $(PROG).a
-$(DEMO_COMP): $(DEMO_OBJ)
-	llvm-ar ru $@ $^
-	llvm-ranlib $@
+#DEMO_COMP = $(PROG).a
+#$(DEMO_COMP): $(DEMO_OBJ)
+#	llvm-ar ru $@ $^
+#	llvm-ranlib $@
 
-COMPARTMENTS = $(DEMO_COMP)
+#COMPARTMENTS = $(DEMO_COMP)
 LDFLAGS	+= -T link.ld -nostartfiles -nostdlib -defsym=_STACK_SIZE=4K -march=$(ARCH) -mabi=$(ABI)
 
 $(info ASFLAGS=$(ASFLAGS))
@@ -225,7 +225,8 @@ gen_freertos_header:
 $(PROG).elf  : gen_freertos_header $(OBJS) Makefile
 	@echo Building FreeRTOS/RISC-V for PLATFORM=$(PLATFORM) ARCH=$(ARCH) ABI=$(ABI)
 	@echo Linking....
-	$(CC) -o $@ $(LDFLAGS) $(OBJS) $(COMPARTMENTS) $(LIBS) -v
+	$(CC) -o $@ $(LDFLAGS) $(OBJS) $(LIBS) -v
+	#$(CC) -o $@ $(LDFLAGS) $(OBJS) $(COMPARTMENTS) $(LIBS) -v
 	#@$(OBJDUMP) -S $(PROG).elf > $(PROG).asm
 	@echo Completed $@
 
@@ -234,3 +235,4 @@ clean :
 	@rm -f $(PROG).elf
 	@rm -f $(PROG).map
 	@rm -f $(PROG).asm
+	@rm -f *.a
