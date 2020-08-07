@@ -83,9 +83,11 @@ int _getpid(int n) {
 }
 
 void _exit(int x) {
-  (void)x;
   do {
-
+#if PLATFORM_QEMU_VIRT || PLATFORM_SPIKE || PLATFORM_SAIL
+  vTerminate ( x );
+#else
+#warning "Unsupported exit syscall for this PLATFORM"
+#endif
   } while (1);
-
 }
