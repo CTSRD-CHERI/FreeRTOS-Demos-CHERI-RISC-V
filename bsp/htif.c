@@ -70,3 +70,16 @@ int htif_console_write_polled(
 
   return i;
 }
+
+void htif_poweroff( int32_t lExitCode) __attribute__( ( noreturn ) )
+{
+	while ( 1 )
+	{
+		fromhost = 0;
+		__set_tohost( 0, 0, lExitCode );
+	}
+}
+void vTerminate( int code )
+{
+	htif_poweroff( code );
+}

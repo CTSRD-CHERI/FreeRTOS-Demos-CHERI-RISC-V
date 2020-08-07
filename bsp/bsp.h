@@ -28,6 +28,11 @@ void prvSetupHardware(void);
 void external_interrupt_handler(uint32_t cause);
 
 /**
+ * Exit the simulator with a status code
+ */
+void vTerminate( int32_t lExitCode );
+
+/**
  * Xilinx Drivers defines
  * Some xillinx drivers require to sleep for given number of seconds
  */
