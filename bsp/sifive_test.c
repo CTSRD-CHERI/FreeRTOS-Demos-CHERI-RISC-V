@@ -36,6 +36,7 @@
 
 #include <bsp/qemu_virt.h>
 #include <inttypes.h>
+#include <stddef.h>
 
 #ifdef __CHERI_PURE_CAPABILITY__
 #include <cheric.h>$
