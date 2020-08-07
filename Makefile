@@ -99,8 +99,6 @@ APP_SRC = \
 	bsp/bsp.c \
 	bsp/plic_driver.c \
 	bsp/syscalls.c \
-  bsp/uart16550.c \
-  bsp/htif.c
 
 INCLUDES = \
 	-I. \
@@ -118,15 +116,20 @@ endif
 # PLATFORM Variants
 ifeq ($(PLATFORM),spike)
 	CFLAGS += -DPLATFORM_SPIKE=1
+	APP_SRC += bsp/htif.c
 else
 ifeq ($(PLATFORM),piccolo)
 	CFLAGS += -DPLATFORM_PICCOLO=1
+	APP_SRC += bsp/uart16550.c
 else
 ifeq ($(PLATFORM),sail)
 	CFLAGS += -DPLATFORM_SAIL=1
+	APP_SRC += bsp/htif.c
 else
 ifeq ($(PLATFORM),qemu_virt)
 	CFLAGS += -DPLATFORM_QEMU_VIRT=1
+	APP_SRC += bsp/uart16550.c
+	APP_SRC += bsp/sifive_test.c
 else
 ifeq ($(PLATFORM),rvbs)
 	CFLAGS += -DPLATFORM_RVBS=1
