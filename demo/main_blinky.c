@@ -204,6 +204,13 @@ static void prvQueueReceiveTask(void *pvParameters) {
       ulReceivedValue = 0U;
     } else {
       printf("Unexpected value received\r\n");
+      _exit(-1);
+    }
+
+    if ( cnt == 5 ) {
+        /* Successully blinked for 5 time, enough for testing. Shutdown the
+           supported platforms and signal a success. */
+        _exit(0);
     }
   }
 }
