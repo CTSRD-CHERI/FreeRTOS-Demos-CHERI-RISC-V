@@ -157,6 +157,31 @@ SECTIONS {
        . = ALIGN(16);
     } > cmem
 
+    .shstrtab : {
+       . = ALIGN(16);
+       __shstrtab_start = .;
+        *(.shstrtab)
+       __shstrtab_end = .;
+     } > dmem
+    .symtab : {
+       . = ALIGN(16);
+       __symtab_start = .;
+        *(.symtab)
+       __symtab_end = .;
+    } > dmem
+    .strtab : {
+       . = ALIGN(16);
+       __strtab_start = .;
+        *(.strtab)
+       __strtab_end = .;
+     } > dmem
+    .symtab_shndx : {
+       . = ALIGN(16);
+       __symtab_shndx_start = .;
+        *(.symtab_shndx)
+       __symtab_shndx_end = .;
+    } > dmem
+
     .bss : {
        . = ALIGN(16);
        __bss_start = .;
