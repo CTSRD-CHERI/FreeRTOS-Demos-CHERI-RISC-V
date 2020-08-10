@@ -39,7 +39,7 @@
 #include <stddef.h>
 
 #ifdef __CHERI_PURE_CAPABILITY__
-#include <cheric.h>$
+#include <cheric.h>
 extern void *pvAlmightyDataCap;
 #endif
 
