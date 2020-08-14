@@ -32,14 +32,31 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
+import yaml
+
 class Compartmentalize:
-  def __init__(mysillyobject, ymlfile, linkerscript):
+  yml_files = []
+
+  def __init__(self, ymlfile, linkerscript):
+    self.ymlfile = ymlfile
+    self.linkerscript = linkerscript
     pass
+
+  def open_yml(self):
+    with open(self.ymlfile, "r") as file:
+      # The FullLoader parameter handles the conversion from YAML
+      # scalar values to Python the dictionary format
+      read_file = yaml.load(file, Loader=yaml.FullLoader)
+
+    print(read_file)
 
   def Usage(self):
     pass
 
   def main(self):
+
+    self.open_yml()
+
     pass
 
 c = Compartmentalize("system.yml", "link.ld")
