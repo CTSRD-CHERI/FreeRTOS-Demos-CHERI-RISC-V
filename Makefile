@@ -120,7 +120,11 @@ else
 ifeq ($(PROG),main_tests)
 	CFLAGS += -DmainDEMO_TYPE=3
 else
+ifeq ($(PROG),main_compartment_test)
+	CFLAGS += -DmainDEMO_TYPE=4
+else
 	$(info unknown demo: $(PROG))
+endif
 endif
 endif
 

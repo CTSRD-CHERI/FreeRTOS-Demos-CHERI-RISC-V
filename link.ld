@@ -72,6 +72,21 @@
 
 OUTPUT_ARCH( "riscv" )
 
+PHDRS
+{
+  headers PT_PHDR PHDRS FILEHDR;
+  /*interp PT_INTERP ;*/
+  text PT_LOAD PHDRS ;
+  data PT_LOAD ;
+  /*dynamic PT_DYNAMIC ;*/
+  captable PT_LOAD ;
+  symtab PT_LOAD ;
+  strtab PT_LOAD ;
+  shdr_ndx PT_LOAD ;
+
+  comp1 PT_LOAD ;
+}
+
 /*
 _STACK_SIZE = DEFINED(_STACK_SIZE) ? _STACK_SIZE : 0x4000;
 _HEAP_SIZE = DEFINED(_HEAP_SIZE) ? _HEAP_SIZE : 0x4000;
@@ -84,7 +99,9 @@ _HEAP_SIZE = 0x4000;
  * Define memory layout
  ****************************************************************************/
 MEMORY {
-	cmem : ORIGIN = MEM_START, LENGTH = 0x10000000
+    cmem : ORIGIN = MEM_START, LENGTH = 0x00800000
+	imem : ORIGIN = MEM_START, LENGTH = 0x10000000
+	dmem : ORIGIN = MEM_START + 0x10001000, LENGTH = 0x10000000
 }
 
 /* Specify the default entry point to the program */
@@ -153,34 +170,46 @@ SECTIONS {
        . = ALIGN(16);
     } > cmem
 
-    .captable : {
-       . = ALIGN(16);
-    } > cmem
+    .symtab : {
+       __symtab_start = .;
+        *(.symtab)
+       __symtab_end = .;
+    } > dmem :symtab
 
-    .shstrtab : {
+    /*.shstrtab : {
        . = ALIGN(16);
        __shstrtab_start = .;
         *(.shstrtab)
        __shstrtab_end = .;
-     } > dmem
-    .symtab : {
-       . = ALIGN(16);
-       __symtab_start = .;
-        *(.symtab)
-       __symtab_end = .;
-    } > dmem
-    .strtab : {
-       . = ALIGN(16);
-       __strtab_start = .;
-        *(.strtab)
-       __strtab_end = .;
      } > dmem
     .symtab_shndx : {
        . = ALIGN(16);
        __symtab_shndx_start = .;
         *(.symtab_shndx)
        __symtab_shndx_end = .;
+    } > dmem :shdr_ndx
+    */
+
+    .dynsym : {
+       __dynsym_start = .;
+        *(.dynsym)
+       __dynsym_end = .;
     } > dmem
+
+    .dynstr : {
+       . = ALIGN(16);
+        *(.dynstr)
+    } > dmem
+
+    .strtab : {
+       __strtab_start = .;
+        *(.strtab)
+       __strtab_end = .;
+     } > dmem :strtab
+
+    .captable : {
+       . = ALIGN(16);
+    } > dmem :captable
 
     .bss : {
        . = ALIGN(16);
@@ -212,6 +241,10 @@ SECTIONS {
        __stack = _stack;
        __freertos_irq_stack_top = .;
     } > cmem
+
+    "_comp1" : {
+       *(.comp1)
+    } > dmem :comp1
 
     _end = .;
 }

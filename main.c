@@ -55,6 +55,9 @@ extern void main_blinky(void);
 #elif mainDEMO_TYPE == 3
 #pragma message "Demo type 3: Tests"
 extern void main_tests(void);
+#elif mainDEMO_TYPE == 4
+#pragma message "Demo type 4: Compartment Tests"
+extern void main_tests(void);
 #else
 #error "Unsupported demo type"
 #endif
@@ -124,6 +127,10 @@ int main(void) {
 #elif mainDEMO_TYPE == 3
   {
     main_tests();
+  }
+#elif mainDEMO_TYPE == 4
+  {
+    main_compartment_test();
   }
 #else
 #error "Unsupported Demo"

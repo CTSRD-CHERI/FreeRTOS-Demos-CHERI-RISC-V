@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <elf.h>
 
 /* Kernel includes. */
 #include "FreeRTOS.h"
@@ -38,29 +39,117 @@
 
 #include <inttypes.h>
 #include <cheric.h>
+extern void *pvAlmightyDataCap;
 
 #if __riscv_xlen == 32
 #define PRINT_REG "0x%08" PRIx32
+typedef Elf32_Sym Elf_Sym;
 #elif __riscv_xlen == 64
 #define PRINT_REG "0x%016" PRIx64
+typedef Elf64_Sym Elf_Sym;
 #endif
 
-static void vTaskCompartment(void *pvParameters);
+static void vTaskCompartment(void *pvParameters) __attribute__ ((section (".comp1")));;
 static UBaseType_t cheri_exception_handler();
+static UBaseType_t default_exception_handler(uintptr_t *exception_frame);
+static void elf_manip( void );
+
+static void vElfHeaderPrint( void )
+{
+extern char  __strtab_start[];
+Elf64_Ehdr *phdr = (void *) 0x80000000;
+	phdr = cheri_setoffset( pvAlmightyDataCap, ( ptraddr_t ) phdr );
+	phdr = cheri_csetbounds( ( void * ) phdr, sizeof( Elf64_Ehdr ) );
+
+  printf("phdr->e_type = %llu\t e_phoff = %llx \n", phdr->e_type, phdr->e_phoff);
+}
+
+static void vElfProgramHeaderPrint( void )
+{
+extern char  __strtab_start[];
+Elf64_Phdr *phdr = (void *) 0x80000040;
+	phdr = cheri_setoffset( pvAlmightyDataCap, ( ptraddr_t ) phdr );
+	phdr = cheri_csetbounds( ( void * ) phdr, sizeof( Elf64_Phdr ) * 2 );
+
+  printf("phdr->p_type = %llu\t paddr = %llx \n", phdr->p_type, phdr->p_paddr);
+  printf("phdr[1]->p_type = %llu\t paddr = %llx \n", phdr[1].p_type, phdr[1].p_paddr);
+}
+
+static void vSymEntryPrint( Elf_Sym *entry )
+{
+extern char  __strtab_start[];
+	printf("st_name[]: %s\t", &__strtab_start[entry->st_name]);
+	printf("st_value: %lx\t", entry->st_value);
+	printf("st_size: %lx\t", entry->st_size);
+	printf("st_shndx: %lu\n", entry->st_shndx);
+}
+
+static void elf_manip( void )
+{
+extern Elf_Sym  __symtab_start[];
+extern Elf_Sym  __symtab_end[];
+extern char  __strtab_start[];
+extern char  __strtab_end[];
+extern char  __dynsym_start[];
+extern char  __dynsym_end[];
+//extern Elf_Sym  __symtab_shndx_start[];
+//extern Elf_Sym  __symtab_shndx_end[];
+uint32_t entries_num =  ((ptraddr_t) __symtab_end - (ptraddr_t) __symtab_start) / sizeof(Elf_Sym);
+uint32_t dynentries_num =  (__dynsym_end - __dynsym_start) / sizeof(Elf_Sym);
+//uint32_t section_ndex_num =  ((ptraddr_t)__symtab_shndx_end - (ptraddr_t)__symtab_shndx_start) / sizeof(Elf_Sym);
+
+//extern Elf_Sym str_table[] = (Elf_Sym *) __symtab_start;
+	printf("sizeof(Elf_Sym) = %u\n", sizeof(Elf_Sym));
+	printf("__symtab_start = %p\n", __symtab_start);
+	printf("__symtab_end = %p\n", __symtab_end);
+	printf("__dynsym_start = %p\n", __dynsym_start);
+	printf("__dynsym_end = %p\n", __dynsym_end);
+	printf("__strab_start = %p\n", __strtab_start);
+	printf("__strtab_end = %p\n", __strtab_end);
+	//printf("__symtab_shndx_start = %p\n", __symtab_shndx_start);
+	//printf("__symtab_shndx_end = %p\n", __symtab_shndx_end);
+	printf("entries_num = %u\n", entries_num);
+	printf("dynentries_num = %u\n", dynentries_num);
+	//printf("section_ndex_num = %u\n", section_ndex_num);
+
+	for(int i = 0; i < entries_num; i++)
+	{
+    //printf("entry = %u\n", i);
+    if ((__symtab_start[i].st_info & 0xf) == STT_SECTION)
+		  vSymEntryPrint(&__symtab_start[i]);
+	}
+
+	//for(int i = 0; i < section_ndex_num; i++)
+	//{
+    //printf("symtab_shndx = %u\n", i);
+		//vSymEntryPrint(&__symtab_shndx_start[i]);
+	//}
+
+  vElfHeaderPrint();
+  vElfProgramHeaderPrint();
+
+	printf("Done with symbols\n");
+}
 
 /*-----------------------------------------------------------*/
 
 void main_compartment_test(void) {
 
-    xTaskCreate(prvvTaskCompartment,			 /* The function that implements the task. */
+    xTaskCreate(vTaskCompartment,			 /* The function that implements the task. */
                 "Compartment Task",					 /* The text name assigned to the task - for debug only as it is not used by the kernel. */
                 configMINIMAL_STACK_SIZE * 2U,   /* The size of the stack to allocate to the task. */
                 NULL,							 /* The parameter passed to the task - not used in this case. */
                 1, /* The priority assigned to the task. */
                 NULL);							 /* The task handle is not required, so NULL is passed. */
 
+    for (int i = 0; i < 64; i++) {
+      vPortSetExceptionHandler(i, default_exception_handler);
+    }
     /* Setup an exception handler for CHERI */
     vPortSetExceptionHandler(0x1c, cheri_exception_handler);
+
+    /* Print symtable */
+    elf_manip();
 
     /* Start the tasks and timer running. */
     vTaskStartScheduler();
@@ -79,6 +168,7 @@ void main_compartment_test(void) {
 static void vTaskCompartment(void *pvParameters) {
 
   printf("Testing Compartment\n");
+  _exit(0);
   while(1);
 }
 /*-----------------------------------------------------------*/
@@ -103,6 +193,17 @@ static void cheri_print_cap(void *cap) {
 static UBaseType_t cheri_exception_handler(uintptr_t *exception_frame)
 {
   cheri_print_cap(*(++exception_frame));
+  while(1);
+}
+
+static UBaseType_t default_exception_handler(uintptr_t *exception_frame)
+{
+  size_t cause = 0;
+  size_t epc = 0;
+  asm volatile ("csrr %0, mcause" : "=r"(cause)::);
+  asm volatile ("csrr %0, mepc" : "=r"(epc)::);
+  printf("mcause = %u\n", cause);
+  printf("mepc = %u\n", epc);
   while(1);
 }
 /*-----------------------------------------------------------*/
