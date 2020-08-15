@@ -61,19 +61,33 @@ Elf64_Ehdr *phdr = (void *) 0x80000000;
 	phdr = cheri_setoffset( pvAlmightyDataCap, ( ptraddr_t ) phdr );
 	phdr = cheri_csetbounds( ( void * ) phdr, sizeof( Elf64_Ehdr ) );
 
-  printf("phdr->e_type = %llu\t e_phoff = %llx \n", phdr->e_type, phdr->e_phoff);
+  for(int i = 0; i < 0x40 / 4; i++) {
+    printf("%u\n", ((uint32_t *) phdr)[i]);
+  }
+
+  printf("ehdr->Ie_ident = %s\n", &phdr->e_ident[1]);
+  printf("ehdr->e_type = %llu\t e_phoff = %llx \n", phdr->e_type, phdr->e_phoff);
+  printf("ehdr->phoff = %x\n", phdr->e_phoff);
 }
+/*-----------------------------------------------------------*/
 
 static void vElfProgramHeaderPrint( void )
 {
 extern char  __strtab_start[];
 Elf64_Phdr *phdr = (void *) 0x80000040;
+extern char _headers_end[];
+size_t headers_size =  (ptraddr_t) _headers_end - 0x080000000;
+printf("_headers_end = %lx\n", (ptraddr_t) _headers_end);
+printf("Headers Size = %lu\n", headers_size);
+// while(1);
 	phdr = cheri_setoffset( pvAlmightyDataCap, ( ptraddr_t ) phdr );
-	phdr = cheri_csetbounds( ( void * ) phdr, sizeof( Elf64_Phdr ) * 2 );
+	phdr = cheri_csetbounds( ( void * ) phdr, (size_t) _headers_end );
 
-  printf("phdr->p_type = %llu\t paddr = %llx \n", phdr->p_type, phdr->p_paddr);
-  printf("phdr[1]->p_type = %llu\t paddr = %llx \n", phdr[1].p_type, phdr[1].p_paddr);
+  for(int i = 0; i < (size_t) (_headers_end) / sizeof(Elf64_Phdr); i++) {
+    printf("phdr[%u]->p_type = %lu\t paddr = %llx \t p_flags = %lu\n", i, phdr[i].p_type, phdr[i].p_paddr, phdr[i].p_flags);
+  }
 }
+/*-----------------------------------------------------------*/
 
 static void vSymEntryPrint( Elf_Sym *entry )
 {
@@ -83,6 +97,7 @@ extern char  __strtab_start[];
 	printf("st_size: %lx\t", entry->st_size);
 	printf("st_shndx: %lu\n", entry->st_shndx);
 }
+/*-----------------------------------------------------------*/
 
 static void elf_manip( void )
 {
@@ -130,7 +145,6 @@ uint32_t dynentries_num =  (__dynsym_end - __dynsym_start) / sizeof(Elf_Sym);
 
 	printf("Done with symbols\n");
 }
-
 /*-----------------------------------------------------------*/
 
 void main_compartment_test(void) {
