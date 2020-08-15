@@ -1,0 +1,15 @@
+compartments:
+  - comp1:
+      type: component
+      comp_type: files
+      connections:
+        - comp2
+      input:
+        - demo/compartments/comp1.c
+  - comp2:
+      type: component
+      comp_type: files
+      connections:
+        - comp2
+      input:
+        - demo/compartments/comp2.c
