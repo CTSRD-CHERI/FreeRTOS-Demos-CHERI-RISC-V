@@ -204,7 +204,7 @@ OBJS = $(CRT0_OBJ) $(PORT_ASM_OBJ) $(PORT_OBJ) $(RTOS_OBJ) $(DEMO_OBJ) $(APP_OBJ
 #	llvm-ranlib $@
 
 #COMPARTMENTS = $(DEMO_COMP)
-LDFLAGS	+= -T link.ld -nostartfiles -nostdlib -defsym=_STACK_SIZE=4K -march=$(ARCH) -mabi=$(ABI)
+LDFLAGS	+= -T link.ld.generated -nostartfiles -nostdlib -defsym=_STACK_SIZE=4K -march=$(ARCH) -mabi=$(ABI)
 
 $(info ASFLAGS=$(ASFLAGS))
 $(info LDLIBS=$(LDLIBS))
@@ -232,6 +232,7 @@ $(PROG).elf  : gen_freertos_header $(OBJS) Makefile
 	$(CC) -o $@ $(LDFLAGS) $(OBJS) $(LIBS) -v
 	#$(CC) -o $@ $(LDFLAGS) $(OBJS) $(COMPARTMENTS) $(LIBS) -v
 	#@$(OBJDUMP) -S $(PROG).elf > $(PROG).asm
+	@echo $(CFLAGS) > comp.cflags
 	@echo Completed $@
 
 clean :
