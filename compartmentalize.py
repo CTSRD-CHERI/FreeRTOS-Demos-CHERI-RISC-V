@@ -33,6 +33,11 @@
 # SUCH DAMAGE.
 
 import yaml
+import os
+import subprocess
+import logging, sys
+
+from pathlib import Path
 
 class Compartmentalize:
   yml_files = []
@@ -47,17 +52,62 @@ class Compartmentalize:
       # The FullLoader parameter handles the conversion from YAML
       # scalar values to Python the dictionary format
       read_file = yaml.load(file, Loader=yaml.FullLoader)
+      logging.debug(read_file)
+      return read_file
 
-    print(read_file)
+  def llvm_compile_file(self, source_file):
+      with open(source_file, "r") as file:
+        with open("comp.cflags", "r") as file:
+          CFLAGS = file.read().replace('\n', '')
+          logging.debug("CFLAG= %s\n", CFLAGS)
+          logging.debug("Compiling %s\n", source_file)
+          output = subprocess.Popen(["clang" + " -c " + source_file + " -target " + "riscv64-unknown-elf " +  CFLAGS],
+                        stdin =subprocess.PIPE,
+                        #stdout=subprocess.PIPE,
+                        #stderr=subprocess.PIPE,
+                        shell=True,
+                        #universal_newlines=True,
+                        bufsize=0)
+          logging.debug("The commandline is {}".format(output.args))
+
+  def llvm_create_lib(self, libname, objs):
+    logging.debug(objs)
+
+    output = subprocess.Popen(["llvm-ar" + " rcs " + libname +".a " + ' '.join(objs)],
+             stdin =subprocess.PIPE,
+             shell=True,
+             bufsize=0)
+    logging.debug("The commandline is {}".format(output.args))
+
+  def process(self, sys_desc):
+    # Get components
+    for compartment in sys_desc["compartments"]:
+      logging.debug(compartment)
+
+      for comp_name in compartment.keys():
+        logging.debug(comp_name)
+        #logging.debug("Comp %s sources -> {}", comp_name, compartment[comp_name]["input"])
+
+        source_files =  compartment[comp_name]["input"]
+
+        for source_file in source_files:
+          self.llvm_compile_file(source_file)
+
+        objs = [source.replace(".c", ".o") for source in source_files]
+        objs = [obj.split("/")[-1] for obj in objs]
+
+        logging.debug("Objects -> %s", objs)
+
+        self.llvm_create_lib(comp_name, objs)
 
   def Usage(self):
     pass
 
   def main(self):
+    logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
-    self.open_yml()
-
-    pass
+    sys_desc = self.open_yml()
+    self.process(sys_desc)
 
 c = Compartmentalize("system.yml", "link.ld")
 c.main()
