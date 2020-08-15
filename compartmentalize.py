@@ -55,6 +55,51 @@ class Compartmentalize:
       logging.debug(read_file)
       return read_file
 
+  def open_linkcmd(self):
+    with open(self.linkerscript, "r") as file:
+      # The FullLoader parameter handles the conversion from YAML
+      # scalar values to Python the dictionary format
+      linkcmd = file.readlines()
+      logging.debug(linkcmd)
+      return linkcmd
+
+  def linkcmd_add_comp_phdrs(self, compartments):
+    phdre_string = ""
+    comp_idx = 1
+    for compartment in compartments:
+      phdre_string += '\t' + compartment + " PT_LOAD FLAGS(" +\
+                        str(hex(0xf800 + comp_idx)) + ");\n"
+      comp_idx += 1
+
+    return phdre_string
+
+  def linkcmd_add_comp_sections(self, compartments):
+    section_string = ""
+    for compartment in compartments:
+      section_string += '.' + compartment + ' : {\n' \
+                       "\t. = ALIGN(16);\n" \
+                       "\t" + compartment + ".a:(*)\n" \
+                       "\t} > dmem :" + compartment + "\n"
+    return section_string
+
+  def linkcmd_add_compartments(self, compartments):
+    logging.debug("Opening a file %s", self.linkerscript)
+    new_output = ""
+    with open(self.linkerscript, "r") as file:
+      linkcmd =  file.readlines()
+      for line in linkcmd:
+        if "start_compartments" in line:
+          new_output += self.linkcmd_add_comp_phdrs(compartments)
+          new_output += line
+        elif "_compartments_end" in line:
+          new_output += self.linkcmd_add_comp_sections(compartments)
+          new_output += line
+        else:
+          new_output += line
+
+    with open("link.ld.generated", "w") as file:
+      file.write(new_output)
+
   def llvm_compile_file(self, source_file):
       with open(source_file, "r") as file:
         with open("comp.cflags", "r") as file:
@@ -81,12 +126,15 @@ class Compartmentalize:
 
   def process(self, sys_desc):
     # Get components
+    comp_list = []
+
     for compartment in sys_desc["compartments"]:
       logging.debug(compartment)
 
       for comp_name in compartment.keys():
         logging.debug(comp_name)
         #logging.debug("Comp %s sources -> {}", comp_name, compartment[comp_name]["input"])
+        comp_list.append(comp_name)
 
         source_files =  compartment[comp_name]["input"]
 
@@ -100,6 +148,8 @@ class Compartmentalize:
 
         self.llvm_create_lib(comp_name, objs)
 
+    self.linkcmd_add_compartments(comp_list);
+
   def Usage(self):
     pass
 
@@ -109,5 +159,5 @@ class Compartmentalize:
     sys_desc = self.open_yml()
     self.process(sys_desc)
 
-c = Compartmentalize("system.yml", "link.ld")
+c = Compartmentalize("system.yml", "link.ld.in")
 c.main()
