@@ -10,6 +10,6 @@ compartments:
       type: component
       comp_type: files
       connections:
-        - comp2
+        - comp1
       input:
         - demo/compartments/comp2.c
