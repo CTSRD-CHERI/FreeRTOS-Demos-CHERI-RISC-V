@@ -49,21 +49,44 @@ typedef Elf32_Sym Elf_Sym;
 typedef Elf64_Sym Elf_Sym;
 #endif
 
+#define CHERI_ELF_PT_COMPARTMENT 0xf800
+
+typedef struct compartment {
+  uintcap_t   cap;
+  uintcap_t   *cap_list
+} compartment_t;
+
 static void vTaskCompartment(void *pvParameters) __attribute__ ((section (".comp1")));;
 static UBaseType_t cheri_exception_handler();
 static UBaseType_t default_exception_handler(uintptr_t *exception_frame);
 static void elf_manip( void );
 
+
+static void vElfGetCompartments( void )
+{
+Elf64_Phdr *phdr = (void *) 0x80000040;
+extern char _headers_end[];
+size_t headers_size =  (ptraddr_t) _headers_end - 0x080000000;
+	phdr = cheri_setoffset( pvAlmightyDataCap, ( ptraddr_t ) phdr );
+	phdr = cheri_csetbounds( ( void * ) phdr, (size_t) _headers_end );
+
+  for(int i = 0; i < (size_t) (_headers_end) / sizeof(Elf64_Phdr); i++) {
+    if((phdr[i].p_flags & CHERI_ELF_PT_COMPARTMENT) == CHERI_ELF_PT_COMPARTMENT) {
+      printf("- Compartment #%u starting at 0x%lx of size %u\n",
+             (phdr[i].p_flags & ~CHERI_ELF_PT_COMPARTMENT),
+             phdr[i].p_paddr,
+             phdr[i].p_memsz);
+      }
+  }
+}
+
+/*-----------------------------------------------------------*/
 static void vElfHeaderPrint( void )
 {
 extern char  __strtab_start[];
 Elf64_Ehdr *phdr = (void *) 0x80000000;
 	phdr = cheri_setoffset( pvAlmightyDataCap, ( ptraddr_t ) phdr );
 	phdr = cheri_csetbounds( ( void * ) phdr, sizeof( Elf64_Ehdr ) );
-
-  for(int i = 0; i < 0x40 / 4; i++) {
-    printf("%u\n", ((uint32_t *) phdr)[i]);
-  }
 
   printf("ehdr->Ie_ident = %s\n", &phdr->e_ident[1]);
   printf("ehdr->e_type = %llu\t e_phoff = %llx \n", phdr->e_type, phdr->e_phoff);
@@ -140,8 +163,11 @@ uint32_t dynentries_num =  (__dynsym_end - __dynsym_start) / sizeof(Elf_Sym);
 		//vSymEntryPrint(&__symtab_shndx_start[i]);
 	//}
 
-  vElfHeaderPrint();
+  //vElfHeaderPrint();
+
   vElfProgramHeaderPrint();
+
+  vElfGetCompartments();
 
 	printf("Done with symbols\n");
 }
