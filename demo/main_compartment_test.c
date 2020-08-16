@@ -191,6 +191,8 @@ void main_compartment_test(void) {
     /* Print symtable */
     elf_manip();
 
+    vComp1();
+
     /* Start the tasks and timer running. */
     vTaskStartScheduler();
 
