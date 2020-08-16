@@ -42,9 +42,10 @@ from pathlib import Path
 class Compartmentalize:
   yml_files = []
 
-  def __init__(self, ymlfile, linkerscript):
+  def __init__(self, ymlfile, linkerscript, makefile):
     self.ymlfile = ymlfile
     self.linkerscript = linkerscript
+    self.makefile = makefile
     pass
 
   def open_yml(self):
@@ -98,6 +99,18 @@ class Compartmentalize:
           new_output += line
 
     with open("link.ld.generated", "w") as file:
+      file.write(new_output)
+
+    new_output = ""
+    with open(self.makefile, "r") as file:
+      make =  file.readlines()
+      for line in make:
+        if "COMPARTMENTS ?=" in line:
+          new_output += "COMPARTMENTS = " + " ".join([compartment+".a" for compartment in compartments])
+        else:
+          new_output += line
+
+    with open("Makefile", "w") as file:
       file.write(new_output)
 
   def llvm_compile_file(self, source_file):
@@ -159,5 +172,5 @@ class Compartmentalize:
     sys_desc = self.open_yml()
     self.process(sys_desc)
 
-c = Compartmentalize("system.yml", "link.ld.in")
+c = Compartmentalize("system.yml", "link.ld.in", "Makefile.in")
 c.main()
