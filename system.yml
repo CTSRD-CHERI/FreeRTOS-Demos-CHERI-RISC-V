@@ -13,3 +13,4 @@ compartments:
         - comp1
       input:
         - demo/compartments/comp2.c
+        - demo/compartments/comp2_1.c
