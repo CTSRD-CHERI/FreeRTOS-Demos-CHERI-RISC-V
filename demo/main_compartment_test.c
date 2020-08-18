@@ -40,6 +40,7 @@
 #include <inttypes.h>
 #include <cheric.h>
 extern void *pvAlmightyDataCap;
+extern void *pvAlmightyCodeCap;
 
 #if __riscv_xlen == 32
 #define PRINT_REG "0x%08" PRIx32
@@ -49,18 +50,32 @@ typedef Elf32_Sym Elf_Sym;
 typedef Elf64_Sym Elf_Sym;
 #endif
 
+#define CHERI_ELF_PT_TYPE_MASK 0xfc00u
+#define CHERI_ELF_PT_ID_MASK ~(CHERI_ELF_PT_TYPE_MASK)
 #define CHERI_ELF_PT_COMPARTMENT 0xf800
+#define CHERI_ELF_PT_COMPSYMTAB  0xfc00
 
 typedef struct compartment {
-  uintcap_t   cap;
-  uintcap_t   *cap_list
+  void        *cap;
+  uintcap_t   *cap_list;
+  // TCB?
+  // Symtab?
 } compartment_t;
 
-static void vTaskCompartment(void *pvParameters) __attribute__ ((section (".comp1")));;
+compartment_t comp_list[configCOMPARTMENTS_NUM];
+
+static void vTaskCompartment(void *pvParameters);
 static UBaseType_t cheri_exception_handler();
 static UBaseType_t default_exception_handler(uintptr_t *exception_frame);
+static void vSymEntryPrint( Elf_Sym *entry );
 static void elf_manip( void );
 
+static void *cheri_create_cap(ptraddr_t base, size_t size) {
+	void *return_cap;
+	return_cap = cheri_setoffset( pvAlmightyCodeCap, base );
+	return_cap = cheri_csetbounds( return_cap, size );
+	return return_cap;
+}
 
 static void vElfGetCompartments( void )
 {
@@ -71,12 +86,27 @@ size_t headers_size =  (ptraddr_t) _headers_end - 0x080000000;
 	phdr = cheri_csetbounds( ( void * ) phdr, (size_t) _headers_end );
 
   for(int i = 0; i < (size_t) (_headers_end) / sizeof(Elf64_Phdr); i++) {
-    if((phdr[i].p_flags & CHERI_ELF_PT_COMPARTMENT) == CHERI_ELF_PT_COMPARTMENT) {
+    if((phdr[i].p_flags & CHERI_ELF_PT_TYPE_MASK) == CHERI_ELF_PT_COMPARTMENT) {
+
+      UBaseType_t comp_id = (phdr[i].p_flags & CHERI_ELF_PT_ID_MASK);
+      printf("comp id = %u\n", comp_id);
+      void *cap = cheri_create_cap((ptraddr_t) phdr[i].p_paddr, phdr[i].p_memsz);
+
       printf("- Compartment #%u starting at 0x%lx of size %u\n",
-             (phdr[i].p_flags & ~CHERI_ELF_PT_COMPARTMENT),
+             (phdr[i].p_flags & CHERI_ELF_PT_ID_MASK),
              phdr[i].p_paddr,
              phdr[i].p_memsz);
+
+      comp_list[comp_id].cap = cap;
+    } else if ((phdr[i].p_flags & CHERI_ELF_PT_TYPE_MASK) == CHERI_ELF_PT_COMPSYMTAB) {
+      UBaseType_t comp_id = (phdr[i].p_flags & CHERI_ELF_PT_ID_MASK);
+      void *cap_symtab = cheri_create_cap((ptraddr_t) phdr[i].p_paddr, phdr[i].p_memsz * sizeof(Elf_Sym));
+
+      for(int i = 0; i < phdr[i].p_memsz; i++) {
+        //printf("- SymTab Compartment #%u\n", comp_id);
+        //vSymEntryPrint(((Elf_Sym *) cap_symtab) + i);
       }
+    }
   }
 }
 
@@ -164,6 +194,8 @@ uint32_t dynentries_num =  (__dynsym_end - __dynsym_start) / sizeof(Elf_Sym);
 	//}
 
   //vElfHeaderPrint();
+
+  printf("CHERI Compartments Num = %u\n", configCOMPARTMENTS_NUM);
 
   vElfProgramHeaderPrint();
 
