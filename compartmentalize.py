@@ -86,8 +86,11 @@ class Compartmentalize:
                        "\t} > dmem :" + compartment + "\n"
       section_string += '.' + compartment+".symtab" + ' : {\n' \
                        "\t. = ALIGN(16);\n" \
-                       "\t" + compartment + ".a:(.symtab)\n" \
+                       "\t(" + compartment + ".symtab)\n" \
                        "\t} > dmem :" + compartment+".symtab" + "\n"
+                       #"\t_" + compartment + "_strtab_start = .;\n" \
+                       #"\t (" + compartment + ".strtab)\n" \
+                       #"\t_" + compartment + "_strtab_end = .;\n"
     return section_string
 
   def linkcmd_add_compartments(self, compartments):
@@ -126,30 +129,30 @@ class Compartmentalize:
       with open(source_file, "r") as file:
         logging.debug("CFLAG= %s\n", self.CFLAGS)
         logging.debug("Compiling %s\n", source_file)
-        output = subprocess.Popen(["clang" + " -c " + source_file + " -target " + "riscv64-unknown-elf " +  self.CFLAGS],
+        output = subprocess.call(["clang" + " -c " + source_file + " -target " + "riscv64-unknown-elf " +  self.CFLAGS],
                       stdin =subprocess.PIPE,
                       #stdout=subprocess.PIPE,
                       #stderr=subprocess.PIPE,
                       shell=True,
                       #universal_newlines=True,
                       bufsize=0)
-        logging.debug("The commandline is {}".format(output.args))
+        #logging.debug("The commandline is {}".format(output.args))
 
   def llvm_create_lib(self, libname, objs):
     logging.debug(objs)
 
-    output = subprocess.Popen(["llvm-ar" + " rcs " + libname +".a " + ' '.join(objs)],
+    output = subprocess.call(["llvm-ar" + " rcs " + libname +".a " + ' '.join(objs)],
              stdin =subprocess.PIPE,
              shell=True,
              bufsize=0)
-    logging.debug("The commandline is {}".format(output.args))
+    #logging.debug("The commandline is {}".format(output.args))
 
-    output = subprocess.Popen(["llvm-objcopy" + " --remove-section=.riscv.attributes " + libname + ".a"],
+    output = subprocess.call(["llvm-objcopy" + " --remove-section=.riscv.attributes " + libname + ".a"],
              stdin =subprocess.PIPE,
              shell=True,
              bufsize=0)
 
-    output = subprocess.Popen(["llvm-objcopy" + " --set-section-flags .symtab=alloc,load " + libname + ".a"],
+    output = subprocess.call(["llvm-objcopy" + " --set-section-flags .symtab=alloc,load " + libname + ".a"],
              stdin =subprocess.PIPE,
              shell=True,
              bufsize=0)
@@ -159,7 +162,12 @@ class Compartmentalize:
     #         shell=True,
     #         bufsize=0)
 
-    output = subprocess.Popen(["llvm-objcopy" + " --prefix-alloc-sections=" + libname + " " + libname + ".a "],
+    output = subprocess.call(["llvm-objcopy" + " --prefix-alloc-sections=" + libname + " " + libname + ".a "],
+             stdin =subprocess.PIPE,
+             shell=True,
+             bufsize=0)
+
+    output = subprocess.call(["llvm-objcopy" + " --rename-section .strtab=" + libname + ".strtab " + libname + ".a "],
              stdin =subprocess.PIPE,
              shell=True,
              bufsize=0)
