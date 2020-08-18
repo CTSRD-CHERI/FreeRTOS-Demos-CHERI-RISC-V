@@ -46,7 +46,8 @@ class Compartmentalize:
     self.ymlfile = ymlfile
     self.linkerscript = linkerscript
     self.makefile = makefile
-    pass
+    self.CFLAGS = ""
+    self.num_comps = 0
 
   def open_yml(self):
     with open(self.ymlfile, "r") as file:
@@ -66,10 +67,12 @@ class Compartmentalize:
 
   def linkcmd_add_comp_phdrs(self, compartments):
     phdre_string = ""
-    comp_idx = 1
+    comp_idx = 0
     for compartment in compartments:
       phdre_string += '\t' + compartment + " PT_LOAD FLAGS(" +\
                         str(hex(0xf800 + comp_idx)) + ");\n"
+      phdre_string += '\t' + compartment+".symtab" + " PT_LOAD FLAGS(" +\
+                        str(hex(0xfc00 + comp_idx)) + ");\n"
       comp_idx += 1
 
     return phdre_string
@@ -79,8 +82,12 @@ class Compartmentalize:
     for compartment in compartments:
       section_string += '.' + compartment + ' : {\n' \
                        "\t. = ALIGN(16);\n" \
-                       "\t" + compartment + ".a:(*)\n" \
+                       "\t" + compartment + ".*\n" \
                        "\t} > dmem :" + compartment + "\n"
+      section_string += '.' + compartment+".symtab" + ' : {\n' \
+                       "\t. = ALIGN(16);\n" \
+                       "\t" + compartment + ".a:(.symtab)\n" \
+                       "\t} > dmem :" + compartment+".symtab" + "\n"
     return section_string
 
   def linkcmd_add_compartments(self, compartments):
@@ -107,6 +114,8 @@ class Compartmentalize:
       for line in make:
         if "COMPARTMENTS ?=" in line:
           new_output += "COMPARTMENTS = " + " ".join([compartment+".a" for compartment in compartments])
+          #new_output += "COMPARTMENTS_NUM = " + str(self.num_comps) + "\n"
+          new_output += "\nCFLAGS = -DconfigCOMPARTMENTS_NUM=" + str(self.num_comps) + "\n"
         else:
           new_output += line
 
@@ -115,18 +124,16 @@ class Compartmentalize:
 
   def llvm_compile_file(self, source_file):
       with open(source_file, "r") as file:
-        with open("comp.cflags", "r") as file:
-          CFLAGS = file.read().replace('\n', '')
-          logging.debug("CFLAG= %s\n", CFLAGS)
-          logging.debug("Compiling %s\n", source_file)
-          output = subprocess.Popen(["clang" + " -c " + source_file + " -target " + "riscv64-unknown-elf " +  CFLAGS],
-                        stdin =subprocess.PIPE,
-                        #stdout=subprocess.PIPE,
-                        #stderr=subprocess.PIPE,
-                        shell=True,
-                        #universal_newlines=True,
-                        bufsize=0)
-          logging.debug("The commandline is {}".format(output.args))
+        logging.debug("CFLAG= %s\n", self.CFLAGS)
+        logging.debug("Compiling %s\n", source_file)
+        output = subprocess.Popen(["clang" + " -c " + source_file + " -target " + "riscv64-unknown-elf " +  self.CFLAGS],
+                      stdin =subprocess.PIPE,
+                      #stdout=subprocess.PIPE,
+                      #stderr=subprocess.PIPE,
+                      shell=True,
+                      #universal_newlines=True,
+                      bufsize=0)
+        logging.debug("The commandline is {}".format(output.args))
 
   def llvm_create_lib(self, libname, objs):
     logging.debug(objs)
@@ -137,9 +144,34 @@ class Compartmentalize:
              bufsize=0)
     logging.debug("The commandline is {}".format(output.args))
 
+    output = subprocess.Popen(["llvm-objcopy" + " --remove-section=.riscv.attributes " + libname + ".a"],
+             stdin =subprocess.PIPE,
+             shell=True,
+             bufsize=0)
+
+    output = subprocess.Popen(["llvm-objcopy" + " --set-section-flags .symtab=alloc,load " + libname + ".a"],
+             stdin =subprocess.PIPE,
+             shell=True,
+             bufsize=0)
+
+    #output = subprocess.Popen(["llvm-objcopy" + " --set-section-flags .strtab=alloc,load " + libname + ".a"],
+    #         stdin =subprocess.PIPE,
+    #         shell=True,
+    #         bufsize=0)
+
+    output = subprocess.Popen(["llvm-objcopy" + " --prefix-alloc-sections=" + libname + " " + libname + ".a "],
+             stdin =subprocess.PIPE,
+             shell=True,
+             bufsize=0)
+
   def process(self, sys_desc):
+    with open("comp.cflags", "r") as file:
+      self.CFLAGS += file.read().replace('\n', '')
+
     # Get components
     comp_list = []
+
+    self.num_comps += len(sys_desc["compartments"])
 
     for compartment in sys_desc["compartments"]:
       logging.debug(compartment)
