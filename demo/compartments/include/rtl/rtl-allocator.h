@@ -1,4 +1,5 @@
 /*
+ *  Copyright (C) 2020 Hesham Almatary <hesham.almatary@cl.cam.ac.uk>
  *  COPYRIGHT (c) 2012, 2018 Chris Johns <chrisj@rtems.org>
  *
  *  The license and distribution terms for this file may be
@@ -92,7 +93,7 @@ struct rtems_rtl_alloc_data {
   /**< The memory allocator handler. */
   rtems_rtl_allocator allocator;
   /**< The indirect pointer chains. */
-  rtems_chain_control indirects[RTEMS_RTL_ALLOC_TAGS];
+  List_t indirects[RTEMS_RTL_ALLOC_TAGS];
 };
 
 typedef struct rtems_rtl_alloc_data rtems_rtl_alloc_data;
