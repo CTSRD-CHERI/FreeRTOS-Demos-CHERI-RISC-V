@@ -1,4 +1,5 @@
 /*
+ *  Copyright (C) 2020 Hesham Almatary <hesham.almatary@cl.cam.ac.uk>
  *  COPYRIGHT (c) 2012, 2018 Chris Johns <chrisj@rtems.org>
  *
  *  The license and distribution terms for this file may be
@@ -21,13 +22,14 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <rtems/chain.h>
+#include <freertos.h>
+#include "list.h"
 
 /**
  * The RTL Indirect pointer.
  */
 struct rtems_rtl_ptr {
-  rtems_chain_node node;     /**< Indirect pointers are held on lists. */
+  ListItem_t       node;     /**< Indirect pointers are held on lists. */
   void*            pointer;  /**< The actual pointer. */
 };
 
@@ -50,7 +52,7 @@ typedef struct rtems_rtl_sptr rtems_rtl_sptr;
  *       used by applications.
  */
 struct rtems_rtl_ptr_chain {
-  rtems_chain_node node;  /**< Chain of indirect pointers. */
+  ListItem_t       node;  /**< Chain of indirect pointers. */
   rtems_rtl_ptr    ptr;   /**< The indirect pointer. */
 };
 
@@ -63,7 +65,7 @@ typedef struct rtems_rtl_ptr_chain rtems_rtl_ptr_chain;
  *       used by applications.
  */
 struct rtems_rtl_sptr_chain {
-  rtems_chain_node node; /**< Chain of indirect pointers. */
+  ListItem_t       node; /**< Chain of indirect pointers. */
   rtems_rtl_sptr   ptr;  /**< The indirect pointer. */
 };
 
@@ -98,7 +100,7 @@ static inline void rtems_rtl_ptr_set (rtems_rtl_ptr* handle, void* pointer)
  */
 static inline void rtems_rtl_ptr_init (rtems_rtl_ptr* handle)
 {
-  rtems_chain_set_off_chain (&handle->node);
+  vListInitialiseItem (&handle->node);
   handle->pointer = NULL;
 }
 
@@ -122,12 +124,9 @@ static inline bool rtems_rtl_ptr_null (rtems_rtl_ptr* handle)
  */
 static inline void rtems_rtl_ptr_move (rtems_rtl_ptr* dst, rtems_rtl_ptr* src)
 {
-  /*
-   * We do not know which chain the src handle resides on so insert the dst
-   * handle after the src handle then extract the src handle.
-   */
-  rtems_chain_insert_unprotected (&src->node, &dst->node);
-  rtems_chain_extract_unprotected (&src->node);
+  vListInsert(listLIST_ITEM_CONTAINER(&dst->node), &src->node);
+  uxListRemove(&src->node);
+
   dst->pointer = src->pointer;
   rtems_rtl_ptr_init (src);
 }
