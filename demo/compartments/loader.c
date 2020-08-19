@@ -31,15 +31,85 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <elf.h>
 
 /* Kernel includes. */
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
 
+#include <inttypes.h>
+#if __riscv_xlen == 32
+#define PRINT_REG "0x%08" PRIx32
+typedef Elf32_Sym Elf_Sym;
+#elif __riscv_xlen == 64
+#define PRINT_REG "0x%016" PRIx64
+typedef Elf64_Sym Elf_Sym;
+#endif
+
+#define CHERI_ELF_PT_TYPE_MASK 0xfc00u
+#define CHERI_ELF_PT_ID_MASK ~(CHERI_ELF_PT_TYPE_MASK)
+#define CHERI_ELF_PT_COMPARTMENT 0xf800
+#define CHERI_ELF_PT_COMPSYMTAB  0xfc00
+
+#ifdef __CHERI_PURE_CAPABILITY__
+#include <cheric.h>
+extern void *pvAlmightyDataCap;
+extern void *pvAlmightyCodeCap;
+#endif /* __CHERI_PURE_CAPABILITY__ */
+
+typedef struct compartment {
+  void        *cap;
+  uintcap_t   *cap_list;
+  // TCB?
+  // Symtab?
+} compartment_t;
+
+compartment_t comp_list[configCOMPARTMENTS_NUM];
+
+void vCompartmentsLoad(void);
+
+static void vTaskCompartment(void *pvParameters);
+static UBaseType_t cheri_exception_handler();
+static UBaseType_t default_exception_handler(uintptr_t *exception_frame);
+static void vSymEntryPrint( Elf_Sym *entry );
+static void elf_manip( void );
+
+static void *cheri_create_cap(ptraddr_t base, size_t size) {
+    void *return_cap;
+    return_cap = cheri_setoffset( pvAlmightyCodeCap, base );
+    return_cap = cheri_csetbounds( return_cap, size );
+    return return_cap;
+}
+
+static void vCompartmentsElfPrint( void )
+{
+Elf64_Phdr *phdr = (void *) 0x80000040;
+extern char _headers_end[];
+size_t headers_size =  (ptraddr_t) _headers_end - 0x080000000;
+    phdr = cheri_setoffset( pvAlmightyDataCap, ( ptraddr_t ) phdr );
+    phdr = cheri_csetbounds( ( void * ) phdr, (size_t) _headers_end );
+
+  for(int i = 0; i < (size_t) (_headers_end) / sizeof(Elf64_Phdr); i++) {
+    if((phdr[i].p_flags & CHERI_ELF_PT_TYPE_MASK) == CHERI_ELF_PT_COMPARTMENT) {
+
+      UBaseType_t comp_id = (phdr[i].p_flags & CHERI_ELF_PT_ID_MASK);
+      printf("comp id = %u\n", comp_id);
+      void *cap = cheri_create_cap((ptraddr_t) phdr[i].p_paddr, phdr[i].p_memsz);
+
+      printf("- Compartment #%u starting at 0x%lx of size %u\n",
+             (phdr[i].p_flags & CHERI_ELF_PT_ID_MASK),
+             phdr[i].p_paddr,
+             phdr[i].p_memsz);
+
+      comp_list[comp_id].cap = cap;
+    }
+  }
+}
 
 void vCompartmentsLoad(void) {
   printf("Starting Compartments Loading\n");
 
+  vCompartmentsElfPrint();
 }
 /*-----------------------------------------------------------*/

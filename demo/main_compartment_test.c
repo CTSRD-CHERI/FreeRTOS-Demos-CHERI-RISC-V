@@ -31,24 +31,29 @@
 #include <string.h>
 #include <unistd.h>
 #include <elf.h>
+#include <inttypes.h>
 
 /* Kernel includes. */
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
 
-#include <inttypes.h>
+#if __riscv_xlen == 32
+#define PRINT_REG "0x%08" PRIx32
+#elif __riscv_xlen == 64
+#define PRINT_REG "0x%016" PRIx64
+#endif
+
+void vCompartmentsLoad(void);
+
+static void vTaskCompartment(void *pvParameters);
+static UBaseType_t cheri_exception_handler();
+static UBaseType_t default_exception_handler(uintptr_t *exception_frame);
+#if 0
 #include <cheric.h>
 extern void *pvAlmightyDataCap;
 extern void *pvAlmightyCodeCap;
 
-#if __riscv_xlen == 32
-#define PRINT_REG "0x%08" PRIx32
-typedef Elf32_Sym Elf_Sym;
-#elif __riscv_xlen == 64
-#define PRINT_REG "0x%016" PRIx64
-typedef Elf64_Sym Elf_Sym;
-#endif
 
 #define CHERI_ELF_PT_TYPE_MASK 0xfc00u
 #define CHERI_ELF_PT_ID_MASK ~(CHERI_ELF_PT_TYPE_MASK)
@@ -64,11 +69,6 @@ typedef struct compartment {
 
 compartment_t comp_list[configCOMPARTMENTS_NUM];
 
-void vCompartmentsLoad(void);
-
-static void vTaskCompartment(void *pvParameters);
-static UBaseType_t cheri_exception_handler();
-static UBaseType_t default_exception_handler(uintptr_t *exception_frame);
 static void vSymEntryPrint( Elf_Sym *entry );
 static void elf_manip( void );
 
@@ -205,6 +205,7 @@ uint32_t dynentries_num =  (__dynsym_end - __dynsym_start) / sizeof(Elf_Sym);
 
 	printf("Done with symbols\n");
 }
+#endif
 /*-----------------------------------------------------------*/
 
 void main_compartment_test(void) {
@@ -221,9 +222,6 @@ void main_compartment_test(void) {
     }
     /* Setup an exception handler for CHERI */
     vPortSetExceptionHandler(0x1c, cheri_exception_handler);
-
-    /* Print symtable */
-    elf_manip();
 
     vCompartmentsLoad();
 
