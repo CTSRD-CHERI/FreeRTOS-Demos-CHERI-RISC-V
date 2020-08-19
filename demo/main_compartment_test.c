@@ -64,6 +64,8 @@ typedef struct compartment {
 
 compartment_t comp_list[configCOMPARTMENTS_NUM];
 
+void vCompartmentsLoad(void);
+
 static void vTaskCompartment(void *pvParameters);
 static UBaseType_t cheri_exception_handler();
 static UBaseType_t default_exception_handler(uintptr_t *exception_frame);
@@ -223,7 +225,7 @@ void main_compartment_test(void) {
     /* Print symtable */
     elf_manip();
 
-    vComp1();
+    vCompartmentsLoad();
 
     /* Start the tasks and timer running. */
     vTaskStartScheduler();
