@@ -77,23 +77,31 @@ class Compartmentalize:
 
     return phdre_string
 
+  def comp_gen_assembly_file(self, compartment):
+    assembly_string = ""
+    assembly_string += ".section " + compartment + "\n" \
+                       ".incbin \"" + compartment + ".o\"\n"
+
+    with open(compartment + ".S", "w") as file:
+      file.write(assembly_string)
+
   def linkcmd_add_comp_sections(self, compartments):
     section_string = ""
     for compartment in compartments:
       section_string += '.' + compartment + ' : {\n' \
                        "\t. = ALIGN(16);\n" \
-                       "\t" + compartment + ".*\n" \
+                       "\t" + compartment + "*\n" \
                        "\t} > dmem :" + compartment + "\n"
-      section_string += '.' + compartment+".symtab" + ' : {\n' \
-                       "\t. = ALIGN(16);\n" \
-                       "\t(" + compartment + ".symtab)\n" \
-                       "\t} > dmem :" + compartment+".symtab" + "\n"
+      #section_string += '.' + compartment+".symtab" + ' : {\n' \
+      #                 "\t. = ALIGN(16);\n" \
+      #                 "\t(" + compartment + ".symtab)\n" \
+      #                 "\t} > dmem :" + compartment+".symtab" + "\n"
                        #"\t_" + compartment + "_strtab_start = .;\n" \
                        #"\t (" + compartment + ".strtab)\n" \
                        #"\t_" + compartment + "_strtab_end = .;\n"
     return section_string
 
-  def linkcmd_add_compartments(self, compartments):
+  def linkcmd_add_compartments_libs(self, compartments):
     logging.debug("Opening a file %s", self.linkerscript)
     new_output = ""
     with open(self.linkerscript, "r") as file:
@@ -125,6 +133,39 @@ class Compartmentalize:
     with open("Makefile", "w") as file:
       file.write(new_output)
 
+  def linkcmd_add_compartments_objs(self, compartments):
+    logging.debug("Opening a file %s", self.linkerscript)
+    new_output = ""
+    with open(self.linkerscript, "r") as file:
+      linkcmd =  file.readlines()
+      for line in linkcmd:
+        if "start_compartments" in line:
+          new_output += self.linkcmd_add_comp_phdrs(compartments)
+          new_output += line
+        elif "_compartments_end" in line:
+          new_output += self.linkcmd_add_comp_sections(compartments)
+          new_output += line
+        else:
+          new_output += line
+
+    with open("link.ld.generated", "w") as file:
+      file.write(new_output)
+
+    new_output = ""
+    with open(self.makefile, "r") as file:
+      make =  file.readlines()
+      for line in make:
+        if "COMPARTMENTS ?=" in line:
+          #new_output += "COMPARTMENTS = " + " ".join([compartment+".a" for compartment in compartments])
+          new_output += "COMPARTMENTS = " + " ".join([compartment+".o.wrapped" for compartment in compartments])
+          #new_output += "COMPARTMENTS_NUM = " + str(self.num_comps) + "\n"
+          new_output += "\nCFLAGS = -DconfigCOMPARTMENTS_NUM=" + str(self.num_comps) + "\n"
+        else:
+          new_output += line
+
+    with open("Makefile", "w") as file:
+      file.write(new_output)
+
   def llvm_compile_file(self, source_file):
       with open(source_file, "r") as file:
         logging.debug("CFLAG= %s\n", self.CFLAGS)
@@ -137,6 +178,43 @@ class Compartmentalize:
                       #universal_newlines=True,
                       bufsize=0)
         #logging.debug("The commandline is {}".format(output.args))
+
+  def llvm_wrap_obj_in_elf(self, output_obj):
+
+      self.comp_gen_assembly_file(output_obj)
+
+      output = subprocess.call(["clang" + " -o " + output_obj + ".o.wrapped" " -c " + output_obj + ".S" + " -target " + "riscv64-unknown-elf " +  self.CFLAGS],
+                      shell=True,
+                      bufsize=0)
+
+      #output = subprocess.call(["ld.lld" + " -relocatable -o" + output_obj + ".o.bin " + output_obj + ".o"],
+      #              stdin =subprocess.PIPE,
+                    #stdout=subprocess.PIPE,
+                    #stderr=subprocess.PIPE,
+      #              shell=True,
+                    #universal_newlines=True,
+      #              bufsize=0)
+
+  def llvm_create_obj_from_sources(self, output_obj, srcs):
+      logging.debug("CFLAG= %s\n", self.CFLAGS)
+      output = subprocess.call(["clang" + "-o " + output_obj + ".o" + " -c -combine " + " ".join(srcs) + " -target " + "riscv64-unknown-elf " +  self.CFLAGS],
+                    stdin =subprocess.PIPE,
+                    #stdout=subprocess.PIPE,
+                    #stderr=subprocess.PIPE,
+                    shell=True,
+                    #universal_newlines=True,
+                    bufsize=0)
+
+      objs = [source.replace(".c", ".o") for source in srcs]
+      objs = [obj.split("/")[-1] for obj in objs]
+
+      output = subprocess.call(["ld.lld" + " -relocatable -o " + output_obj + ".o " + " ".join(objs)],
+                    stdin =subprocess.PIPE,
+                    #stdout=subprocess.PIPE,
+                    #stderr=subprocess.PIPE,
+                    shell=True,
+                    #universal_newlines=True,
+                    bufsize=0)
 
   def llvm_create_lib(self, libname, objs):
     logging.debug(objs)
@@ -201,7 +279,11 @@ class Compartmentalize:
 
         self.llvm_create_lib(comp_name, objs)
 
-    self.linkcmd_add_compartments(comp_list);
+        self.llvm_create_obj_from_sources(comp_name, source_files)
+        self.llvm_wrap_obj_in_elf(comp_name)
+
+    #self.linkcmd_add_compartments_libs(comp_list);
+    self.linkcmd_add_compartments_objs(comp_list);
 
   def Usage(self):
     pass
