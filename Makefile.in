@@ -23,6 +23,7 @@ LIBS_PATH ?=
 CFLAGS    ?=
 LDFLAGS   ?=
 LIBS      ?=
+COMPARTMENTS ?=
 
 EXTENSION ?=
 CHERI_CLEN ?= 2*$(RISCV_XLEN)
@@ -38,7 +39,7 @@ OBJCOPY = llvm-objcopy
 OBJDUMP = llvm-objdump
 AR      = llvm-ar
 RANLIB  = llvm-ranlib
-CFLAGS  = -mno-relax -mcmodel=medium --sysroot=$(SYSROOT)
+CFLAGS  += -mno-relax -mcmodel=medium --sysroot=$(SYSROOT)
 LDFLAGS += --sysroot=$(SYSROOT) -lclang_rt.builtins-riscv$(RISCV_XLEN)
 LIBS	  += -lc
 else
@@ -48,7 +49,7 @@ OBJDUMP  = $(TARGET)-objdump
 AR       = $(TARGET)-ar
 RANLIB   = $(TARGET)-ranlib
 LIBS    += -lc -lgcc
-CFLAGS   = -mcmodel=medany
+CFLAGS  += -mcmodel=medany
 LDFLAGS =
 endif
 
@@ -122,6 +123,7 @@ ifeq ($(PROG),main_tests)
 else
 ifeq ($(PROG),main_compartment_test)
 	CFLAGS += -DmainDEMO_TYPE=4
+DEMO_SRC += demo/compartments/loader.c
 else
 	$(info unknown demo: $(PROG))
 endif
@@ -203,7 +205,6 @@ OBJS = $(CRT0_OBJ) $(PORT_ASM_OBJ) $(PORT_OBJ) $(RTOS_OBJ) $(DEMO_OBJ) $(APP_OBJ
 #	llvm-ar ru $@ $^
 #	llvm-ranlib $@
 
-#COMPARTMENTS = $(DEMO_COMP)
 LDFLAGS	+= -T link.ld.generated -nostartfiles -nostdlib -defsym=_STACK_SIZE=4K -march=$(ARCH) -mabi=$(ABI)
 
 $(info ASFLAGS=$(ASFLAGS))
@@ -229,8 +230,7 @@ gen_freertos_header:
 $(PROG).elf  : gen_freertos_header $(OBJS) Makefile
 	@echo Building FreeRTOS/RISC-V for PLATFORM=$(PLATFORM) ARCH=$(ARCH) ABI=$(ABI)
 	@echo Linking....
-	$(CC) -o $@ $(LDFLAGS) $(OBJS) $(LIBS) -v
-	#$(CC) -o $@ $(LDFLAGS) $(OBJS) $(COMPARTMENTS) $(LIBS) -v
+	$(CC) -o $@ $(LDFLAGS) $(OBJS) $(LIBS) $(COMPARTMENTS) -v
 	#@$(OBJDUMP) -S $(PROG).elf > $(PROG).asm
 	@echo $(CFLAGS) > comp.cflags
 	@echo Completed $@
@@ -241,3 +241,4 @@ clean :
 	@rm -f $(PROG).map
 	@rm -f $(PROG).asm
 	@rm -f *.a
+	@rm -f *.o
