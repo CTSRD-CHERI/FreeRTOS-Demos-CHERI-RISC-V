@@ -31,7 +31,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <elf.h>
+#include <exec_elf.h>
 
 /* Kernel includes. */
 #include "FreeRTOS.h"
