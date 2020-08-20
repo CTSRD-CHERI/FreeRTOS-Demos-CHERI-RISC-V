@@ -26,10 +26,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <rtems/rtl/rtl-allocator.h>
+#include <rtl/rtl-allocator.h>
 #include "rtl-bit-alloc.h"
 #include "rtl-error.h"
-#include <rtems/rtl/rtl-trace.h>
+#include <rtl/rtl-trace.h>
 
 #define BITS_PER_WORD (sizeof (uint32_t) * 8)
 

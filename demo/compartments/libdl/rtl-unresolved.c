@@ -23,10 +23,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <rtems/rtl/rtl.h>
+#include <rtl/rtl.h>
 #include "rtl-error.h"
-#include <rtems/rtl/rtl-unresolved.h>
-#include <rtems/rtl/rtl-trace.h>
+#include <rtl/rtl-unresolved.h>
+#include <rtl/rtl-trace.h>
 #include "rtl-trampoline.h"
 
 static rtems_rtl_unresolv_block*
@@ -44,7 +44,7 @@ rtems_rtl_unresolved_block_alloc (rtems_rtl_unresolved* unresolved)
   {
     if (rtems_rtl_trace (RTEMS_RTL_TRACE_UNRESOLVED))
       printf ("rtl: unresolv: block-alloc %p (%p)\n", block, block + size);
-    rtems_chain_append (&unresolved->blocks, &block->link);
+    vListInsertEnd (&unresolved->blocks, &block->link);
   }
   else
     rtems_rtl_set_error (ENOMEM, "no memory for unresolved block");
@@ -247,7 +247,7 @@ rtems_rtl_unresolved_resolve_reloc (rtems_rtl_unresolv_rec* rec,
 {
   if (rec->type == rtems_rtl_unresolved_reloc)
   {
-    rtems_chain_control*             pending;
+    List_t*             pending;
     rtems_rtl_unresolved_reloc_data* rd;
 
     rd = (rtems_rtl_unresolved_reloc_data*) data;
@@ -268,8 +268,8 @@ rtems_rtl_unresolved_resolve_reloc (rtems_rtl_unresolv_rec* rec,
         if (rec->rec.reloc.obj->unresolved == 0)
         {
           pending = rtems_rtl_pending_unprotected ();
-          rtems_chain_extract (&rec->rec.reloc.obj->link);
-          rtems_chain_append (pending, &rec->rec.reloc.obj->link);
+          uxListRemove (&rec->rec.reloc.obj->link);
+          vListInsertEnd (pending, &rec->rec.reloc.obj->link);
         }
 
         /*
@@ -377,14 +377,14 @@ static rtems_rtl_unresolv_block*
 rtems_rtl_unresolved_alloc_recs (rtems_rtl_unresolved* unresolved,
                                  size_t                count)
 {
-  rtems_chain_node* node = rtems_chain_first (&unresolved->blocks);
-  while (!rtems_chain_is_tail (&unresolved->blocks, node))
+  ListItem_t* node = listGET_HEAD_ENTRY (&unresolved->blocks);
+  while (listGET_END_MARKER (&unresolved->blocks) != node)
   {
     rtems_rtl_unresolv_block* block = (rtems_rtl_unresolv_block*) node;
 
     if (block->recs + count <= unresolved->block_recs)
       return block;
-    node = rtems_chain_next (node);
+    node = listGET_NEXT (node);
   }
   return NULL;
 }
@@ -405,20 +405,20 @@ rtems_rtl_unresolved_clean_block (rtems_rtl_unresolv_block* block,
   memset (&block->rec[block->recs], 0, bytes);
 }
 
-static rtems_chain_node*
-rtems_rtl_unresolved_delete_block_if_empty (rtems_chain_control*      blocks,
+static ListItem_t*
+rtems_rtl_unresolved_delete_block_if_empty (List_t*      blocks,
                                             rtems_rtl_unresolv_block* block)
 {
-  rtems_chain_node* node = &block->link;
-  rtems_chain_node* next_node = rtems_chain_next (node);
+  ListItem_t* node = &block->link;
+  ListItem_t* next_node = listGET_NEXT (node);
   /*
    * Always leave a single block allocated. Eases possible heap fragmentation.
    */
-  if (block->recs == 0 && !rtems_chain_has_only_one_node (blocks))
+  if (block->recs == 0 && listCURRENT_LIST_LENGTH (blocks) > 1)
   {
     if (rtems_rtl_trace (RTEMS_RTL_TRACE_UNRESOLVED))
       printf ("rtl: unresolv: block-del %p\n", block);
-    rtems_chain_extract (node);
+    uxListRemove (node);
     rtems_rtl_alloc_del (RTEMS_RTL_ALLOC_EXTERNAL, block);
   }
   return next_node;
@@ -434,9 +434,9 @@ rtems_rtl_unresolved_compact (void)
      * Iterate over the blocks removing any empty strings. If a string is
      * removed update the indexes of all strings above this level.
      */
-    rtems_chain_node* node = rtems_chain_first (&unresolved->blocks);
+    ListItem_t* node = listGET_HEAD_ENTRY (&unresolved->blocks);
     uint16_t          index = 0;
-    while (!rtems_chain_is_tail (&unresolved->blocks, node))
+    while (listGET_END_MARKER (&unresolved->blocks) != node)
     {
       rtems_rtl_unresolv_block* block = (rtems_rtl_unresolv_block*) node;
       rtems_rtl_unresolv_rec*   rec = rtems_rtl_unresolved_rec_first (block);
@@ -489,17 +489,17 @@ rtems_rtl_unresolved_table_open (rtems_rtl_unresolved* unresolved,
 {
   unresolved->marker = 0xdeadf00d;
   unresolved->block_recs = block_recs;
-  rtems_chain_initialize_empty (&unresolved->blocks);
+  vListInitialise (&unresolved->blocks);
   return rtems_rtl_unresolved_block_alloc (unresolved);
 }
 
 void
 rtems_rtl_unresolved_table_close (rtems_rtl_unresolved* unresolved)
 {
-  rtems_chain_node* node = rtems_chain_first (&unresolved->blocks);
-  while (!rtems_chain_is_tail (&unresolved->blocks, node))
+  ListItem_t* node = listGET_HEAD_ENTRY (&unresolved->blocks);
+  while (listGET_END_MARKER (&unresolved->blocks) != node)
   {
-    rtems_chain_node* next = rtems_chain_next (node);
+    ListItem_t* next = listGET_NEXT (node);
     rtems_rtl_alloc_del (RTEMS_RTL_ALLOC_EXTERNAL, node);
     node = next;
   }
@@ -512,8 +512,8 @@ rtems_rtl_unresolved_iterate (rtems_rtl_unresolved_iterator iterator,
   rtems_rtl_unresolved* unresolved = rtems_rtl_unresolved_unprotected ();
   if (unresolved)
   {
-    rtems_chain_node* node = rtems_chain_first (&unresolved->blocks);
-    while (!rtems_chain_is_tail (&unresolved->blocks, node))
+    ListItem_t* node = listGET_HEAD_ENTRY (&unresolved->blocks);
+    while (listGET_END_MARKER (&unresolved->blocks) != node)
     {
       rtems_rtl_unresolv_block* block = (rtems_rtl_unresolv_block*) node;
       rtems_rtl_unresolv_rec*   rec = rtems_rtl_unresolved_rec_first (block);
@@ -525,7 +525,7 @@ rtems_rtl_unresolved_iterate (rtems_rtl_unresolved_iterator iterator,
         rec = rtems_rtl_unresolved_rec_next (rec);
       }
 
-      node = rtems_chain_next (node);
+      node = listGET_NEXT (node);
     }
   }
   return false;
@@ -725,8 +725,8 @@ rtems_rtl_trampoline_remove (rtems_rtl_obj* obj)
     /*
      * Iterate over the blocks clearing any trampoline records.
      */
-    rtems_chain_node* node = rtems_chain_first (&unresolved->blocks);
-    while (!rtems_chain_is_tail (&unresolved->blocks, node))
+    ListItem_t* node = listGET_HEAD_ENTRY (&unresolved->blocks);
+    while (listGET_END_MARKER (&unresolved->blocks) != node)
     {
       rtems_rtl_unresolv_block* block = (rtems_rtl_unresolv_block*) node;
       rtems_rtl_unresolv_rec*   rec = rtems_rtl_unresolved_rec_first (block);

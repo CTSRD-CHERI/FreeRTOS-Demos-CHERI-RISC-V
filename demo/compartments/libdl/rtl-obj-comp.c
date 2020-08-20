@@ -22,8 +22,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <rtems/rtl/rtl-allocator.h>
-#include <rtems/rtl/rtl-obj-comp.h>
+#include <rtl/rtl-allocator.h>
+#include <rtl/rtl-obj-comp.h>
 #include "rtl-error.h"
 
 #include "fastlz.h"

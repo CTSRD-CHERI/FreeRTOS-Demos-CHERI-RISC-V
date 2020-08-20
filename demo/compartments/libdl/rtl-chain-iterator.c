@@ -22,14 +22,14 @@
 #include "rtl-chain-iterator.h"
 
 bool
-rtems_rtl_chain_iterate (rtems_chain_control* chain,
+rtems_rtl_chain_iterate (List_t*              chain,
                          rtems_chain_iterator iterator,
                          void*                data)
 {
-  rtems_chain_node* node = rtems_chain_first (chain);
-  while (!rtems_chain_is_tail (chain, node))
+  ListItem_t* node = listGET_HEAD_ENTRY (chain);
+  while (listGET_END_MARKER(chain) != node)
   {
-    rtems_chain_node* next_node = rtems_chain_next (node);
+    ListItem_t* next_node = listGET_NEXT (node);
     if (!iterator (node, data))
       return false;
     node = next_node;
@@ -41,7 +41,7 @@ rtems_rtl_chain_iterate (rtems_chain_control* chain,
  * Count iterator.
  */
 static bool
-rtems_rtl_count_iterator (rtems_chain_node* node, void* data)
+rtems_rtl_count_iterator (ListItem_t* node, void* data)
 {
   int* count = data;
   ++(*count);

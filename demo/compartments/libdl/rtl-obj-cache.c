@@ -23,12 +23,12 @@
 #include <string.h>
 #include <unistd.h>
 #include <inttypes.h>
-#include <rtems/inttypes.h>
+#include <riscv/inttypes.h>
 
-#include <rtems/rtl/rtl-allocator.h>
-#include <rtems/rtl/rtl-obj-cache.h>
+#include <rtl/rtl-allocator.h>
+#include <rtl/rtl-obj-cache.h>
 #include "rtl-error.h"
-#include <rtems/rtl/rtl-trace.h>
+#include <rtl/rtl-trace.h>
 
 bool
 rtems_rtl_obj_cache_open (rtems_rtl_obj_cache* cache, size_t size)

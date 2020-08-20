@@ -1,0 +1,539 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+BITS_PER_WORD	rtl-bit-alloc.c	34;"	d	file:
+ELFSIZE	rtl-elf.h	35;"	d
+ELFSIZE	rtl-elf.h	37;"	d
+FASTLZ_COMPRESSOR	fastlz.c	/^static FASTLZ_INLINE int FASTLZ_COMPRESSOR(const void* input, int length, void* output)$/;"	f	file:
+FASTLZ_COMPRESSOR	fastlz.c	107;"	d	file:
+FASTLZ_COMPRESSOR	fastlz.c	109;"	d	file:
+FASTLZ_COMPRESSOR	fastlz.c	122;"	d	file:
+FASTLZ_COMPRESSOR	fastlz.c	124;"	d	file:
+FASTLZ_DECOMPRESSOR	fastlz.c	/^static FASTLZ_INLINE int FASTLZ_DECOMPRESSOR(const void* input, int length, void* output, int maxout)$/;"	f	file:
+FASTLZ_DECOMPRESSOR	fastlz.c	108;"	d	file:
+FASTLZ_DECOMPRESSOR	fastlz.c	110;"	d	file:
+FASTLZ_DECOMPRESSOR	fastlz.c	123;"	d	file:
+FASTLZ_DECOMPRESSOR	fastlz.c	125;"	d	file:
+FASTLZ_EXPECT_CONDITIONAL	fastlz.c	39;"	d	file:
+FASTLZ_EXPECT_CONDITIONAL	fastlz.c	42;"	d	file:
+FASTLZ_H	fastlz.h	28;"	d
+FASTLZ_INLINE	fastlz.c	50;"	d	file:
+FASTLZ_INLINE	fastlz.c	52;"	d	file:
+FASTLZ_INLINE	fastlz.c	54;"	d	file:
+FASTLZ_LEVEL	fastlz.c	104;"	d	file:
+FASTLZ_LEVEL	fastlz.c	105;"	d	file:
+FASTLZ_LEVEL	fastlz.c	115;"	d	file:
+FASTLZ_LEVEL	fastlz.c	116;"	d	file:
+FASTLZ_READU16	fastlz.c	94;"	d	file:
+FASTLZ_READU16	fastlz.c	96;"	d	file:
+FASTLZ_SAFE	fastlz.c	33;"	d	file:
+FASTLZ_STRICT_ALIGN	fastlz.c	61;"	d	file:
+FASTLZ_STRICT_ALIGN	fastlz.c	63;"	d	file:
+FASTLZ_STRICT_ALIGN	fastlz.c	65;"	d	file:
+FASTLZ_STRICT_ALIGN	fastlz.c	67;"	d	file:
+FASTLZ_STRICT_ALIGN	fastlz.c	69;"	d	file:
+FASTLZ_STRICT_ALIGN	fastlz.c	71;"	d	file:
+FASTLZ_STRICT_ALIGN	fastlz.c	73;"	d	file:
+FASTLZ_UNEXPECT_CONDITIONAL	fastlz.c	40;"	d	file:
+FASTLZ_UNEXPECT_CONDITIONAL	fastlz.c	43;"	d	file:
+FASTLZ_VERSION	fastlz.h	30;"	d
+FASTLZ_VERSION_MAJOR	fastlz.h	32;"	d
+FASTLZ_VERSION_MINOR	fastlz.h	33;"	d
+FASTLZ_VERSION_REVISION	fastlz.h	34;"	d
+FASTLZ_VERSION_STRING	fastlz.h	36;"	d
+HASH_FUNCTION	fastlz.c	102;"	d	file:
+HASH_LOG	fastlz.c	99;"	d	file:
+HASH_MASK	fastlz.c	101;"	d	file:
+HASH_SIZE	fastlz.c	100;"	d	file:
+MAX_COPY	fastlz.c	89;"	d	file:
+MAX_DISTANCE	fastlz.c	118;"	d	file:
+MAX_DISTANCE	fastlz.c	119;"	d	file:
+MAX_DISTANCE	fastlz.c	91;"	d	file:
+MAX_FARDISTANCE	fastlz.c	120;"	d	file:
+MAX_LEN	fastlz.c	90;"	d	file:
+REL_R_ADDEND	rtl-elf.c	43;"	d	file:
+REL_R_ADDEND	rtl-rap.c	43;"	d	file:
+REL_R_INFO	rtl-elf.c	42;"	d	file:
+REL_R_INFO	rtl-rap.c	42;"	d	file:
+REL_R_OFFSET	rtl-elf.c	41;"	d	file:
+REL_R_OFFSET	rtl-rap.c	41;"	d	file:
+RTEMS_RTL_AR_FHDR_BASE	rtl-archive.c	41;"	d	file:
+RTEMS_RTL_AR_FHDR_SIZE	rtl-archive.c	48;"	d	file:
+RTEMS_RTL_AR_FNAME	rtl-archive.c	42;"	d	file:
+RTEMS_RTL_AR_FNAME_SIZE	rtl-archive.c	43;"	d	file:
+RTEMS_RTL_AR_IDENT	rtl-archive.c	39;"	d	file:
+RTEMS_RTL_AR_IDENT_SIZE	rtl-archive.c	40;"	d	file:
+RTEMS_RTL_AR_MAGIC	rtl-archive.c	46;"	d	file:
+RTEMS_RTL_AR_MAGIC_SIZE	rtl-archive.c	47;"	d	file:
+RTEMS_RTL_AR_SIZE	rtl-archive.c	44;"	d	file:
+RTEMS_RTL_AR_SIZE_SIZE	rtl-archive.c	45;"	d	file:
+RTEMS_RTL_COMP_OUTPUT	rtl.c	53;"	d	file:
+RTEMS_RTL_ELF_LOADER	rtl-obj.c	36;"	d	file:
+RTEMS_RTL_ELF_LOADER_COUNT	rtl-obj.c	48;"	d	file:
+RTEMS_RTL_ELF_LOADER_COUNT	rtl-obj.c	50;"	d	file:
+RTEMS_RTL_ELF_RELOC_CACHE	rtl.c	48;"	d	file:
+RTEMS_RTL_ELF_STRING_CACHE	rtl.c	43;"	d	file:
+RTEMS_RTL_ELF_STRING_MAX	rtl-elf.h	80;"	d
+RTEMS_RTL_ELF_SYMBOL_CACHE	rtl.c	38;"	d	file:
+RTEMS_RTL_LOADERS	rtl-obj.c	56;"	d	file:
+RTEMS_RTL_MAX_FILE_SIZE	rtl-archive.c	1240;"	d	file:
+RTEMS_RTL_PRINTF_ATTR	rtl-error.h	24;"	d
+RTEMS_RTL_PRINTF_ATTR	rtl-error.h	26;"	d
+RTEMS_RTL_RAP_BSS_SEC	rtl-rap.c	71;"	d	file:
+RTEMS_RTL_RAP_CONST_SEC	rtl-rap.c	67;"	d	file:
+RTEMS_RTL_RAP_CTOR_SEC	rtl-rap.c	68;"	d	file:
+RTEMS_RTL_RAP_DATA_SEC	rtl-rap.c	70;"	d	file:
+RTEMS_RTL_RAP_DTOR_SEC	rtl-rap.c	69;"	d	file:
+RTEMS_RTL_RAP_LOADER	rtl-obj.c	37;"	d	file:
+RTEMS_RTL_RAP_LOADER_COUNT	rtl-obj.c	41;"	d	file:
+RTEMS_RTL_RAP_LOADER_COUNT	rtl-obj.c	43;"	d	file:
+RTEMS_RTL_RAP_SECS	rtl-rap.c	72;"	d	file:
+RTEMS_RTL_RAP_TEXT_SEC	rtl-rap.c	66;"	d	file:
+SEPARATED_PREFIX	rtl-elf.c	132;"	d	file:
+SYMNAME_BUFFER_SIZE	rtl-rap.c	224;"	d	file:
+SignExtend64	rtl-mdreloc-riscv.c	/^static int64_t SignExtend64(uint64_t val, unsigned bits) {$/;"	f	file:
+_RTEMS_RTL_ALLOC_HEAP_H_	rtl-alloc-heap.h	17;"	d
+_RTEMS_RTL_BIT_ALLOC_H_	rtl-bit-alloc.h	17;"	d
+_RTEMS_RTL_CHAIN_ITERATOR_H_	rtl-chain-iterator.h	17;"	d
+_RTEMS_RTL_ELF_H_	rtl-elf.h	17;"	d
+_RTEMS_RTL_ERROR_H_	rtl-error.h	17;"	d
+_RTEMS_RTL_FIND_FILE_H_	rtl-find-file.h	17;"	d
+_RTEMS_RTL_RAP_H_	rtl-rap.h	17;"	d
+_RTEMS_RTL_STRING_H_	rtl-string.h	17;"	d
+_RTEMS_RTL_TRAMPOLINE_H_	rtl-trampoline.h	58;"	d
+_RTEMS_RTL_UNWIND_DW2_H_	rtl-unwind-dw2.h	17;"	d
+_RTEMS_RTL_UNWIND_H_	rtl-unwind.h	17;"	d
+_STANDALONE	rtl-elf.h	43;"	d
+_STANDALONE	rtl-elf.h	48;"	d
+_rtld_debug	rtl-debugger.c	/^struct r_debug  _rtld_debug;$/;"	v	typeref:struct:r_debug
+_rtld_debug_state	rtl-debugger.c	/^_rtld_debug_state (void)$/;"	f
+_rtld_linkmap_add	rtl-debugger.c	/^_rtld_linkmap_add (rtems_rtl_obj* obj)$/;"	f
+_rtld_linkmap_delete	rtl-debugger.c	/^_rtld_linkmap_delete (rtems_rtl_obj* obj)$/;"	f
+alignment	rtl-elf.c	/^  uint32_t alignment; \/**< The alignment of the common section. *\/$/;"	m	struct:__anon2	file:
+alignment	rtl-obj.c	/^  uint32_t alignment; \/**< The alignment of the section type. *\/$/;"	m	struct:__anon4	file:
+alignment	rtl-rap.c	/^  uint32_t alignment;  \/**< The alignment of the section. *\/$/;"	m	struct:rtems_rtl_rap_section	file:
+archive	rtl-archive.c	/^  rtems_rtl_archive* archive;  \/**< The archive the symbol is found$/;"	m	struct:rtems_rtl_archive_obj_data	file:
+archive	rtl-archive.c	/^  rtems_rtl_archive* archive;$/;"	m	struct:rtems_rtl_archive_find_data	file:
+archives	rtl-unresolved.c	/^  rtems_rtl_archives*      archives; \/**< The archives to search. *\/$/;"	m	struct:rtems_rtl_unresolved_archive_reloc_data	file:
+base	rtl-bit-alloc.h	/^  uint8_t*  base;       \/**< The memory being allocated. *\/$/;"	m	struct:rtems_rtl_bit_alloc
+bit_blocks	rtl-bit-alloc.c	/^bit_blocks (rtems_rtl_bit_alloc* balloc, size_t size)$/;"	f	file:
+bit_clear	rtl-bit-alloc.c	/^bit_clear (rtems_rtl_bit_alloc* balloc, size_t start, size_t bits)$/;"	f	file:
+bit_find_clear	rtl-bit-alloc.c	/^bit_find_clear (rtems_rtl_bit_alloc* balloc, size_t blocks)$/;"	f	file:
+bit_mask	rtl-bit-alloc.c	/^bit_mask (size_t bit)$/;"	f	file:
+bit_offset	rtl-bit-alloc.c	/^bit_offset (size_t bit)$/;"	f	file:
+bit_set	rtl-bit-alloc.c	/^bit_set (rtems_rtl_bit_alloc* balloc, size_t start, size_t bits)$/;"	f	file:
+bit_word	rtl-bit-alloc.c	/^bit_word (size_t bit)$/;"	f	file:
+bits	rtl-bit-alloc.h	/^  uint32_t* bits;       \/**< The bit map indicating which blocks are allocated. *\/$/;"	m	struct:rtems_rtl_bit_alloc
+block_size	rtl-bit-alloc.h	/^  size_t    block_size; \/**< The size of a block, the minimum allocation unit. *\/$/;"	m	struct:rtems_rtl_bit_alloc
+blocks	rtl-bit-alloc.h	/^  size_t    blocks;     \/**< The number of blocks in the memory. *\/$/;"	m	struct:rtems_rtl_bit_alloc
+cache_line_size	rtl-obj.c	/^  size_t   cache_line_size;$/;"	m	struct:__anon6	file:
+checksum	rtl-rap.c	/^  uint32_t              checksum;     \/**< The checksum. *\/$/;"	m	struct:rtems_rtl_rap	file:
+class	rtl-rap.c	/^  uint32_t              class;        \/**< The ELF class. *\/$/;"	m	struct:rtems_rtl_rap	file:
+clear	rtl.c	/^  uint32_t clear;   \/**< Flags to clear, do not invert. *\/$/;"	m	struct:rtems_rtl_obj_flags_data	file:
+compression	rtl-rap.c	/^  uint32_t              compression;  \/**< The type of compression. *\/$/;"	m	struct:rtems_rtl_rap	file:
+count	rtl-elf.c	/^  size_t         count;$/;"	m	struct:rtems_rtl_tramp_data	file:
+data	rtl-archive.c	/^  void*                      data;      \/**< User's data. *\/$/;"	m	struct:rtems_rtl_archive_chain_data	file:
+datatype	rtl-rap.c	/^  uint32_t              datatype;     \/**< The ELF data type. *\/$/;"	m	struct:rtems_rtl_rap	file:
+decomp	rtl-rap.c	/^  rtems_rtl_obj_comp*   decomp;       \/**< The decompression streamer. *\/$/;"	m	struct:rtems_rtl_rap	file:
+dependents	rtl-elf.c	/^  size_t dependents; \/**< The number of dependent object files. *\/$/;"	m	struct:__anon1	file:
+dl_get_obj_from_handle	dlfcn.c	/^dl_get_obj_from_handle (void* handle)$/;"	f	file:
+dlclose	dlfcn.c	/^dlclose (void* handle)$/;"	f
+dlerror	dlfcn.c	/^dlerror (void)$/;"	f
+dlinfo	dlfcn.c	/^dlinfo (void* handle, int request, void* p)$/;"	f
+dlopen	dlfcn.c	/^dlopen (const char* name, int mode)$/;"	f
+dlsym	dlfcn.c	/^dlsym (void* handle, const char *symbol)$/;"	f
+elf_sig	rtl-elf.c	/^static rtems_rtl_loader_format elf_sig =$/;"	v	file:
+end_va	rtl-obj.c	/^  void     *end_va;$/;"	m	struct:__anon6	file:
+extractBits	rtl-mdreloc-riscv.c	/^static uint32_t extractBits(uint64_t v, uint32_t begin, uint32_t end) {$/;"	f	file:
+failure	rtl-elf.c	/^  bool           failure;$/;"	m	struct:rtems_rtl_tramp_data	file:
+fastlz_compress	fastlz.c	/^int fastlz_compress(const void* input, int length, void* output)$/;"	f
+fastlz_compress_level	fastlz.c	/^int fastlz_compress_level(int level, const void* input, int length, void* output)$/;"	f
+fastlz_decompress	fastlz.c	/^int fastlz_decompress(const void* input, int length, void* output, int maxout)$/;"	f
+file	rtl-rap.c	/^  rtems_rtl_obj_cache*  file;         \/**< The file cache for the RAP file. *\/$/;"	m	struct:rtems_rtl_rap	file:
+fini	rtl-rap.c	/^  uint32_t              fini;         \/**< The finish strtab offset. *\/$/;"	m	struct:rtems_rtl_rap	file:
+flags	rtl-obj.c	/^  unsigned int         flags; \/**< The flags to use when matching. *\/$/;"	m	struct:__anon5	file:
+flags	rtl-rap.c	/^  const uint32_t flags;   \/**< Section flags. *\/$/;"	m	struct:rtems_rtl_rap_sectdef	file:
+flzuint16	fastlz.c	/^typedef unsigned short flzuint16;$/;"	t	file:
+flzuint32	fastlz.c	/^typedef unsigned int   flzuint32;$/;"	t	file:
+flzuint8	fastlz.c	/^typedef unsigned char  flzuint8;$/;"	t	file:
+global_sym_add	rtl-sym.c	/^static rtems_rtl_obj_sym global_sym_add =$/;"	v	file:
+has_unresolved	rtl-obj.c	/^  bool has_unresolved;$/;"	m	struct:rtems_rtl_obj_unresolved_data	file:
+index	rtl-obj.c	/^  int                  index; \/**< The index to match. *\/$/;"	m	struct:__anon5	file:
+index	rtl-unresolved.c	/^  int                     index;  \/**< The name's index. *\/$/;"	m	struct:__anon7	file:
+init	rtl-rap.c	/^  uint32_t              init;         \/**< The initialisation strtab offset. *\/$/;"	m	struct:rtems_rtl_rap	file:
+iterator	rtl-archive.c	/^  rtems_rtl_archive_iterator iterator;  \/**< The actual iterator. *\/$/;"	m	struct:rtems_rtl_archive_chain_data	file:
+length	rtl-rap.c	/^  uint32_t              length;       \/**< The file length. *\/$/;"	m	struct:rtems_rtl_rap	file:
+length	rtl-unresolved.c	/^  size_t                  length; \/**< The length of the name. *\/$/;"	m	struct:__anon7	file:
+loaders	rtl-obj.c	/^static const rtems_rtl_loader_table loaders[RTEMS_RTL_LOADERS] =$/;"	v	file:
+machinetype	rtl-rap.c	/^  uint32_t              machinetype;  \/**< The ELF machine type. *\/$/;"	m	struct:rtems_rtl_rap	file:
+mask	rtl-obj.c	/^  uint32_t             mask;  \/**< The mask to match. *\/$/;"	m	struct:__anon5	file:
+mask	rtl-obj.c	/^  uint32_t mask;      \/**< The selection mask to look for alignment. *\/$/;"	m	struct:__anon4	file:
+mask	rtl-obj.c	/^  uint32_t mask; \/**< The selection mask to sum. *\/$/;"	m	struct:__anon3	file:
+mask	rtl-obj.c	/^  uint32_t mask;$/;"	m	struct:__anon6	file:
+name	rtl-obj.c	/^  const char*          name;  \/**< The name to match. *\/$/;"	m	struct:__anon5	file:
+name	rtl-rap.c	/^  const char*    name;    \/**< Name of the section. *\/$/;"	m	struct:rtems_rtl_rap_sectdef	file:
+name	rtl-unresolved.c	/^  const char*             name;   \/**< The name being searched for. *\/$/;"	m	struct:__anon7	file:
+name	rtl-unresolved.c	/^  uint16_t                 name;     \/**< Name index. *\/$/;"	m	struct:rtems_rtl_unresolved_archive_reloc_data	file:
+name	rtl-unresolved.c	/^  uint16_t                name;     \/**< Name index. *\/$/;"	m	struct:rtems_rtl_unresolved_reloc_data	file:
+name_rec	rtl-unresolved.c	/^  rtems_rtl_unresolv_rec* name_rec; \/**< Name record. *\/$/;"	m	struct:rtems_rtl_unresolved_reloc_data	file:
+names	rtl-unresolved.c	/^  size_t names;$/;"	m	struct:rtems_rtl_unresolved_dump_data	file:
+obj	rtl-elf.c	/^  rtems_rtl_obj* obj;$/;"	m	struct:rtems_rtl_tramp_data	file:
+offset	rtl-archive.c	/^  off_t              offset;   \/**< The offset in the archive if found$/;"	m	struct:rtems_rtl_archive_obj_data	file:
+offset	rtl-unresolved.c	/^  int                     offset; \/**< The offset to move the index. *\/$/;"	m	struct:__anon7	file:
+parsing	rtl-elf.h	/^  bool   parsing;     \/**< The reloc records are being parsed. *\/$/;"	m	struct:rtems_rtl_mdreloc_trmap
+path	rtl-archive.c	/^  const char*        path;$/;"	m	struct:rtems_rtl_archive_find_data	file:
+rap_sections	rtl-rap.c	/^static const rtems_rtl_rap_sectdef rap_sections[RTEMS_RTL_RAP_SECS] =$/;"	v	file:
+rap_sig	rtl-rap.c	/^static rtems_rtl_loader_format rap_sig =$/;"	v	file:
+read16le	rtl-mdreloc-riscv.c	/^static uint16_t read16le(void *loc) {$/;"	f	file:
+read32le	rtl-mdreloc-riscv.c	/^static uint32_t read32le(void *loc) {$/;"	f	file:
+read64le	rtl-mdreloc-riscv.c	/^static uint64_t read64le(void *loc) {$/;"	f	file:
+rec	rtl-unresolved.c	/^  rtems_rtl_unresolv_rec* rec;    \/**< The record being searched for. *\/$/;"	m	struct:__anon7	file:
+rec	rtl-unresolved.c	/^  size_t rec;$/;"	m	struct:rtems_rtl_unresolved_dump_data	file:
+relocs_size	rtl-rap.c	/^  uint32_t              relocs_size;  \/**< The relocation table size. *\/$/;"	m	struct:rtems_rtl_rap	file:
+result	rtl-unresolved.c	/^  rtems_rtl_archive_search result;   \/**< The result of the load. *\/$/;"	m	struct:rtems_rtl_unresolved_archive_reloc_data	file:
+rpathlen	rtl-rap.c	/^  uint32_t              rpathlen;     \/**< The length of rpath. *\/$/;"	m	struct:rtems_rtl_rap	file:
+rtems_chain_iterator	rtl-chain-iterator.h	/^typedef bool (*rtems_chain_iterator) (rtems_chain_node* node, void* data);$/;"	t
+rtems_filesystem_is_delimiter	rtl-find-file.c	37;"	d	file:
+rtems_rtl_alloc_bss_tag	rtl-allocator.c	/^rtems_rtl_alloc_bss_tag (void)$/;"	f
+rtems_rtl_alloc_const_tag	rtl-allocator.c	/^rtems_rtl_alloc_const_tag (void)$/;"	f
+rtems_rtl_alloc_data_tag	rtl-allocator.c	/^rtems_rtl_alloc_data_tag (void)$/;"	f
+rtems_rtl_alloc_del	rtl-allocator.c	/^rtems_rtl_alloc_del (rtems_rtl_alloc_tag tag, void* address)$/;"	f
+rtems_rtl_alloc_eh_tag	rtl-allocator.c	/^rtems_rtl_alloc_eh_tag (void)$/;"	f
+rtems_rtl_alloc_heap	rtl-alloc-heap.c	/^rtems_rtl_alloc_heap (rtems_rtl_alloc_cmd cmd,$/;"	f
+rtems_rtl_alloc_hook	rtl-allocator.c	/^rtems_rtl_alloc_hook (rtems_rtl_allocator handler)$/;"	f
+rtems_rtl_alloc_indirect_del	rtl-allocator.c	/^rtems_rtl_alloc_indirect_del (rtems_rtl_alloc_tag tag,$/;"	f
+rtems_rtl_alloc_indirect_new	rtl-allocator.c	/^rtems_rtl_alloc_indirect_new (rtems_rtl_alloc_tag tag,$/;"	f
+rtems_rtl_alloc_initialise	rtl-allocator.c	/^rtems_rtl_alloc_initialise (rtems_rtl_alloc_data* data)$/;"	f
+rtems_rtl_alloc_lock	rtl-allocator.c	/^rtems_rtl_alloc_lock (void)$/;"	f
+rtems_rtl_alloc_module_del	rtl-allocator.c	/^rtems_rtl_alloc_module_del (void** text_base,$/;"	f
+rtems_rtl_alloc_module_new	rtl-allocator.c	/^rtems_rtl_alloc_module_new (void** text_base, size_t text_size,$/;"	f
+rtems_rtl_alloc_new	rtl-allocator.c	/^rtems_rtl_alloc_new (rtems_rtl_alloc_tag tag, size_t size, bool zero)$/;"	f
+rtems_rtl_alloc_text_tag	rtl-allocator.c	/^rtems_rtl_alloc_text_tag (void)$/;"	f
+rtems_rtl_alloc_unlock	rtl-allocator.c	/^rtems_rtl_alloc_unlock (void)$/;"	f
+rtems_rtl_alloc_wr_disable	rtl-allocator.c	/^rtems_rtl_alloc_wr_disable (rtems_rtl_alloc_tag tag, void* address)$/;"	f
+rtems_rtl_alloc_wr_enable	rtl-allocator.c	/^rtems_rtl_alloc_wr_enable (rtems_rtl_alloc_tag tag, void* address)$/;"	f
+rtems_rtl_archive_chain_data	rtl-archive.c	/^typedef struct rtems_rtl_archive_chain_data$/;"	s	file:
+rtems_rtl_archive_chain_data	rtl-archive.c	/^} rtems_rtl_archive_chain_data;$/;"	t	typeref:struct:rtems_rtl_archive_chain_data	file:
+rtems_rtl_archive_del	rtl-archive.c	/^rtems_rtl_archive_del (rtems_rtl_archive* archive)$/;"	f	file:
+rtems_rtl_archive_dup_name	rtl-archive.c	/^rtems_rtl_archive_dup_name (const char* name)$/;"	f	file:
+rtems_rtl_archive_find	rtl-archive.c	/^rtems_rtl_archive_find (rtems_rtl_archives* archives,$/;"	f	file:
+rtems_rtl_archive_find_data	rtl-archive.c	/^typedef struct rtems_rtl_archive_find_data$/;"	s	file:
+rtems_rtl_archive_find_data	rtl-archive.c	/^} rtems_rtl_archive_find_data;$/;"	t	typeref:struct:rtems_rtl_archive_find_data	file:
+rtems_rtl_archive_finder	rtl-archive.c	/^rtems_rtl_archive_finder (rtems_rtl_archive* archive, void* data)$/;"	f	file:
+rtems_rtl_archive_get	rtl-archive.c	/^rtems_rtl_archive_get (rtems_rtl_archives* archives,$/;"	f	file:
+rtems_rtl_archive_iterate_archives	rtl-archive.c	/^rtems_rtl_archive_iterate_archives (rtems_rtl_archives*        archives,$/;"	f	file:
+rtems_rtl_archive_iterator	rtl-archive.c	/^typedef bool (*rtems_rtl_archive_iterator) (rtems_rtl_archive* archive,$/;"	t	file:
+rtems_rtl_archive_load	rtl-archive.c	/^rtems_rtl_archive_load (rtems_rtl_archives* archives, const char* name)$/;"	f
+rtems_rtl_archive_loader	rtl-archive.c	/^rtems_rtl_archive_loader (rtems_rtl_archive* archive, void* data)$/;"	f	file:
+rtems_rtl_archive_match_name	rtl-archive.c	/^rtems_rtl_archive_match_name (const char* file_name, const char* name)$/;"	f	file:
+rtems_rtl_archive_new	rtl-archive.c	/^rtems_rtl_archive_new (rtems_rtl_archives* archives,$/;"	f	file:
+rtems_rtl_archive_node_iterator	rtl-archive.c	/^rtems_rtl_archive_node_iterator (rtems_chain_node* node, void* data)$/;"	f	file:
+rtems_rtl_archive_obj_data	rtl-archive.c	/^typedef struct rtems_rtl_archive_obj_data$/;"	s	file:
+rtems_rtl_archive_obj_data	rtl-archive.c	/^} rtems_rtl_archive_obj_data;$/;"	t	typeref:struct:rtems_rtl_archive_obj_data	file:
+rtems_rtl_archive_obj_finder	rtl-archive.c	/^rtems_rtl_archive_obj_finder (rtems_rtl_archive* archive, void* data)$/;"	f	file:
+rtems_rtl_archive_obj_load	rtl-archive.c	/^rtems_rtl_archive_obj_load (rtems_rtl_archives* archives,$/;"	f
+rtems_rtl_archive_read_32	rtl-archive.c	/^rtems_rtl_archive_read_32 (void* data)$/;"	f	file:
+rtems_rtl_archive_set_error	rtl-archive.c	/^rtems_rtl_archive_set_error (int num, const char* text)$/;"	f	file:
+rtems_rtl_archive_set_flags	rtl-archive.c	/^rtems_rtl_archive_set_flags (rtems_rtl_archive* archive, void* data)$/;"	f	file:
+rtems_rtl_archive_symbol_compare	rtl-archive.c	/^rtems_rtl_archive_symbol_compare (const void* a, const void* b)$/;"	f	file:
+rtems_rtl_archives_close	rtl-archive.c	/^rtems_rtl_archives_close (rtems_rtl_archives* archives)$/;"	f
+rtems_rtl_archives_load	rtl-archive.c	/^rtems_rtl_archives_load (rtems_rtl_archives* archives)$/;"	f	file:
+rtems_rtl_archives_load_config	rtl-archive.c	/^rtems_rtl_archives_load_config (rtems_rtl_archives* archives)$/;"	f	file:
+rtems_rtl_archives_open	rtl-archive.c	/^rtems_rtl_archives_open (rtems_rtl_archives* archives, const char* config)$/;"	f
+rtems_rtl_archives_refresh	rtl-archive.c	/^rtems_rtl_archives_refresh (rtems_rtl_archives* archives)$/;"	f
+rtems_rtl_archives_remove	rtl-archive.c	/^rtems_rtl_archives_remove (rtems_rtl_archives* archives)$/;"	f	file:
+rtems_rtl_archives_unprotected	rtl.c	/^rtems_rtl_archives_unprotected (void)$/;"	f
+rtems_rtl_base_global_syms_init	rtl.c	/^rtems_rtl_base_global_syms_init (void)$/;"	f
+rtems_rtl_base_sym_global_add	rtl.c	/^rtems_rtl_base_sym_global_add (const unsigned char* esyms,$/;"	f
+rtems_rtl_baseimage	rtl.c	/^rtems_rtl_baseimage (void)$/;"	f
+rtems_rtl_bit_alloc	rtl-bit-alloc.h	/^typedef struct rtems_rtl_bit_alloc$/;"	s
+rtems_rtl_bit_alloc	rtl-bit-alloc.h	/^} rtems_rtl_bit_alloc;$/;"	t	typeref:struct:rtems_rtl_bit_alloc
+rtems_rtl_bit_alloc_balloc	rtl-bit-alloc.c	/^rtems_rtl_bit_alloc_balloc (rtems_rtl_bit_alloc* balloc, size_t size)$/;"	f
+rtems_rtl_bit_alloc_bfree	rtl-bit-alloc.c	/^rtems_rtl_bit_alloc_bfree (rtems_rtl_bit_alloc* balloc, void* addr, size_t size)$/;"	f
+rtems_rtl_bit_alloc_close	rtl-bit-alloc.c	/^rtems_rtl_bit_alloc_close (rtems_rtl_bit_alloc* balloc)$/;"	f
+rtems_rtl_bit_alloc_open	rtl-bit-alloc.c	/^rtems_rtl_bit_alloc_open (void* base, size_t size, size_t block_size, size_t used)$/;"	f
+rtems_rtl_chain_count	rtl-chain-iterator.c	/^rtems_rtl_chain_count (rtems_chain_control* chain)$/;"	f
+rtems_rtl_chain_iterate	rtl-chain-iterator.c	/^rtems_rtl_chain_iterate (rtems_chain_control* chain,$/;"	f
+rtems_rtl_check_handle	rtl.c	/^rtems_rtl_check_handle (void* handle)$/;"	f
+rtems_rtl_count_iterator	rtl-chain-iterator.c	/^rtems_rtl_count_iterator (rtems_chain_node* node, void* data)$/;"	f	file:
+rtems_rtl_data_init	rtl.c	/^rtems_rtl_data_init (void)$/;"	f	file:
+rtems_rtl_data_unprotected	rtl.c	/^rtems_rtl_data_unprotected (void)$/;"	f
+rtems_rtl_elf_add_common	rtl-elf.c	/^rtems_rtl_elf_add_common (rtems_rtl_obj* obj, size_t size, uint32_t alignment)$/;"	f	file:
+rtems_rtl_elf_alloc_trampoline	rtl-elf.c	/^rtems_rtl_elf_alloc_trampoline (rtems_rtl_obj* obj, size_t unresolved)$/;"	f	file:
+rtems_rtl_elf_arch_alloc	rtl-elf.c	/^rtems_rtl_elf_arch_alloc (rtems_rtl_obj*      obj,$/;"	f	file:
+rtems_rtl_elf_arch_free	rtl-elf.c	/^rtems_rtl_elf_arch_free (rtems_rtl_obj* obj)$/;"	f	file:
+rtems_rtl_elf_arch_parse_section	rtl-mdreloc-riscv.c	/^rtems_rtl_elf_arch_parse_section (const rtems_rtl_obj* obj,$/;"	f
+rtems_rtl_elf_arch_section_alloc	rtl-mdreloc-riscv.c	/^rtems_rtl_elf_arch_section_alloc (const rtems_rtl_obj* obj,$/;"	f
+rtems_rtl_elf_arch_section_free	rtl-mdreloc-riscv.c	/^rtems_rtl_elf_arch_section_free (const rtems_rtl_obj* obj,$/;"	f
+rtems_rtl_elf_common	rtl-elf.c	/^rtems_rtl_elf_common (rtems_rtl_obj*      obj,$/;"	f	file:
+rtems_rtl_elf_common_data	rtl-elf.c	/^} rtems_rtl_elf_common_data;$/;"	t	typeref:struct:__anon2	file:
+rtems_rtl_elf_dependents	rtl-elf.c	/^rtems_rtl_elf_dependents (rtems_rtl_obj* obj, rtems_rtl_elf_reloc_data* reloc)$/;"	f	file:
+rtems_rtl_elf_file_check	rtl-elf.c	/^rtems_rtl_elf_file_check (rtems_rtl_obj* obj, int fd)$/;"	f
+rtems_rtl_elf_file_load	rtl-elf.c	/^rtems_rtl_elf_file_load (rtems_rtl_obj* obj, int fd)$/;"	f
+rtems_rtl_elf_file_sig	rtl-elf.c	/^rtems_rtl_elf_file_sig (void)$/;"	f
+rtems_rtl_elf_file_unload	rtl-elf.c	/^rtems_rtl_elf_file_unload (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_elf_find_symbol	rtl-elf.c	/^rtems_rtl_elf_find_symbol (rtems_rtl_obj*      obj,$/;"	f	file:
+rtems_rtl_elf_load_linkmap	rtl-elf.c	/^rtems_rtl_elf_load_linkmap (rtems_rtl_obj* obj)$/;"	f	file:
+rtems_rtl_elf_loader	rtl-elf.c	/^rtems_rtl_elf_loader (rtems_rtl_obj*      obj,$/;"	f	file:
+rtems_rtl_elf_machine_check	rtl-elf.c	/^rtems_rtl_elf_machine_check (Elf_Ehdr* ehdr)$/;"	f	file:
+rtems_rtl_elf_parse_sections	rtl-elf.c	/^rtems_rtl_elf_parse_sections (rtems_rtl_obj* obj, int fd, Elf_Ehdr* ehdr)$/;"	f	file:
+rtems_rtl_elf_rel_failure	rtl-elf.h	/^  rtems_rtl_elf_rel_failure,     \/**< There was a failure processing the record. *\/$/;"	e	enum:rtems_rtl_elf_rel_status
+rtems_rtl_elf_rel_no_error	rtl-elf.h	/^  rtems_rtl_elf_rel_no_error,    \/**< There is no error processing the record. *\/$/;"	e	enum:rtems_rtl_elf_rel_status
+rtems_rtl_elf_rel_resolve_sym	rtl-mdreloc-riscv.c	/^rtems_rtl_elf_rel_resolve_sym (Elf_Word type) {$/;"	f
+rtems_rtl_elf_rel_status	rtl-elf.h	/^typedef enum rtems_rtl_elf_rel_status$/;"	g
+rtems_rtl_elf_rel_status	rtl-elf.h	/^} rtems_rtl_elf_rel_status;$/;"	t	typeref:enum:rtems_rtl_elf_rel_status
+rtems_rtl_elf_rel_tramp_add	rtl-elf.h	/^  rtems_rtl_elf_rel_tramp_add    \/**< Add a trampoliine. *\/$/;"	e	enum:rtems_rtl_elf_rel_status
+rtems_rtl_elf_rel_tramp_cache	rtl-elf.h	/^  rtems_rtl_elf_rel_tramp_cache, \/**< The reloc record may need a trampoliine. *\/$/;"	e	enum:rtems_rtl_elf_rel_status
+rtems_rtl_elf_reloc_data	rtl-elf.c	/^} rtems_rtl_elf_reloc_data;$/;"	t	typeref:struct:__anon1	file:
+rtems_rtl_elf_reloc_handler	rtl-elf.c	/^typedef bool (*rtems_rtl_elf_reloc_handler)(rtems_rtl_obj*      obj,$/;"	t	file:
+rtems_rtl_elf_reloc_parser	rtl-elf.c	/^rtems_rtl_elf_reloc_parser (rtems_rtl_obj*      obj,$/;"	f	file:
+rtems_rtl_elf_reloc_rela	rtl-mdreloc-riscv.c	/^rtems_rtl_elf_reloc_rela (rtems_rtl_obj*      obj,$/;"	f	file:
+rtems_rtl_elf_reloc_relocator	rtl-elf.c	/^rtems_rtl_elf_reloc_relocator (rtems_rtl_obj*      obj,$/;"	f	file:
+rtems_rtl_elf_relocate_rel	rtl-mdreloc-riscv.c	/^rtems_rtl_elf_relocate_rel (rtems_rtl_obj*      obj,$/;"	f
+rtems_rtl_elf_relocate_rel_tramp	rtl-mdreloc-riscv.c	/^rtems_rtl_elf_relocate_rel_tramp (rtems_rtl_obj*            obj,$/;"	f
+rtems_rtl_elf_relocate_rela	rtl-mdreloc-riscv.c	/^rtems_rtl_elf_relocate_rela (rtems_rtl_obj*            obj,$/;"	f
+rtems_rtl_elf_relocate_rela_tramp	rtl-mdreloc-riscv.c	/^rtems_rtl_elf_relocate_rela_tramp (rtems_rtl_obj*            obj,$/;"	f
+rtems_rtl_elf_relocate_tramp_max_size	rtl-mdreloc-riscv.c	/^rtems_rtl_elf_relocate_tramp_max_size (void) {$/;"	f
+rtems_rtl_elf_relocate_worker	rtl-elf.c	/^rtems_rtl_elf_relocate_worker (rtems_rtl_obj*              obj,$/;"	f	file:
+rtems_rtl_elf_relocs_locator	rtl-elf.c	/^rtems_rtl_elf_relocs_locator (rtems_rtl_obj*      obj,$/;"	f	file:
+rtems_rtl_elf_relocs_parser	rtl-elf.c	/^rtems_rtl_elf_relocs_parser (rtems_rtl_obj*      obj,$/;"	f	file:
+rtems_rtl_elf_section_flags	rtl-mdreloc-riscv.c	/^rtems_rtl_elf_section_flags (const rtems_rtl_obj* obj,$/;"	f
+rtems_rtl_elf_separated_section	rtl-elf.c	/^rtems_rtl_elf_separated_section (const char* name)$/;"	f	file:
+rtems_rtl_elf_sym_bind_label	rtl-elf.c	/^rtems_rtl_elf_sym_bind_label (Elf_Byte st_info)$/;"	f	file:
+rtems_rtl_elf_sym_type_label	rtl-elf.c	/^rtems_rtl_elf_sym_type_label (Elf_Byte st_info)$/;"	f	file:
+rtems_rtl_elf_symbols_load	rtl-elf.c	/^rtems_rtl_elf_symbols_load (rtems_rtl_obj*      obj,$/;"	f	file:
+rtems_rtl_elf_symbols_locate	rtl-elf.c	/^rtems_rtl_elf_symbols_locate (rtems_rtl_obj*      obj,$/;"	f	file:
+rtems_rtl_elf_tramp_resolve_reloc	rtl-elf.c	/^rtems_rtl_elf_tramp_resolve_reloc (rtems_rtl_unresolv_rec* rec,$/;"	f	file:
+rtems_rtl_elf_unwind_deregister	rtl-mdreloc-riscv.c	/^rtems_rtl_elf_unwind_deregister (rtems_rtl_obj* obj) {$/;"	f
+rtems_rtl_elf_unwind_dw2_deregister	rtl-unwind-dw2.c	/^bool rtems_rtl_elf_unwind_dw2_deregister (const rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_elf_unwind_dw2_parse	rtl-unwind-dw2.c	/^rtems_rtl_elf_unwind_dw2_parse (const rtems_rtl_obj* obj,$/;"	f
+rtems_rtl_elf_unwind_dw2_register	rtl-unwind-dw2.c	/^rtems_rtl_elf_unwind_dw2_register (const rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_elf_unwind_dw2_sleb128	rtl-unwind-dw2.h	/^  typedef long long rtems_rtl_elf_unwind_dw2_sleb128;$/;"	t
+rtems_rtl_elf_unwind_dw2_sleb128	rtl-unwind-dw2.h	/^  typedef long rtems_rtl_elf_unwind_dw2_sleb128;$/;"	t
+rtems_rtl_elf_unwind_dw2_uleb128	rtl-unwind-dw2.h	/^  typedef unsigned long long rtems_rtl_elf_unwind_dw2_uleb128;$/;"	t
+rtems_rtl_elf_unwind_dw2_uleb128	rtl-unwind-dw2.h	/^  typedef unsigned long rtems_rtl_elf_unwind_dw2_uleb128;$/;"	t
+rtems_rtl_elf_unwind_parse	rtl-mdreloc-riscv.c	/^rtems_rtl_elf_unwind_parse (const rtems_rtl_obj* obj,$/;"	f
+rtems_rtl_elf_unwind_register	rtl-mdreloc-riscv.c	/^rtems_rtl_elf_unwind_register (rtems_rtl_obj* obj) {$/;"	f
+rtems_rtl_find_file	rtl-find-file.c	/^rtems_rtl_find_file (const char*  name,$/;"	f
+rtems_rtl_find_obj	rtl.c	/^rtems_rtl_find_obj (const char* name)$/;"	f
+rtems_rtl_find_obj_with_symbol	rtl.c	/^rtems_rtl_find_obj_with_symbol (const rtems_rtl_obj_sym* sym)$/;"	f
+rtems_rtl_get_error	rtl-error.c	/^rtems_rtl_get_error (char* message, size_t max_message)$/;"	f
+rtems_rtl_global_symbols	rtl.c	/^rtems_rtl_global_symbols (void)$/;"	f
+rtems_rtl_last_error_unprotected	rtl.c	/^rtems_rtl_last_error_unprotected (void)$/;"	f
+rtems_rtl_load	rtl.c	/^rtems_rtl_load (const char* name, int mode)$/;"	f
+rtems_rtl_load_object	rtl.c	/^rtems_rtl_load_object (const char* name, int mode)$/;"	f
+rtems_rtl_lock	rtl.c	/^rtems_rtl_lock (void)$/;"	f
+rtems_rtl_mdreloc_tramp	rtl-elf.h	/^} rtems_rtl_mdreloc_tramp;$/;"	t	typeref:struct:rtems_rtl_mdreloc_trmap
+rtems_rtl_mdreloc_trmap	rtl-elf.h	/^typedef struct rtems_rtl_mdreloc_trmap$/;"	s
+rtems_rtl_obj_add_dependent	rtl-obj.c	/^rtems_rtl_obj_add_dependent (rtems_rtl_obj* obj, rtems_rtl_obj* dependent)$/;"	f
+rtems_rtl_obj_add_section	rtl-obj.c	/^rtems_rtl_obj_add_section (rtems_rtl_obj* obj,$/;"	f
+rtems_rtl_obj_alloc	rtl-obj.c	/^rtems_rtl_obj_alloc (void)$/;"	f
+rtems_rtl_obj_alloc_dependents	rtl-obj.c	/^rtems_rtl_obj_alloc_dependents (rtems_rtl_obj* obj, size_t dependents)$/;"	f
+rtems_rtl_obj_alloc_sections	rtl-obj.c	/^rtems_rtl_obj_alloc_sections (rtems_rtl_obj*             obj,$/;"	f
+rtems_rtl_obj_alloc_trampoline	rtl-obj.c	/^rtems_rtl_obj_alloc_trampoline (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_archive_find_obj	rtl-archive.c	/^rtems_rtl_obj_archive_find_obj (int                     fd,$/;"	f
+rtems_rtl_obj_bss_alignment	rtl-obj.c	/^rtems_rtl_obj_bss_alignment (const rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_bss_size	rtl-obj.c	/^rtems_rtl_obj_bss_size (const rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_cache_close	rtl-obj-cache.c	/^rtems_rtl_obj_cache_close (rtems_rtl_obj_cache* cache)$/;"	f
+rtems_rtl_obj_cache_flush	rtl-obj-cache.c	/^rtems_rtl_obj_cache_flush (rtems_rtl_obj_cache* cache)$/;"	f
+rtems_rtl_obj_cache_open	rtl-obj-cache.c	/^rtems_rtl_obj_cache_open (rtems_rtl_obj_cache* cache, size_t size)$/;"	f
+rtems_rtl_obj_cache_read	rtl-obj-cache.c	/^rtems_rtl_obj_cache_read (rtems_rtl_obj_cache* cache,$/;"	f
+rtems_rtl_obj_cache_read_byval	rtl-obj-cache.c	/^rtems_rtl_obj_cache_read_byval (rtems_rtl_obj_cache* cache,$/;"	f
+rtems_rtl_obj_caches	rtl.c	/^rtems_rtl_obj_caches (rtems_rtl_obj_cache** symbols,$/;"	f
+rtems_rtl_obj_caches_flush	rtl.c	/^rtems_rtl_obj_caches_flush (void)$/;"	f
+rtems_rtl_obj_cdtors_to_run	rtl-obj.c	/^rtems_rtl_obj_cdtors_to_run (rtems_rtl_obj* obj, uint32_t mask)$/;"	f	file:
+rtems_rtl_obj_comp_close	rtl-obj-comp.c	/^rtems_rtl_obj_comp_close (rtems_rtl_obj_comp* comp)$/;"	f
+rtems_rtl_obj_comp_open	rtl-obj-comp.c	/^rtems_rtl_obj_comp_open (rtems_rtl_obj_comp* comp,$/;"	f
+rtems_rtl_obj_comp_read	rtl-obj-comp.c	/^rtems_rtl_obj_comp_read (rtems_rtl_obj_comp* comp,$/;"	f
+rtems_rtl_obj_comp_set	rtl-obj-comp.c	/^rtems_rtl_obj_comp_set (rtems_rtl_obj_comp*  comp,$/;"	f
+rtems_rtl_obj_const_alignment	rtl-obj.c	/^rtems_rtl_obj_const_alignment (const rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_const_size	rtl-obj.c	/^rtems_rtl_obj_const_size (const rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_ctors_to_run	rtl-obj.c	/^rtems_rtl_obj_ctors_to_run (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_data_alignment	rtl-obj.c	/^rtems_rtl_obj_data_alignment (const rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_data_size	rtl-obj.c	/^rtems_rtl_obj_data_size (const rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_dec_reference	rtl-obj.c	/^rtems_rtl_obj_dec_reference (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_decompress	rtl.c	/^rtems_rtl_obj_decompress (rtems_rtl_obj_comp** decomp,$/;"	f
+rtems_rtl_obj_dtors_to_run	rtl-obj.c	/^rtems_rtl_obj_dtors_to_run (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_eh_alignment	rtl-obj.c	/^rtems_rtl_obj_eh_alignment (const rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_eh_size	rtl-obj.c	/^rtems_rtl_obj_eh_size (const rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_erase_dependents	rtl-obj.c	/^rtems_rtl_obj_erase_dependents (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_erase_sections	rtl-obj.c	/^rtems_rtl_obj_erase_sections (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_erase_trampoline	rtl-obj.c	/^rtems_rtl_obj_erase_trampoline (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_file_load	rtl-obj.c	/^rtems_rtl_obj_file_load (rtems_rtl_obj* obj, int fd)$/;"	f	file:
+rtems_rtl_obj_find_file	rtl-obj.c	/^rtems_rtl_obj_find_file (rtems_rtl_obj* obj, const char* name)$/;"	f
+rtems_rtl_obj_find_section	rtl-obj.c	/^rtems_rtl_obj_find_section (const rtems_rtl_obj* obj,$/;"	f
+rtems_rtl_obj_find_section_by_index	rtl-obj.c	/^rtems_rtl_obj_find_section_by_index (const rtems_rtl_obj* obj,$/;"	f
+rtems_rtl_obj_find_section_by_mask	rtl-obj.c	/^rtems_rtl_obj_find_section_by_mask (const rtems_rtl_obj* obj,$/;"	f
+rtems_rtl_obj_flags_data	rtl.c	/^typedef struct rtems_rtl_obj_flags_data$/;"	s	file:
+rtems_rtl_obj_flags_data	rtl.c	/^} rtems_rtl_obj_flags_data;$/;"	t	typeref:struct:rtems_rtl_obj_flags_data	file:
+rtems_rtl_obj_flags_iterator	rtl.c	/^rtems_rtl_obj_flags_iterator (rtems_chain_node* node, void* data)$/;"	f	file:
+rtems_rtl_obj_free	rtl-obj.c	/^rtems_rtl_obj_free (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_free_names	rtl-obj.c	/^rtems_rtl_obj_free_names (rtems_rtl_obj* obj)$/;"	f	file:
+rtems_rtl_obj_get_reference	rtl-obj.c	/^rtems_rtl_obj_get_reference (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_inc_reference	rtl-obj.c	/^rtems_rtl_obj_inc_reference (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_iterate_dependents	rtl-obj.c	/^rtems_rtl_obj_iterate_dependents (rtems_rtl_obj*                 obj,$/;"	f
+rtems_rtl_obj_load	rtl-obj.c	/^rtems_rtl_obj_load (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_load_sections	rtl-obj.c	/^rtems_rtl_obj_load_sections (rtems_rtl_obj*             obj,$/;"	f
+rtems_rtl_obj_load_symbols	rtl-obj.c	/^rtems_rtl_obj_load_symbols (rtems_rtl_obj*             obj,$/;"	f
+rtems_rtl_obj_orphaned	rtl-obj.c	/^rtems_rtl_obj_orphaned (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_parse_name	rtl-obj.c	/^rtems_rtl_obj_parse_name (rtems_rtl_obj* obj, const char* name)$/;"	f	file:
+rtems_rtl_obj_relocate	rtl-obj.c	/^rtems_rtl_obj_relocate (rtems_rtl_obj*             obj,$/;"	f
+rtems_rtl_obj_relocate_unresolved	rtl-elf.c	/^rtems_rtl_obj_relocate_unresolved (rtems_rtl_unresolv_reloc* reloc,$/;"	f
+rtems_rtl_obj_remove_dependencies	rtl-obj.c	/^rtems_rtl_obj_remove_dependencies (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_run_cdtors	rtl-obj.c	/^rtems_rtl_obj_run_cdtors (rtems_rtl_obj* obj, uint32_t mask)$/;"	f	file:
+rtems_rtl_obj_run_ctors	rtl-obj.c	/^rtems_rtl_obj_run_ctors (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_run_dtors	rtl-obj.c	/^rtems_rtl_obj_run_dtors (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_sect_aligner	rtl-obj.c	/^rtems_rtl_obj_sect_aligner (rtems_chain_node* node, void* data)$/;"	f	file:
+rtems_rtl_obj_sect_aligner_data	rtl-obj.c	/^} rtems_rtl_obj_sect_aligner_data;$/;"	t	typeref:struct:__anon4	file:
+rtems_rtl_obj_sect_finder	rtl-obj.c	/^} rtems_rtl_obj_sect_finder;$/;"	t	typeref:struct:__anon5	file:
+rtems_rtl_obj_sect_match_index	rtl-obj.c	/^rtems_rtl_obj_sect_match_index (rtems_chain_node* node, void* data)$/;"	f	file:
+rtems_rtl_obj_sect_match_mask	rtl-obj.c	/^rtems_rtl_obj_sect_match_mask (rtems_chain_node* node, void* data)$/;"	f	file:
+rtems_rtl_obj_sect_match_name	rtl-obj.c	/^rtems_rtl_obj_sect_match_name (rtems_chain_node* node, void* data)$/;"	f	file:
+rtems_rtl_obj_sect_summer	rtl-obj.c	/^rtems_rtl_obj_sect_summer (rtems_chain_node* node, void* data)$/;"	f	file:
+rtems_rtl_obj_sect_summer_data	rtl-obj.c	/^} rtems_rtl_obj_sect_summer_data;$/;"	t	typeref:struct:__anon3	file:
+rtems_rtl_obj_sect_sync_ctx	rtl-obj.c	/^} rtems_rtl_obj_sect_sync_ctx;$/;"	t	typeref:struct:__anon6	file:
+rtems_rtl_obj_sect_sync_handler	rtl-obj.c	/^rtems_rtl_obj_sect_sync_handler (rtems_chain_node* node, void* data)$/;"	f	file:
+rtems_rtl_obj_section_alignment	rtl-obj.c	/^rtems_rtl_obj_section_alignment (const rtems_rtl_obj* obj, uint32_t mask)$/;"	f	file:
+rtems_rtl_obj_section_handler	rtl-obj.c	/^rtems_rtl_obj_section_handler (uint32_t                   mask,$/;"	f	file:
+rtems_rtl_obj_section_size	rtl-obj.c	/^rtems_rtl_obj_section_size (const rtems_rtl_obj* obj, uint32_t mask)$/;"	f	file:
+rtems_rtl_obj_sections_link_order	rtl-obj.c	/^rtems_rtl_obj_sections_link_order (uint32_t mask, rtems_rtl_obj* obj)$/;"	f	file:
+rtems_rtl_obj_sections_linked_to_order	rtl-obj.c	/^rtems_rtl_obj_sections_linked_to_order (rtems_rtl_obj* obj,$/;"	f	file:
+rtems_rtl_obj_sections_loader	rtl-obj.c	/^rtems_rtl_obj_sections_loader (uint32_t                   mask,$/;"	f	file:
+rtems_rtl_obj_sections_locate	rtl-obj.c	/^rtems_rtl_obj_sections_locate (uint32_t            mask,$/;"	f	file:
+rtems_rtl_obj_set_error	rtl-obj.c	/^rtems_rtl_obj_set_error (int num, const char* text)$/;"	f	file:
+rtems_rtl_obj_synchronize_cache	rtl-obj.c	/^rtems_rtl_obj_synchronize_cache (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_text_alignment	rtl-obj.c	/^rtems_rtl_obj_text_alignment (const rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_text_size	rtl-obj.c	/^rtems_rtl_obj_text_size (const rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_unload	rtl-obj.c	/^rtems_rtl_obj_unload (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_unresolved	rtl-obj.c	/^rtems_rtl_obj_unresolved (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_obj_unresolved_data	rtl-obj.c	/^typedef struct rtems_rtl_obj_unresolved_data$/;"	s	file:
+rtems_rtl_obj_unresolved_data	rtl-obj.c	/^} rtems_rtl_obj_unresolved_data;$/;"	t	typeref:struct:rtems_rtl_obj_unresolved_data	file:
+rtems_rtl_obj_unresolved_dependent	rtl-obj.c	/^rtems_rtl_obj_unresolved_dependent (rtems_rtl_obj* obj,$/;"	f	file:
+rtems_rtl_obj_unresolved_object	rtl-obj.c	/^rtems_rtl_obj_unresolved_object (rtems_chain_node* node, void* data)$/;"	f	file:
+rtems_rtl_obj_update_flags	rtl.c	/^rtems_rtl_obj_update_flags (uint32_t clear, uint32_t set)$/;"	f
+rtems_rtl_objects_unprotected	rtl.c	/^rtems_rtl_objects_unprotected (void)$/;"	f
+rtems_rtl_parse_name	rtl-obj.c	/^rtems_rtl_parse_name (const char*  name,$/;"	f
+rtems_rtl_path_append	rtl.c	/^rtems_rtl_path_append (const char* path)$/;"	f
+rtems_rtl_path_prepend	rtl.c	/^rtems_rtl_path_prepend (const char* path)$/;"	f
+rtems_rtl_path_update	rtl.c	/^rtems_rtl_path_update (bool prepend, const char* path)$/;"	f	file:
+rtems_rtl_pending_unprotected	rtl.c	/^rtems_rtl_pending_unprotected (void)$/;"	f
+rtems_rtl_rap	rtl-rap.c	/^typedef struct rtems_rtl_rap$/;"	s	file:
+rtems_rtl_rap	rtl-rap.c	/^} rtems_rtl_rap;$/;"	t	typeref:struct:rtems_rtl_rap	file:
+rtems_rtl_rap_class_check	rtl-rap.c	/^rtems_rtl_rap_class_check (uint32_t class)$/;"	f	file:
+rtems_rtl_rap_datatype_check	rtl-rap.c	/^rtems_rtl_rap_datatype_check (uint32_t datatype)$/;"	f	file:
+rtems_rtl_rap_file_check	rtl-rap.c	/^rtems_rtl_rap_file_check (rtems_rtl_obj* obj, int fd)$/;"	f
+rtems_rtl_rap_file_load	rtl-rap.c	/^rtems_rtl_rap_file_load (rtems_rtl_obj* obj, int fd)$/;"	f
+rtems_rtl_rap_file_sig	rtl-rap.c	/^rtems_rtl_rap_file_sig (void)$/;"	f
+rtems_rtl_rap_file_unload	rtl-rap.c	/^rtems_rtl_rap_file_unload (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_rap_get_uint32	rtl-rap.c	/^rtems_rtl_rap_get_uint32 (const uint8_t* buffer)$/;"	f	file:
+rtems_rtl_rap_load_linkmap	rtl-rap.c	/^rtems_rtl_rap_load_linkmap (rtems_rtl_rap* rap, rtems_rtl_obj* obj)$/;"	f	file:
+rtems_rtl_rap_load_symbols	rtl-rap.c	/^rtems_rtl_rap_load_symbols (rtems_rtl_rap* rap, rtems_rtl_obj* obj)$/;"	f	file:
+rtems_rtl_rap_loader	rtl-rap.c	/^rtems_rtl_rap_loader (rtems_rtl_obj*      obj,$/;"	f	file:
+rtems_rtl_rap_machine_check	rtl-rap.c	/^rtems_rtl_rap_machine_check (uint32_t machinetype)$/;"	f	file:
+rtems_rtl_rap_parse_header	rtl-rap.c	/^rtems_rtl_rap_parse_header (uint8_t*  rhdr,$/;"	f	file:
+rtems_rtl_rap_read_uint32	rtl-rap.c	/^rtems_rtl_rap_read_uint32 (rtems_rtl_obj_comp* comp, uint32_t* value)$/;"	f	file:
+rtems_rtl_rap_relocate	rtl-rap.c	/^rtems_rtl_rap_relocate (rtems_rtl_rap* rap, rtems_rtl_obj* obj)$/;"	f	file:
+rtems_rtl_rap_sectdef	rtl-rap.c	/^typedef struct rtems_rtl_rap_sectdef$/;"	s	file:
+rtems_rtl_rap_sectdef	rtl-rap.c	/^} rtems_rtl_rap_sectdef;$/;"	t	typeref:struct:rtems_rtl_rap_sectdef	file:
+rtems_rtl_rap_section	rtl-rap.c	/^typedef struct rtems_rtl_rap_section$/;"	s	file:
+rtems_rtl_rap_section	rtl-rap.c	/^} rtems_rtl_rap_section;$/;"	t	typeref:struct:rtems_rtl_rap_section	file:
+rtems_rtl_rchive_name_end	rtl-archive.c	/^rtems_rtl_rchive_name_end (const char c)$/;"	f	file:
+rtems_rtl_scan_decimal	rtl-archive.c	/^rtems_rtl_scan_decimal (const uint8_t* string, size_t len)$/;"	f	file:
+rtems_rtl_seek_read	rtl-archive.c	/^rtems_rtl_seek_read (int fd, off_t off, size_t len, uint8_t* buffer)$/;"	f	file:
+rtems_rtl_set_error	rtl-error.c	/^rtems_rtl_set_error (int error, const char* format, ...)$/;"	f
+rtems_rtl_strdup	rtl-string.c	/^rtems_rtl_strdup (const char *s1)$/;"	f
+rtems_rtl_symbol_global_add	rtl-sym.c	/^rtems_rtl_symbol_global_add (rtems_rtl_obj*       obj,$/;"	f
+rtems_rtl_symbol_global_find	rtl-sym.c	/^rtems_rtl_symbol_global_find (const char* name)$/;"	f
+rtems_rtl_symbol_global_insert	rtl-sym.c	/^rtems_rtl_symbol_global_insert (rtems_rtl_symbols* symbols,$/;"	f	file:
+rtems_rtl_symbol_hash	rtl-sym.c	/^rtems_rtl_symbol_hash (const char *s)$/;"	f	file:
+rtems_rtl_symbol_obj_add	rtl-sym.c	/^rtems_rtl_symbol_obj_add (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_symbol_obj_compare	rtl-sym.c	/^rtems_rtl_symbol_obj_compare (const void* a, const void* b)$/;"	f	file:
+rtems_rtl_symbol_obj_erase	rtl-sym.c	/^rtems_rtl_symbol_obj_erase (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_symbol_obj_erase_local	rtl-sym.c	/^rtems_rtl_symbol_obj_erase_local (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_symbol_obj_find	rtl-sym.c	/^rtems_rtl_symbol_obj_find (rtems_rtl_obj* obj, const char* name)$/;"	f
+rtems_rtl_symbol_obj_sort	rtl-sym.c	/^rtems_rtl_symbol_obj_sort (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_symbol_table_close	rtl-sym.c	/^rtems_rtl_symbol_table_close (rtems_rtl_symbols* symbols)$/;"	f
+rtems_rtl_symbol_table_open	rtl-sym.c	/^rtems_rtl_symbol_table_open (rtems_rtl_symbols* symbols,$/;"	f
+rtems_rtl_trace	rtl-trace.c	/^rtems_rtl_trace (rtems_rtl_trace_mask mask)$/;"	f
+rtems_rtl_trace_clear_mask	rtl-trace.c	/^rtems_rtl_trace_clear_mask (rtems_rtl_trace_mask mask)$/;"	f
+rtems_rtl_trace_flags	rtl-trace.c	/^static rtems_rtl_trace_mask rtems_rtl_trace_flags;$/;"	v	file:
+rtems_rtl_trace_set_mask	rtl-trace.c	/^rtems_rtl_trace_set_mask (rtems_rtl_trace_mask mask)$/;"	f
+rtems_rtl_trace_shell_command	rtl-trace.c	/^rtems_rtl_trace_shell_command (const rtems_printer* printer,$/;"	f
+rtems_rtl_trace_tag_label	rtl-allocator.c	36;"	d	file:
+rtems_rtl_trace_tag_label	rtl-allocator.c	38;"	d	file:
+rtems_rtl_tramp_data	rtl-elf.c	/^typedef struct rtems_rtl_tramp_data$/;"	s	file:
+rtems_rtl_tramp_data	rtl-elf.c	/^} rtems_rtl_tramp_data;$/;"	t	typeref:struct:rtems_rtl_tramp_data	file:
+rtems_rtl_trampoline_add	rtl-unresolved.c	/^rtems_rtl_trampoline_add (rtems_rtl_obj*        obj,$/;"	f
+rtems_rtl_trampoline_remove	rtl-unresolved.c	/^rtems_rtl_trampoline_remove (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_unload	rtl.c	/^rtems_rtl_unload (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_unload_object	rtl.c	/^rtems_rtl_unload_object (rtems_rtl_obj* obj)$/;"	f
+rtems_rtl_unlock	rtl.c	/^rtems_rtl_unlock (void)$/;"	f
+rtems_rtl_unresolved_add	rtl-unresolved.c	/^rtems_rtl_unresolved_add (rtems_rtl_obj*        obj,$/;"	f
+rtems_rtl_unresolved_alloc_recs	rtl-unresolved.c	/^rtems_rtl_unresolved_alloc_recs (rtems_rtl_unresolved* unresolved,$/;"	f	file:
+rtems_rtl_unresolved_archive_iterator	rtl-unresolved.c	/^rtems_rtl_unresolved_archive_iterator (rtems_rtl_unresolv_rec* rec,$/;"	f	file:
+rtems_rtl_unresolved_archive_reloc_data	rtl-unresolved.c	/^typedef struct rtems_rtl_unresolved_archive_reloc_data$/;"	s	file:
+rtems_rtl_unresolved_archive_reloc_data	rtl-unresolved.c	/^} rtems_rtl_unresolved_archive_reloc_data;$/;"	t	typeref:struct:rtems_rtl_unresolved_archive_reloc_data	file:
+rtems_rtl_unresolved_archive_search_iterator	rtl-unresolved.c	/^rtems_rtl_unresolved_archive_search_iterator (rtems_rtl_unresolv_rec* rec,$/;"	f	file:
+rtems_rtl_unresolved_block_alloc	rtl-unresolved.c	/^rtems_rtl_unresolved_block_alloc (rtems_rtl_unresolved* unresolved)$/;"	f	file:
+rtems_rtl_unresolved_clean_block	rtl-unresolved.c	/^rtems_rtl_unresolved_clean_block (rtems_rtl_unresolv_block* block,$/;"	f	file:
+rtems_rtl_unresolved_compact	rtl-unresolved.c	/^rtems_rtl_unresolved_compact (void)$/;"	f	file:
+rtems_rtl_unresolved_delete_block_if_empty	rtl-unresolved.c	/^rtems_rtl_unresolved_delete_block_if_empty (rtems_chain_control*      blocks,$/;"	f	file:
+rtems_rtl_unresolved_dump	rtl-unresolved.c	/^rtems_rtl_unresolved_dump (void)$/;"	f
+rtems_rtl_unresolved_dump_data	rtl-unresolved.c	/^typedef struct rtems_rtl_unresolved_dump_data$/;"	s	file:
+rtems_rtl_unresolved_dump_data	rtl-unresolved.c	/^} rtems_rtl_unresolved_dump_data;$/;"	t	typeref:struct:rtems_rtl_unresolved_dump_data	file:
+rtems_rtl_unresolved_dump_iterator	rtl-unresolved.c	/^rtems_rtl_unresolved_dump_iterator (rtems_rtl_unresolv_rec* rec,$/;"	f	file:
+rtems_rtl_unresolved_find_index	rtl-unresolved.c	/^rtems_rtl_unresolved_find_index (rtems_rtl_unresolv_rec* rec)$/;"	f	file:
+rtems_rtl_unresolved_find_index_iterator	rtl-unresolved.c	/^rtems_rtl_unresolved_find_index_iterator (rtems_rtl_unresolv_rec* rec,$/;"	f	file:
+rtems_rtl_unresolved_find_name	rtl-unresolved.c	/^rtems_rtl_unresolved_find_name (const char* name)$/;"	f	file:
+rtems_rtl_unresolved_find_name_iterator	rtl-unresolved.c	/^rtems_rtl_unresolved_find_name_iterator (rtems_rtl_unresolv_rec* rec,$/;"	f	file:
+rtems_rtl_unresolved_iterate	rtl-unresolved.c	/^rtems_rtl_unresolved_iterate (rtems_rtl_unresolved_iterator iterator,$/;"	f
+rtems_rtl_unresolved_rec_first	rtl-unresolved.c	/^rtems_rtl_unresolved_rec_first (rtems_rtl_unresolv_block* block)$/;"	f	file:
+rtems_rtl_unresolved_rec_first_free	rtl-unresolved.c	/^rtems_rtl_unresolved_rec_first_free (rtems_rtl_unresolv_block* block)$/;"	f	file:
+rtems_rtl_unresolved_rec_index	rtl-unresolved.c	/^rtems_rtl_unresolved_rec_index (rtems_rtl_unresolv_block* block,$/;"	f	file:
+rtems_rtl_unresolved_rec_is_last	rtl-unresolved.c	/^rtems_rtl_unresolved_rec_is_last (rtems_rtl_unresolv_block* block,$/;"	f	file:
+rtems_rtl_unresolved_rec_next	rtl-unresolved.c	/^rtems_rtl_unresolved_rec_next (rtems_rtl_unresolv_rec* rec)$/;"	f	file:
+rtems_rtl_unresolved_reindex_iterator	rtl-unresolved.c	/^rtems_rtl_unresolved_reindex_iterator (rtems_rtl_unresolv_rec* rec,$/;"	f	file:
+rtems_rtl_unresolved_reindex_names	rtl-unresolved.c	/^rtems_rtl_unresolved_reindex_names (uint16_t index, int offset)$/;"	f	file:
+rtems_rtl_unresolved_reloc_data	rtl-unresolved.c	/^typedef struct rtems_rtl_unresolved_reloc_data$/;"	s	file:
+rtems_rtl_unresolved_reloc_data	rtl-unresolved.c	/^} rtems_rtl_unresolved_reloc_data;$/;"	t	typeref:struct:rtems_rtl_unresolved_reloc_data	file:
+rtems_rtl_unresolved_resolve	rtl-unresolved.c	/^rtems_rtl_unresolved_resolve (void)$/;"	f
+rtems_rtl_unresolved_resolve_iterator	rtl-unresolved.c	/^rtems_rtl_unresolved_resolve_iterator (rtems_rtl_unresolv_rec* rec,$/;"	f	file:
+rtems_rtl_unresolved_resolve_reloc	rtl-unresolved.c	/^rtems_rtl_unresolved_resolve_reloc (rtems_rtl_unresolv_rec* rec,$/;"	f	file:
+rtems_rtl_unresolved_set_archive_search	rtl-unresolved.c	/^rtems_rtl_unresolved_set_archive_search (void)$/;"	f
+rtems_rtl_unresolved_symbol_rec_count	rtl-unresolved.c	/^rtems_rtl_unresolved_symbol_rec_count (size_t length)$/;"	f	file:
+rtems_rtl_unresolved_symbol_recs	rtl-unresolved.c	/^rtems_rtl_unresolved_symbol_recs (const char* name)$/;"	f	file:
+rtems_rtl_unresolved_table_close	rtl-unresolved.c	/^rtems_rtl_unresolved_table_close (rtems_rtl_unresolved* unresolved)$/;"	f
+rtems_rtl_unresolved_table_open	rtl-unresolved.c	/^rtems_rtl_unresolved_table_open (rtems_rtl_unresolved* unresolved,$/;"	f
+rtems_rtl_unresolved_unprotected	rtl.c	/^rtems_rtl_unresolved_unprotected (void)$/;"	f
+rtl	rtl.c	/^static rtems_rtl_data* rtl;$/;"	v	file:
+rtl_data_init	rtl.c	/^static bool            rtl_data_init;$/;"	v	file:
+rtl_unresolved_name_data	rtl-unresolved.c	/^} rtl_unresolved_name_data;$/;"	t	typeref:struct:__anon7	file:
+secs	rtl-rap.c	/^  rtems_rtl_rap_section secs[RTEMS_RTL_RAP_SECS]; \/**< The sections. *\/$/;"	m	struct:rtems_rtl_rap	file:
+sect	rtl-obj.c	/^  rtems_rtl_obj_sect*  sect;  \/**< The matching section. *\/$/;"	m	struct:__anon5	file:
+set	rtl.c	/^  uint32_t set;     \/**< Flags to set, applied after clearing. *\/$/;"	m	struct:rtems_rtl_obj_flags_data	file:
+show_relocs	rtl-unresolved.c	/^  bool   show_relocs;$/;"	m	struct:rtems_rtl_unresolved_dump_data	file:
+size	rtl-bit-alloc.h	/^  size_t    size;       \/**< The number of bytes of memory being managed. *\/$/;"	m	struct:rtems_rtl_bit_alloc
+size	rtl-elf.c	/^  size_t   size;      \/**< The size of the common section *\/$/;"	m	struct:__anon2	file:
+size	rtl-elf.h	/^  size_t size;        \/**< The trampoline size. *\/$/;"	m	struct:rtems_rtl_mdreloc_trmap
+size	rtl-obj.c	/^  size_t   size; \/**< The size of all section fragments. *\/$/;"	m	struct:__anon3	file:
+size	rtl-rap.c	/^  uint32_t size;       \/**< The size of the section. *\/$/;"	m	struct:rtems_rtl_rap_section	file:
+start_va	rtl-obj.c	/^  void     *start_va;$/;"	m	struct:__anon6	file:
+strtab	rtl-rap.c	/^  char*                 strtab;       \/**< The string table. *\/$/;"	m	struct:rtems_rtl_rap	file:
+strtab_size	rtl-rap.c	/^  uint32_t              strtab_size;  \/**< The string table size. *\/$/;"	m	struct:rtems_rtl_rap	file:
+strtable	rtl-rap.c	/^  char*                 strtable;     \/**< The detail string which resides in obj detail. *\/$/;"	m	struct:rtems_rtl_rap	file:
+strtable_size	rtl-rap.c	/^  uint32_t              strtable_size;\/**< The size of section names and obj names. *\/$/;"	m	struct:rtems_rtl_rap	file:
+sym	rtl-unresolved.c	/^  rtems_rtl_obj_sym*      sym;      \/**< The symbol record. *\/$/;"	m	struct:rtems_rtl_unresolved_reloc_data	file:
+symbol	rtl-archive.c	/^  const char*        symbol;   \/**< The symbol to search for. *\/$/;"	m	struct:rtems_rtl_archive_obj_data	file:
+symbols	rtl-rap.c	/^  uint32_t              symbols;      \/**< The number of symbols. *\/$/;"	m	struct:rtems_rtl_rap	file:
+symtab_size	rtl-rap.c	/^  uint32_t              symtab_size;  \/**< The symbol table size. *\/$/;"	m	struct:rtems_rtl_rap	file:
+tag_labels	rtl-allocator.c	/^static const char* tag_labels[6] =$/;"	v	file:
+tampolines	rtl-elf.h	/^  void*  tampolines;  \/**< The trampoline memory. *\/$/;"	m	struct:rtems_rtl_mdreloc_trmap
+total	rtl-elf.c	/^  size_t         total;$/;"	m	struct:rtems_rtl_tramp_data	file:
+unresolved	rtl-elf.c	/^  size_t unresolved; \/**< The number of unresolved symbols. *\/$/;"	m	struct:__anon1	file:
+version	rtl-rap.c	/^  uint32_t              version;      \/**< The RAP file version. *\/$/;"	m	struct:rtems_rtl_rap	file:
+write16le	rtl-mdreloc-riscv.c	/^static void write16le(void *loc, uint16_t val) {$/;"	f	file:
+write32le	rtl-mdreloc-riscv.c	/^static void write32le(void *loc, uint32_t val) {$/;"	f	file:
+write64le	rtl-mdreloc-riscv.c	/^static void write64le(void *loc, uint64_t val) {$/;"	f	file:

@@ -22,7 +22,7 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include <rtems/rtl/rtl.h>
+#include <rtl/rtl.h>
 #include "rtl-error.h"
 
 void

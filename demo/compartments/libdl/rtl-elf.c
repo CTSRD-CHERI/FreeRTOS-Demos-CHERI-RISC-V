@@ -27,13 +27,13 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include <rtems/rtl/rtl.h>
+#include <rtl/rtl.h>
 #include "rtl-elf.h"
 #include "rtl-error.h"
-#include <rtems/rtl/rtl-trace.h>
+#include <rtl/rtl-trace.h>
 #include "rtl-trampoline.h"
 #include "rtl-unwind.h"
-#include <rtems/rtl/rtl-unresolved.h>
+#include <rtl/rtl-unresolved.h>
 
 /**
  * The offsets in the reloc words.
@@ -1148,7 +1148,7 @@ rtems_rtl_elf_symbols_load (rtems_rtl_obj*      obj,
           value = symbol.st_value;
         }
 
-        rtems_chain_set_off_chain (&osym->node);
+        uxListRemove (&osym->node);
         memcpy (string, name, strlen (name) + 1);
         osym->name = string;
         osym->value = (uint8_t*) value;
@@ -1533,8 +1533,8 @@ rtems_rtl_elf_file_check (rtems_rtl_obj* obj, int fd)
 static bool
 rtems_rtl_elf_load_linkmap (rtems_rtl_obj* obj)
 {
-  rtems_chain_control* sections = NULL;
-  rtems_chain_node*    node = NULL;
+  List_t* sections = NULL;
+  ListItem_t*    node = NULL;
   int                  sec_num = 0;
   section_detail*      sd;
   int                  i = 0;
@@ -1557,8 +1557,8 @@ rtems_rtl_elf_load_linkmap (rtems_rtl_obj* obj)
   for (m = 0; m < sect_masks; ++m)
   {
     sections = &obj->sections;
-    node = rtems_chain_first (sections);
-    while (!rtems_chain_is_tail (sections, node))
+    node = listGET_HEAD_ENTRY (sections);
+    while (listGET_END_MARKER (sections) != node)
     {
       rtems_rtl_obj_sect* sect = (rtems_rtl_obj_sect*) node;
       const uint32_t      mask = sect_mask[m];
@@ -1566,7 +1566,7 @@ rtems_rtl_elf_load_linkmap (rtems_rtl_obj* obj)
       {
         ++sec_num;
       }
-      node = rtems_chain_next (node);
+      node = listGET_NEXT (node);
     }
   }
 
@@ -1597,8 +1597,8 @@ rtems_rtl_elf_load_linkmap (rtems_rtl_obj* obj)
   for (m = 0; m < sect_masks; ++m)
   {
     sections = &obj->sections;
-    node = rtems_chain_first (sections);
-    while (!rtems_chain_is_tail (sections, node))
+    node = listGET_HEAD_ENTRY (sections);
+    while (listGET_END_MARKER (sections) != node)
     {
       rtems_rtl_obj_sect* sect = (rtems_rtl_obj_sect*) node;
       const uint32_t      mask = sect_mask[m];
@@ -1630,7 +1630,7 @@ rtems_rtl_elf_load_linkmap (rtems_rtl_obj* obj)
 
         ++i;
       }
-      node = rtems_chain_next (node);
+      node = listGET_NEXT (node);
     }
   }
 

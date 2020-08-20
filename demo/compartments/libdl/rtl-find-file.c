@@ -25,13 +25,11 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <rtems/libio_.h>
-
-#include <rtems/rtl/rtl.h>
+#include <rtl/rtl.h>
 #include "rtl-find-file.h"
 #include "rtl-error.h"
 #include "rtl-string.h"
-#include <rtems/rtl/rtl-trace.h>
+#include <rtl/rtl-trace.h>
 
 #if WAF_BUILD
 #define rtems_filesystem_is_delimiter rtems_filesystem_is_separator

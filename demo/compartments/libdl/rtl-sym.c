@@ -23,10 +23,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <rtems/rtl/rtl.h>
+#include <rtl/rtl.h>
 #include "rtl-error.h"
-#include <rtems/rtl/rtl-sym.h>
-#include <rtems/rtl/rtl-trace.h>
+#include <rtl/rtl-sym.h>
+#include <rtl/rtl-trace.h>
 
 /**
  * The single symbol forced into the global symbol table that is used to load a
@@ -53,7 +53,7 @@ rtems_rtl_symbol_global_insert (rtems_rtl_symbols* symbols,
                                 rtems_rtl_obj_sym* symbol)
 {
   uint_fast32_t hash = rtems_rtl_symbol_hash (symbol->name);
-  rtems_chain_append (&symbols->buckets[hash % symbols->nbuckets],
+  vListInsertEnd (&symbols->buckets[hash % symbols->nbuckets],
                       &symbol->node);
 }
 
@@ -62,7 +62,7 @@ rtems_rtl_symbol_table_open (rtems_rtl_symbols* symbols,
                              size_t             buckets)
 {
   symbols->buckets = rtems_rtl_alloc_new (RTEMS_RTL_ALLOC_SYMBOL,
-                                          buckets * sizeof (rtems_chain_control),
+                                          buckets * sizeof (List_t),
                                           true);
   if (!symbols->buckets)
   {
@@ -71,7 +71,7 @@ rtems_rtl_symbol_table_open (rtems_rtl_symbols* symbols,
   }
   symbols->nbuckets = buckets;
   for (buckets = 0; buckets < symbols->nbuckets; ++buckets)
-    rtems_chain_initialize_empty (&symbols->buckets[buckets]);
+    vListInitialise (&symbols->buckets[buckets]);
   rtems_rtl_symbol_global_insert (symbols, &global_sym_add);
   return true;
 }
@@ -177,16 +177,16 @@ rtems_rtl_symbol_global_find (const char* name)
 {
   rtems_rtl_symbols*   symbols;
   uint_fast32_t        hash;
-  rtems_chain_control* bucket;
-  rtems_chain_node*    node;
+  List_t* bucket;
+  ListItem_t*    node;
 
   symbols = rtems_rtl_global_symbols ();
 
   hash = rtems_rtl_symbol_hash (name);
   bucket = &symbols->buckets[hash % symbols->nbuckets];
-  node = rtems_chain_first (bucket);
+  node = listGET_HEAD_ENTRY (bucket);
 
-  while (!rtems_chain_is_tail (bucket, node))
+  while (listGET_END_MARKER (bucket) != node)
   {
     rtems_rtl_obj_sym* sym = (rtems_rtl_obj_sym*) node;
     /*
@@ -194,7 +194,7 @@ rtems_rtl_symbol_global_find (const char* name)
      */
     if (strcmp (name, sym->name) == 0)
       return sym;
-    node = rtems_chain_next (node);
+    node = listGET_NEXT (node);
   }
 
   return NULL;
@@ -291,8 +291,8 @@ rtems_rtl_symbol_obj_erase (rtems_rtl_obj* obj)
     rtems_rtl_obj_sym* sym;
     size_t             s;
     for (s = 0, sym = obj->global_table; s < obj->global_syms; ++s, ++sym)
-        if (!rtems_chain_is_node_off_chain (&sym->node))
-          rtems_chain_extract (&sym->node);
+        if (listLIST_ITEM_CONTAINER (&sym->node))
+          uxListRemove (&sym->node);
     rtems_rtl_alloc_del (RTEMS_RTL_ALLOC_SYMBOL, obj->global_table);
     obj->global_table = NULL;
     obj->global_size = 0;

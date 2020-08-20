@@ -124,8 +124,8 @@ rtems_rtl_data_init (void)
       /*
        * Initialise the objects and pending list.
        */
-      rtems_chain_initialize_empty (&rtl->objects);
-      rtems_chain_initialize_empty (&rtl->pending);
+      vListInitialise (&rtl->objects);
+      vListInitialise (&rtl->pending);
 
       /*
        * Open the global symbol table.
@@ -232,7 +232,7 @@ rtems_rtl_data_init (void)
        */
       rtl->base->flags |= RTEMS_RTL_OBJ_LOCKED | RTEMS_RTL_OBJ_BASE;
 
-      rtems_chain_append (&rtl->objects, &rtl->base->link);
+      vListInsertEnd (&rtl->objects, &rtl->base->link);
     }
 
     rtems_libio_unlock ();
@@ -271,7 +271,7 @@ rtems_rtl_last_error_unprotected (void)
   return rtl->last_error;
 }
 
-rtems_chain_control*
+List_t*
 rtems_rtl_objects_unprotected (void)
 {
   if (!rtl)
@@ -282,7 +282,7 @@ rtems_rtl_objects_unprotected (void)
   return &rtl->objects;
 }
 
-rtems_chain_control*
+List_t*
 rtems_rtl_pending_unprotected (void)
 {
   if (!rtl)
@@ -376,7 +376,7 @@ typedef struct rtems_rtl_obj_flags_data
 } rtems_rtl_obj_flags_data;
 
 static bool
-rtems_rtl_obj_flags_iterator (rtems_chain_node* node, void* data)
+rtems_rtl_obj_flags_iterator (ListItem_t* node, void* data)
 {
   rtems_rtl_obj* obj              = (rtems_rtl_obj*) node;
   rtems_rtl_obj_flags_data* flags = (rtems_rtl_obj_flags_data*) data;
@@ -420,17 +420,17 @@ rtems_rtl_obj*
 rtems_rtl_check_handle (void* handle)
 {
   rtems_rtl_obj*    obj;
-  rtems_chain_node* node;
+  ListItem_t* node;
 
   obj = handle;
-  node = rtems_chain_first (&rtl->objects);
+  node = listGET_HEAD_ENTRY (&rtl->objects);
 
-  while (!rtems_chain_is_tail (&rtl->objects, node))
+  while (listGET_END_MARKER (&rtl->objects) != node)
   {
     rtems_rtl_obj* check = (rtems_rtl_obj*) node;
     if (check == obj)
       return obj;
-    node = rtems_chain_next (node);
+    node = listGET_NEXT (node);
   }
 
   return NULL;
@@ -439,7 +439,7 @@ rtems_rtl_check_handle (void* handle)
 rtems_rtl_obj*
 rtems_rtl_find_obj (const char* name)
 {
-  rtems_chain_node* node;
+  ListItem_t* node;
   rtems_rtl_obj*    found = NULL;
   const char*       aname = NULL;
   const char*       oname = NULL;
@@ -448,9 +448,9 @@ rtems_rtl_find_obj (const char* name)
   if (!rtems_rtl_parse_name (name, &aname, &oname, &ooffset))
     return NULL;
 
-  node = rtems_chain_first (&rtl->objects);
+  node = listGET_HEAD_ENTRY (&rtl->objects);
 
-  while (!rtems_chain_is_tail (&rtl->objects, node))
+  while (listGET_END_MARKER (&rtl->objects) != node)
   {
     rtems_rtl_obj* obj = (rtems_rtl_obj*) node;
     if ((aname == NULL && strcmp (obj->oname, oname) == 0) ||
@@ -460,7 +460,7 @@ rtems_rtl_find_obj (const char* name)
       found = obj;
       break;
     }
-    node = rtems_chain_next (node);
+    node = listGET_NEXT (node);
   }
 
   if (aname != NULL)
@@ -477,21 +477,21 @@ rtems_rtl_find_obj_with_symbol (const rtems_rtl_obj_sym* sym)
 {
   if (sym != NULL)
   {
-    rtems_chain_node* node = rtems_chain_first (&rtl->objects);
-    while (!rtems_chain_is_tail (&rtl->objects, node))
+    ListItem_t* node = listGET_HEAD_ENTRY (&rtl->objects);
+    while (listGET_END_MARKER (&rtl->objects) != node)
     {
       rtems_rtl_obj* obj = (rtems_rtl_obj*) node;
       if (rtems_rtl_obj_has_symbol (obj, sym))
         return obj;
-      node = rtems_chain_next (node);
+      node = listGET_NEXT (node);
     }
-    node = rtems_chain_first (&rtl->pending);
-    while (!rtems_chain_is_tail (&rtl->pending, node))
+    node = listGET_HEAD_ENTRY (&rtl->pending);
+    while (listGET_END_MARKER (&rtl->pending) != node)
     {
       rtems_rtl_obj* obj = (rtems_rtl_obj*) node;
       if (rtems_rtl_obj_has_symbol (obj, sym))
         return obj;
-      node = rtems_chain_next (node);
+      node = listGET_NEXT (node);
     }
   }
   return NULL;
@@ -521,7 +521,7 @@ rtems_rtl_load_object (const char* name, int mode)
       return NULL;
     }
 
-    rtems_chain_append (&rtl->pending, &obj->link);
+    vListInsertEnd (&rtl->pending, &obj->link);
 
     /*
      * Find the file in the file system using the search path. The fname field
@@ -536,7 +536,7 @@ rtems_rtl_load_object (const char* name, int mode)
 
     if (!rtems_rtl_obj_load (obj))
     {
-      rtems_chain_extract (&obj->link);
+      uxListRemove (&obj->link);
       rtems_rtl_obj_free (obj);
       rtems_rtl_obj_caches_flush ();
       return NULL;
@@ -548,8 +548,8 @@ rtems_rtl_load_object (const char* name, int mode)
      */
     if (obj->unresolved != 0)
     {
-      rtems_chain_extract (&obj->link);
-      rtems_chain_append (&rtl->objects, &obj->link);
+      uxListRemove (&obj->link);
+      vListInsertEnd (&rtl->objects, &obj->link);
     }
 
     rtems_rtl_obj_caches_flush ();
@@ -576,20 +576,20 @@ rtems_rtl_load (const char* name, int mode)
   /*
    * Collect the loaded object files.
    */
-  rtems_chain_initialize_empty (&rtl->pending);
+  vListInitialise (&rtl->pending);
 
   obj = rtems_rtl_load_object (name, mode);
   if (obj != NULL)
   {
-    rtems_chain_node* node;
+    ListItem_t* node;
 
     rtems_rtl_unresolved_resolve ();
 
     /*
      * Iterator over the pending list of object files that have been loaded.
      */
-    node = rtems_chain_first (&rtl->pending);
-    while (!rtems_chain_is_tail (&rtl->pending, node))
+    node = listGET_HEAD_ENTRY (&rtl->pending);
+    while (listGET_END_MARKER (&rtl->pending) != node)
     {
       rtems_rtl_obj* pobj = (rtems_rtl_obj*) node;
 
@@ -597,9 +597,9 @@ rtems_rtl_load (const char* name, int mode)
        * Move to the next pending object file and place this object file on the
        * RTL's objects list.
        */
-      node = rtems_chain_next (&pobj->link);
-      rtems_chain_extract (&pobj->link);
-      rtems_chain_append (&rtl->objects, &pobj->link);
+      node = listGET_NEXT (&pobj->link);
+      uxListRemove (&pobj->link);
+      vListInsertEnd (&rtl->objects, &pobj->link);
 
       /*
        * Make sure the object file and cache is synchronized.
@@ -666,8 +666,8 @@ rtems_rtl_unload (rtems_rtl_obj* obj)
   bool ok = rtems_rtl_unload_object (obj);
   if (ok && obj->users == 0)
   {
-    rtems_chain_control unloading;
-    rtems_chain_node*   node;
+    List_t unloading;
+    ListItem_t*   node;
     bool                orphaned_found = true;
     int                 loop = 0;
 
@@ -679,16 +679,16 @@ rtems_rtl_unload (rtems_rtl_obj* obj)
      * To avoid maintaining a complex tree loop while oprhans are still be found.
      */
 
-    rtems_chain_initialize_empty (&unloading);
+    vListInitialise (&unloading);
 
     while (orphaned_found)
     {
       orphaned_found = false;
       ++loop;
-      node = rtems_chain_first (&rtl->objects);
-      while (!rtems_chain_is_tail (&rtl->objects, node))
+      node = listGET_HEAD_ENTRY (&rtl->objects);
+      while (listGET_END_MARKER (&rtl->objects) != node)
       {
-        rtems_chain_node* next_node = rtems_chain_next (node);
+        ListItem_t* next_node = listGET_NEXT (node);
         rtems_rtl_obj* uobj = (rtems_rtl_obj*) node;
         if (rtems_rtl_trace (RTEMS_RTL_TRACE_UNLOAD))
           printf ("rtl: unload object: %3i: %9s: %s\n",
@@ -699,8 +699,8 @@ rtems_rtl_unload (rtems_rtl_obj* obj)
         {
           orphaned_found = true;
           rtems_rtl_obj_remove_dependencies (uobj);
-          rtems_chain_extract (&uobj->link);
-          rtems_chain_append (&unloading, &uobj->link);
+          uxListRemove (&uobj->link);
+          vListInsertEnd (&unloading, &uobj->link);
           uobj->flags |= RTEMS_RTL_OBJ_LOCKED;
         }
         node = next_node;
@@ -712,8 +712,8 @@ rtems_rtl_unload (rtems_rtl_obj* obj)
      */
     rtems_rtl_unlock ();
 
-    node = rtems_chain_first (&unloading);
-    while (!rtems_chain_is_tail (&unloading, node))
+    node = listGET_HEAD_ENTRY (&unloading);
+    while (listGET_END_MARKER (&unloading) != node)
     {
       rtems_rtl_obj* uobj = (rtems_rtl_obj*) node;
       if ((uobj->flags & RTEMS_RTL_OBJ_CTOR_RUN) != 0)
@@ -721,7 +721,7 @@ rtems_rtl_unload (rtems_rtl_obj* obj)
         rtems_rtl_obj_run_dtors (uobj);
         uobj->flags &= ~RTEMS_RTL_OBJ_CTOR_RUN;
       }
-      node = rtems_chain_next (node);
+      node = listGET_NEXT (node);
     }
 
     rtems_rtl_lock ();
@@ -729,10 +729,10 @@ rtems_rtl_unload (rtems_rtl_obj* obj)
     /*
      * Unload the object files.
      */
-    node = rtems_chain_first (&unloading);
-    while (!rtems_chain_is_tail (&unloading, node))
+    node = listGET_HEAD_ENTRY (&unloading);
+    while (listGET_END_MARKER (&unloading) != node)
     {
-      rtems_chain_node* next_node = rtems_chain_next (node);
+      ListItem_t* next_node = listGET_NEXT (node);
       rtems_rtl_obj*    uobj = (rtems_rtl_obj*) node;
       if (rtems_rtl_trace (RTEMS_RTL_TRACE_UNLOAD))
         printf ("rtl: unloading '%s'\n", rtems_rtl_obj_oname (uobj));

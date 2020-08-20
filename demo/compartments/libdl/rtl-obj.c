@@ -23,25 +23,15 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <rtems/libio_.h>
-
-#include <rtems/rtl/rtl.h>
+#include <rtl/rtl.h>
 #include "rtl-chain-iterator.h"
-#include <rtems/rtl/rtl-obj.h>
+#include <rtl/rtl-obj.h>
 #include "rtl-error.h"
 #include "rtl-find-file.h"
 #include "rtl-string.h"
-#include <rtems/rtl/rtl-trace.h>
+#include <rtl/rtl-trace.h>
 
 #define RTEMS_RTL_ELF_LOADER 1
-#define RTEMS_RTL_RAP_LOADER 1
-
-#if RTEMS_RTL_RAP_LOADER
-#include "rtl-rap.h"
-#define RTEMS_RTL_RAP_LOADER_COUNT 1
-#else
-#define RTEMS_RTL_RAP_LOADER_COUNT 0
-#endif
 
 #if RTEMS_RTL_ELF_LOADER
 #include "rtl-elf.h"
@@ -53,16 +43,9 @@
 /**
  * The table of supported loader formats.
  */
-#define RTEMS_RTL_LOADERS (RTEMS_RTL_ELF_LOADER_COUNT + RTEMS_RTL_RAP_LOADER_COUNT)
+#define RTEMS_RTL_LOADERS (RTEMS_RTL_ELF_LOADER_COUNT)
 static const rtems_rtl_loader_table loaders[RTEMS_RTL_LOADERS] =
 {
-#if RTEMS_RTL_RAP_LOADER
-  { .check     = rtems_rtl_rap_file_check,
-    .load      = rtems_rtl_rap_file_load,
-    .unload    = rtems_rtl_rap_file_unload,
-    .unload    = rtems_rtl_rap_file_unload,
-    .signature = rtems_rtl_rap_file_sig },
-#endif
 #if RTEMS_RTL_ELF_LOADER
   { .check     = rtems_rtl_elf_file_check,
     .load      = rtems_rtl_elf_file_load,
@@ -82,8 +65,8 @@ rtems_rtl_obj_alloc (void)
     /*
      * Initialise the chains.
      */
-    rtems_chain_initialize_empty (&obj->sections);
-    rtems_chain_initialize_empty (&obj->dependents);
+    vListInitialise (&obj->sections);
+    vListInitialise (&obj->dependents);
     /*
      * No valid format.
      */
@@ -111,8 +94,8 @@ rtems_rtl_obj_free (rtems_rtl_obj* obj)
     rtems_rtl_set_error (EINVAL, "cannot free obj still in use");
     return false;
   }
-  if (!rtems_chain_is_node_off_chain (&obj->link))
-    rtems_chain_extract (&obj->link);
+  if (listLIST_ITEM_CONTAINER (&obj->link))
+    uxListRemove (&obj->link);
   rtems_rtl_alloc_module_del (&obj->text_base, &obj->const_base, &obj->eh_base,
                               &obj->data_base, &obj->bss_base);
   rtems_rtl_obj_erase_sections (obj);
@@ -159,7 +142,7 @@ rtems_rtl_obj_unresolved_dependent (rtems_rtl_obj* obj,
 }
 
 static bool
-rtems_rtl_obj_unresolved_object (rtems_chain_node* node, void* data)
+rtems_rtl_obj_unresolved_object (ListItem_t* node, void* data)
 {
   rtems_rtl_obj*                 obj = (rtems_rtl_obj*) node;
   rtems_rtl_obj_unresolved_data* ud;
@@ -298,7 +281,7 @@ typedef struct
 } rtems_rtl_obj_sect_summer_data;
 
 static bool
-rtems_rtl_obj_sect_summer (rtems_chain_node* node, void* data)
+rtems_rtl_obj_sect_summer (ListItem_t* node, void* data)
 {
   rtems_rtl_obj_sect* sect = (rtems_rtl_obj_sect*) node;
   if ((sect->flags & RTEMS_RTL_OBJ_SECT_ARCH_ALLOC) == 0)
@@ -317,7 +300,7 @@ rtems_rtl_obj_section_size (const rtems_rtl_obj* obj, uint32_t mask)
   rtems_rtl_obj_sect_summer_data summer;
   summer.mask = mask;
   summer.size = 0;
-  rtems_rtl_chain_iterate ((rtems_chain_control*) &obj->sections,
+  rtems_rtl_chain_iterate ((List_t*) &obj->sections,
                            rtems_rtl_obj_sect_summer,
                            &summer);
   return summer.size;
@@ -337,7 +320,7 @@ typedef struct
  * The section aligner iterator.
  */
 static bool
-rtems_rtl_obj_sect_aligner (rtems_chain_node* node, void* data)
+rtems_rtl_obj_sect_aligner (ListItem_t* node, void* data)
 {
   rtems_rtl_obj_sect*              sect = (rtems_rtl_obj_sect*) node;
   rtems_rtl_obj_sect_aligner_data* aligner = data;
@@ -355,7 +338,7 @@ rtems_rtl_obj_section_alignment (const rtems_rtl_obj* obj, uint32_t mask)
   rtems_rtl_obj_sect_aligner_data aligner;
   aligner.mask = mask;
   aligner.alignment = 0;
-  rtems_rtl_chain_iterate ((rtems_chain_control*) &obj->sections,
+  rtems_rtl_chain_iterate ((List_t*) &obj->sections,
                            rtems_rtl_obj_sect_aligner,
                            &aligner);
   return aligner.alignment;
@@ -368,8 +351,8 @@ rtems_rtl_obj_section_handler (uint32_t                   mask,
                                rtems_rtl_obj_sect_handler handler,
                                void*                      data)
 {
-  rtems_chain_node* node = rtems_chain_first (&obj->sections);
-  while (!rtems_chain_is_tail (&obj->sections, node))
+  ListItem_t* node = listGET_HEAD_ENTRY (&obj->sections);
+  while (listGET_END_MARKER (&obj->sections) != node)
   {
     rtems_rtl_obj_sect* sect = (rtems_rtl_obj_sect*) node;
     if ((sect->flags & mask) != 0)
@@ -377,7 +360,7 @@ rtems_rtl_obj_section_handler (uint32_t                   mask,
       if (!handler (obj, fd, sect, data))
         return false;
     }
-    node = rtems_chain_next (node);
+    node = listGET_NEXT (node);
   }
   return true;
 }
@@ -452,7 +435,7 @@ rtems_rtl_obj_add_section (rtems_rtl_obj* obj,
     sect->info = info;
     sect->flags = flags;
     sect->base = NULL;
-    rtems_chain_append (&obj->sections, &sect->node);
+    vListInsertEnd (&obj->sections, &sect->node);
 
     if (rtems_rtl_trace (RTEMS_RTL_TRACE_SECTION))
       printf ("rtl: sect: add: %-2d: %s (%zu) 0x%08" PRIu32 "\n",
@@ -464,12 +447,12 @@ rtems_rtl_obj_add_section (rtems_rtl_obj* obj,
 void
 rtems_rtl_obj_erase_sections (rtems_rtl_obj* obj)
 {
-  rtems_chain_node* node = rtems_chain_first (&obj->sections);
-  while (!rtems_chain_is_tail (&obj->sections, node))
+  ListItem_t* node = listGET_HEAD_ENTRY (&obj->sections);
+  while (listGET_END_MARKER (&obj->sections) != node)
   {
     rtems_rtl_obj_sect* sect = (rtems_rtl_obj_sect*) node;
-    rtems_chain_node*   next_node = rtems_chain_next (node);
-    rtems_chain_extract (node);
+    ListItem_t*   next_node = listGET_NEXT (node);
+    uxListRemove (node);
     rtems_rtl_alloc_del (RTEMS_RTL_ALLOC_OBJECT, (void*) sect->name);
     rtems_rtl_alloc_del (RTEMS_RTL_ALLOC_OBJECT, sect);
     node = next_node;
@@ -489,7 +472,7 @@ typedef struct
 } rtems_rtl_obj_sect_finder;
 
 static bool
-rtems_rtl_obj_sect_match_name (rtems_chain_node* node, void* data)
+rtems_rtl_obj_sect_match_name (ListItem_t* node, void* data)
 {
   rtems_rtl_obj_sect*        sect = (rtems_rtl_obj_sect*) node;
   rtems_rtl_obj_sect_finder* match = data;
@@ -510,14 +493,14 @@ rtems_rtl_obj_find_section (const rtems_rtl_obj* obj,
   match.name = name;
   match.mask = 0;
   match.flags = 0;
-  rtems_rtl_chain_iterate ((rtems_chain_control*) &obj->sections,
+  rtems_rtl_chain_iterate ((List_t*) &obj->sections,
                            rtems_rtl_obj_sect_match_name,
                            &match);
   return match.sect;
 }
 
 static bool
-rtems_rtl_obj_sect_match_index (rtems_chain_node* node, void* data)
+rtems_rtl_obj_sect_match_index (ListItem_t* node, void* data)
 {
   rtems_rtl_obj_sect*        sect = (rtems_rtl_obj_sect*) node;
   rtems_rtl_obj_sect_finder* match = data;
@@ -538,14 +521,14 @@ rtems_rtl_obj_find_section_by_index (const rtems_rtl_obj* obj,
   match.index = index;
   match.mask = 0;
   match.flags = 0;
-  rtems_rtl_chain_iterate ((rtems_chain_control*) &obj->sections,
+  rtems_rtl_chain_iterate ((List_t*) &obj->sections,
                            rtems_rtl_obj_sect_match_index,
                            &match);
   return match.sect;
 }
 
 static bool
-rtems_rtl_obj_sect_match_mask (rtems_chain_node* node, void* data)
+rtems_rtl_obj_sect_match_mask (ListItem_t* node, void* data)
 {
   rtems_rtl_obj_sect*        sect = (rtems_rtl_obj_sect*) node;
   rtems_rtl_obj_sect_finder* match = data;
@@ -574,7 +557,7 @@ rtems_rtl_obj_find_section_by_mask (const rtems_rtl_obj* obj,
   match.index = index;
   match.mask = mask;
   match.flags = 0;
-  rtems_rtl_chain_iterate ((rtems_chain_control*) &obj->sections,
+  rtems_rtl_chain_iterate ((List_t*) &obj->sections,
                            rtems_rtl_obj_sect_match_mask,
                            &match);
   return match.sect;
@@ -618,7 +601,7 @@ rtems_rtl_obj_alloc_dependents (rtems_rtl_obj* obj, size_t dependents)
   else
   {
     depends->dependents = dependents;
-    rtems_chain_append (&obj->dependents, &depends->node);
+    vListInsertEnd (&obj->dependents, &depends->node);
   }
 
   return depends != NULL;
@@ -627,12 +610,12 @@ rtems_rtl_obj_alloc_dependents (rtems_rtl_obj* obj, size_t dependents)
 void
 rtems_rtl_obj_erase_dependents (rtems_rtl_obj* obj)
 {
-  rtems_chain_node* node = rtems_chain_first (&obj->dependents);
-  while (!rtems_chain_is_tail (&obj->dependents, node))
+  ListItem_t* node = listGET_HEAD_ENTRY (&obj->dependents);
+  while (listGET_END_MARKER (&obj->dependents) != node)
   {
     rtems_rtl_obj_depends* depends = (rtems_rtl_obj_depends*) node;
-    rtems_chain_node*      next_node = rtems_chain_next (node);
-    rtems_chain_extract (node);
+    ListItem_t*      next_node = listGET_NEXT (node);
+    uxListRemove (node);
     rtems_rtl_alloc_del (RTEMS_RTL_ALLOC_OBJECT, depends);
     node = next_node;
   }
@@ -642,7 +625,7 @@ bool
 rtems_rtl_obj_add_dependent (rtems_rtl_obj* obj, rtems_rtl_obj* dependent)
 {
   rtems_rtl_obj**   free_slot;
-  rtems_chain_node* node;
+  ListItem_t*       node;
 
   if (obj == dependent || dependent == rtems_rtl_baseimage ())
     return false;
@@ -652,8 +635,8 @@ rtems_rtl_obj_add_dependent (rtems_rtl_obj* obj, rtems_rtl_obj* dependent)
 
   free_slot = NULL;
 
-  node = rtems_chain_first (&obj->dependents);
-  while (!rtems_chain_is_tail (&obj->dependents, node))
+  node = listGET_HEAD_ENTRY (&obj->dependents);
+  while (listGET_END_MARKER (&obj->dependents) != node)
   {
     rtems_rtl_obj_depends* depends = (rtems_rtl_obj_depends*) node;
     size_t                 d;
@@ -664,7 +647,7 @@ rtems_rtl_obj_add_dependent (rtems_rtl_obj* obj, rtems_rtl_obj* dependent)
       if (depends->depends[d] == dependent)
         return false;
     }
-    node = rtems_chain_next (node);
+    node = listGET_NEXT (node);
   }
 
   if (free_slot == NULL)
@@ -673,7 +656,7 @@ rtems_rtl_obj_add_dependent (rtems_rtl_obj* obj, rtems_rtl_obj* dependent)
                                         RTEMS_RTL_DEPENDENCY_BLOCK_SIZE))
     {
       rtems_rtl_obj_depends* depends;
-      node = rtems_chain_last (&obj->dependents);
+      node = listGET_END_MARKER (&obj->dependents);
       depends = (rtems_rtl_obj_depends*) node;
       free_slot = &(depends->depends[0]);
       if (*free_slot != NULL)
@@ -704,8 +687,8 @@ rtems_rtl_obj_remove_dependencies (rtems_rtl_obj* obj)
      * unload happens once the list of objects to be unloaded has been made and
      * the destructors have been called for all those modules.
      */
-    rtems_chain_node* node = rtems_chain_first (&obj->dependents);
-    while (!rtems_chain_is_tail (&obj->dependents, node))
+    ListItem_t* node = listGET_HEAD_ENTRY (&obj->dependents);
+    while (listGET_END_MARKER (&obj->dependents) != node)
     {
       rtems_rtl_obj_depends* depends = (rtems_rtl_obj_depends*) node;
       size_t                 d;
@@ -717,7 +700,7 @@ rtems_rtl_obj_remove_dependencies (rtems_rtl_obj* obj)
           depends->depends[d] = NULL;
         }
       }
-      node = rtems_chain_next (node);
+      node = listGET_NEXT (node);
     }
     return true;
   }
@@ -729,8 +712,8 @@ rtems_rtl_obj_iterate_dependents (rtems_rtl_obj*                 obj,
                                   rtems_rtl_obj_depends_iterator iterator,
                                   void*                          data)
 {
-  rtems_chain_node* node = rtems_chain_first (&obj->dependents);
-  while (!rtems_chain_is_tail (&obj->dependents, node))
+  ListItem_t* node = listGET_HEAD_ENTRY (&obj->dependents);
+  while (listGET_END_MARKER (&obj->dependents) != node)
   {
     rtems_rtl_obj_depends* depends = (rtems_rtl_obj_depends*) node;
     size_t                 d;
@@ -742,7 +725,7 @@ rtems_rtl_obj_iterate_dependents (rtems_rtl_obj*                 obj,
           return true;
       }
     }
-    node = rtems_chain_next (node);
+    node = listGET_NEXT (node);
   }
   return false;
 }
@@ -841,7 +824,7 @@ typedef struct
 } rtems_rtl_obj_sect_sync_ctx;
 
 static bool
-rtems_rtl_obj_sect_sync_handler (rtems_chain_node* node, void* data)
+rtems_rtl_obj_sect_sync_handler (ListItem_t* node, void* data)
 {
   rtems_rtl_obj_sect*          sect = (rtems_rtl_obj_sect*) node;
   rtems_rtl_obj_sect_sync_ctx* sync_ctx = data;
@@ -926,13 +909,13 @@ rtems_rtl_obj_sections_linked_to_order (rtems_rtl_obj* obj,
                                         int            section,
                                         uint32_t       visited_mask)
 {
-  rtems_chain_control* sections = &obj->sections;
-  rtems_chain_node*    node = rtems_chain_first (sections);
+  List_t* sections = &obj->sections;
+  ListItem_t*    node = listGET_HEAD_ENTRY (sections);
   /*
    * Find the section being linked-to. If the linked-to link field is 0 we have
    * the end and the section's order is the position we are after.
    */
-  while (!rtems_chain_is_tail (sections, node))
+  while (listGET_END_MARKER (sections) != node)
   {
     rtems_rtl_obj_sect* sect = (rtems_rtl_obj_sect*) node;
     if (sect->section == section)
@@ -954,8 +937,8 @@ rtems_rtl_obj_sections_linked_to_order (rtems_rtl_obj* obj,
                                                        sect->link,
                                                        visited_mask | mask);
       }
-      node = rtems_chain_first (sections);
-      while (!rtems_chain_is_tail (sections, node))
+      node = listGET_HEAD_ENTRY (sections);
+      while (listGET_END_MARKER (sections) != node)
       {
         sect = (rtems_rtl_obj_sect*) node;
         if ((sect->flags & mask) == mask)
@@ -964,10 +947,10 @@ rtems_rtl_obj_sections_linked_to_order (rtems_rtl_obj* obj,
             return order;
           ++order;
         }
-        node = rtems_chain_next (node);
+        node = listGET_NEXT (node);
       }
     }
-    node = rtems_chain_next (node);
+    node = listGET_NEXT (node);
   }
   rtems_rtl_set_error (errno, "section link not found");
   return -1;
@@ -976,10 +959,10 @@ rtems_rtl_obj_sections_linked_to_order (rtems_rtl_obj* obj,
 static void
 rtems_rtl_obj_sections_link_order (uint32_t mask, rtems_rtl_obj* obj)
 {
-  rtems_chain_control* sections = &obj->sections;
-  rtems_chain_node*    node = rtems_chain_first (sections);
+  List_t* sections = &obj->sections;
+  ListItem_t*    node = listGET_HEAD_ENTRY (sections);
   int                  order = 0;
-  while (!rtems_chain_is_tail (sections, node))
+  while (listGET_END_MARKER (sections) != node)
   {
     rtems_rtl_obj_sect* sect = (rtems_rtl_obj_sect*) node;
     if ((sect->flags & mask) == mask)
@@ -998,7 +981,7 @@ rtems_rtl_obj_sections_link_order (uint32_t mask, rtems_rtl_obj* obj)
                                                   mask);
       }
     }
-    node = rtems_chain_next (node);
+    node = listGET_NEXT (node);
   }
 }
 
@@ -1008,15 +991,15 @@ rtems_rtl_obj_sections_locate (uint32_t            mask,
                                rtems_rtl_obj*      obj,
                                uint8_t*            base)
 {
-  rtems_chain_control* sections = &obj->sections;
-  rtems_chain_node*    node = rtems_chain_first (sections);
+  List_t* sections = &obj->sections;
+  ListItem_t*    node = listGET_HEAD_ENTRY (sections);
   size_t               base_offset = 0;
   int                  order = 0;
 
   if (rtems_rtl_trace (RTEMS_RTL_TRACE_LOAD_SECT))
     printf ("rtl: locating section: mask:%08" PRIx32 " base:%p\n", mask, base);
 
-  while (!rtems_chain_is_tail (sections, node))
+  while (listGET_END_MARKER (sections) != node)
   {
     rtems_rtl_obj_sect* sect = (rtems_rtl_obj_sect*) node;
 
@@ -1041,12 +1024,12 @@ rtems_rtl_obj_sections_locate (uint32_t            mask,
 
         ++order;
 
-        node = rtems_chain_first (sections);
+        node = listGET_HEAD_ENTRY (sections);
         continue;
       }
     }
 
-    node = rtems_chain_next (node);
+    node = listGET_NEXT (node);
   }
 }
 
@@ -1165,8 +1148,8 @@ rtems_rtl_obj_sections_loader (uint32_t                   mask,
                                rtems_rtl_obj_sect_handler handler,
                                void*                      data)
 {
-  rtems_chain_control* sections = &obj->sections;
-  rtems_chain_node*    node = rtems_chain_first (sections);
+  List_t* sections = &obj->sections;
+  ListItem_t*    node = listGET_HEAD_ENTRY (sections);
   int                  order = 0;
 
   if (rtems_rtl_trace (RTEMS_RTL_TRACE_LOAD_SECT))
@@ -1174,7 +1157,7 @@ rtems_rtl_obj_sections_loader (uint32_t                   mask,
 
   rtems_rtl_alloc_wr_enable (tag, base);
 
-  while (!rtems_chain_is_tail (sections, node))
+  while (listGET_END_MARKER (sections) != node)
   {
     rtems_rtl_obj_sect* sect = (rtems_rtl_obj_sect*) node;
 
@@ -1211,12 +1194,12 @@ rtems_rtl_obj_sections_loader (uint32_t                   mask,
 
         ++order;
 
-        node = rtems_chain_first (sections);
+        node = listGET_HEAD_ENTRY (sections);
         continue;
       }
     }
 
-    node = rtems_chain_next (node);
+    node = listGET_NEXT (node);
   }
 
   rtems_rtl_alloc_wr_disable (tag, base);
@@ -1263,8 +1246,8 @@ rtems_rtl_obj_load_sections (rtems_rtl_obj*             obj,
 static void
 rtems_rtl_obj_run_cdtors (rtems_rtl_obj* obj, uint32_t mask)
 {
-  rtems_chain_node* node = rtems_chain_first (&obj->sections);
-  while (!rtems_chain_is_tail (&obj->sections, node))
+  ListItem_t* node = listGET_HEAD_ENTRY (&obj->sections);
+  while (listGET_END_MARKER (&obj->sections) != node)
   {
     rtems_rtl_obj_sect* sect = (rtems_rtl_obj_sect*) node;
     if ((sect->flags & mask) == mask)
@@ -1276,20 +1259,20 @@ rtems_rtl_obj_run_cdtors (rtems_rtl_obj* obj, uint32_t mask)
         if (*handler)
           (*handler) ();
     }
-    node = rtems_chain_next (node);
+    node = listGET_NEXT (node);
   }
 }
 
 static bool
 rtems_rtl_obj_cdtors_to_run (rtems_rtl_obj* obj, uint32_t mask)
 {
-  rtems_chain_node* node = rtems_chain_first (&obj->sections);
-  while (!rtems_chain_is_tail (&obj->sections, node))
+  ListItem_t* node = listGET_HEAD_ENTRY (&obj->sections);
+  while (listGET_END_MARKER (&obj->sections) != node)
   {
     rtems_rtl_obj_sect* sect = (rtems_rtl_obj_sect*) node;
     if ((sect->flags & mask) == mask)
       return true;
-    node = rtems_chain_next (node);
+    node = listGET_NEXT (node);
   }
   return false;
 }

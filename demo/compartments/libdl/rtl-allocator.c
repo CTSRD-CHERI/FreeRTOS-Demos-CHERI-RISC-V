@@ -16,9 +16,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <rtems/rtl/rtl.h>
+#include <rtl/rtl.h>
 #include "rtl-alloc-heap.h"
-#include <rtems/rtl/rtl-trace.h>
+#include <rtl/rtl-trace.h>
 
 /**
  * Tags as symbols for tracing.
@@ -44,7 +44,7 @@ rtems_rtl_alloc_initialise (rtems_rtl_alloc_data* data)
   int c;
   data->allocator = rtems_rtl_alloc_heap;
   for (c = 0; c < RTEMS_RTL_ALLOC_TAGS; ++c)
-    rtems_chain_initialize_empty (&data->indirects[c]);
+    vListInitialise (&data->indirects[c]);
 }
 
 void*
@@ -189,7 +189,7 @@ rtems_rtl_alloc_indirect_new (rtems_rtl_alloc_tag tag,
     rtems_rtl_alloc_data* allocator = &rtl->allocator;
     handle->pointer = rtems_rtl_alloc_new (tag, size, false);
     if (!rtems_rtl_ptr_null (handle))
-      rtems_chain_append_unprotected (&allocator->indirects[tag],
+      vListInsertEnd (&allocator->indirects[tag],
                                       &handle->node);
   }
 
@@ -213,7 +213,7 @@ rtems_rtl_alloc_indirect_del (rtems_rtl_alloc_tag tag,
 
   if (rtl && !rtems_rtl_ptr_null (handle))
   {
-    rtems_chain_extract_unprotected (&handle->node);
+    uxListRemove (&handle->node);
     rtems_rtl_alloc_del (tag, &handle->pointer);
   }
 }

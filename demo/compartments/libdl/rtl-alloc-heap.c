@@ -16,8 +16,10 @@
 #include <stdlib.h>
 
 #include "rtl-alloc-heap.h"
+#include "rtl-alloc-lock.h"
 
-#include <rtems/score/apimutex.h>
+#include <FreeRTOS.h>
+#include "semphr.h"
 
 void
 rtems_rtl_alloc_heap (rtems_rtl_alloc_cmd cmd,

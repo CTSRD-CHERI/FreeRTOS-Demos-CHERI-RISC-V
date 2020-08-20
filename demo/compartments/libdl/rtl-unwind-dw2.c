@@ -22,7 +22,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include <rtems/rtl/rtl.h>
+#include <rtl/rtl.h>
 #include "rtl-elf.h"
 #include "rtl-error.h"
 #include "rtl-unwind.h"

@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <rtems/rtl/rtl-trace.h>
+#include <rtl/rtl-trace.h>
 
 #if RTEMS_RTL_TRACE
 static rtems_rtl_trace_mask rtems_rtl_trace_flags;
@@ -91,15 +91,15 @@ rtems_rtl_trace_shell_command (const rtems_printer* printer,
       switch (argv[arg][1])
       {
         case 'h':
-          rtems_printf (printer, "usage: %s [-hl] [set/clear] [flags]\n", argv[0]);
+          printf("usage: %s [-hl] [set/clear] [flags]\n", argv[0]);
           return 0;
         case 'l':
-          rtems_printf (printer, "%s: valid flags to set or clear are:\n", argv[0]);
+          printf("%s: valid flags to set or clear are:\n", argv[0]);
           for (t = 0; t < (sizeof (table) / sizeof (const char*)); t++)
-            rtems_printf (printer, "  %s\n", table[t]);
+            printf("  %s\n", table[t]);
           return 0;
         default:
-          rtems_printf (printer, "error: unknown option\n");
+          printf("error: unknown option\n");
           return 1;
       }
     }

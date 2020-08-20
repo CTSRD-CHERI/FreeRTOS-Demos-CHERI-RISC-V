@@ -17,7 +17,7 @@
 
 #include <stdint.h>
 #include <dlfcn.h>
-#include <rtems/rtl/rtl.h>
+#include <rtl/rtl.h>
 
 static rtems_rtl_obj*
 dl_get_obj_from_handle (void* handle)

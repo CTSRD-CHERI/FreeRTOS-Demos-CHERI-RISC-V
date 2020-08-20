@@ -42,10 +42,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <rtems/rtl/rtl.h>
+#include <rtl/rtl.h>
 #include "rtl-elf.h"
 #include "rtl-error.h"
-#include <rtems/rtl/rtl-trace.h>
+#include <rtl/rtl-trace.h>
 #include "rtl-unwind.h"
 #include "rtl-unwind-dw2.h"
 

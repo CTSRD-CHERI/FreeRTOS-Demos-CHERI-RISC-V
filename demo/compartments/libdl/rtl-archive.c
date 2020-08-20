@@ -25,11 +25,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <rtems/libio_.h>
-
-#include <rtems/rtl/rtl.h>
+#include <rtl/rtl.h>
 #include "rtl-chain-iterator.h"
-#include <rtems/rtl/rtl-trace.h>
+#include <rtl/rtl-trace.h>
 #include "rtl-string.h"
 #include "rtl-error.h"
 
