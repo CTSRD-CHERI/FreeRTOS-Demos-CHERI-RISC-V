@@ -58,6 +58,8 @@ extern void *pvAlmightyDataCap;
 extern void *pvAlmightyCodeCap;
 #endif /* __CHERI_PURE_CAPABILITY__ */
 
+extern char comp_strtab[configCOMPARTMENTS_NUM][configMAXLEN_COMPNAME];
+
 typedef struct compartment {
   void        *cap;
   uintcap_t   *cap_list;
@@ -97,8 +99,9 @@ size_t headers_size =  (ptraddr_t) _headers_end - 0x080000000;
       printf("comp id = %u\n", comp_id);
       void *cap = cheri_create_cap((ptraddr_t) phdr[i].p_paddr, phdr[i].p_memsz);
 
-      printf("- Compartment #%u starting at 0x%lx of size %u\n",
+      printf("- Compartment #%u with name: %s starting at 0x%lx of size %u\n",
              (phdr[i].p_flags & CHERI_ELF_PT_ID_MASK),
+             comp_strtab[comp_id],
              phdr[i].p_paddr,
              phdr[i].p_memsz);
 

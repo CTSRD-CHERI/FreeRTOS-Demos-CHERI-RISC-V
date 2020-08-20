@@ -48,6 +48,7 @@ class Compartmentalize:
     self.makefile = makefile
     self.CFLAGS = ""
     self.num_comps = 0
+    self.max_comp_namelen = 32
 
   def open_yml(self):
     with open(self.ymlfile, "r") as file:
@@ -76,6 +77,17 @@ class Compartmentalize:
       comp_idx += 1
 
     return phdre_string
+
+  def comps_gen_c_table(self, compartments):
+    c_array = "char comp_strtab["+str(len(compartments))+"]["+str(self.max_comp_namelen)+"] = {\n"\
+
+    for compartment in compartments:
+      c_array += '\"' + compartment + '\",\n' \
+
+    c_array += "};\n"\
+
+    with open("comp_strtab_generated.c", "w") as file:
+      file.write(c_array)
 
   def comp_gen_assembly_file(self, compartment):
     assembly_string = ""
@@ -127,6 +139,7 @@ class Compartmentalize:
           new_output += "COMPARTMENTS = " + " ".join([compartment+".a" for compartment in compartments])
           #new_output += "COMPARTMENTS_NUM = " + str(self.num_comps) + "\n"
           new_output += "\nCFLAGS = -DconfigCOMPARTMENTS_NUM=" + str(self.num_comps) + "\n"
+          new_output += "\nCFLAGS += -DconfigMAXLEN_COMPNAME=" + str(self.max_comp_namelen) + "\n"
         else:
           new_output += line
 
@@ -160,6 +173,7 @@ class Compartmentalize:
           new_output += "COMPARTMENTS = " + " ".join([compartment+".o.wrapped" for compartment in compartments])
           #new_output += "COMPARTMENTS_NUM = " + str(self.num_comps) + "\n"
           new_output += "\nCFLAGS = -DconfigCOMPARTMENTS_NUM=" + str(self.num_comps) + "\n"
+          new_output += "\nCFLAGS += -DconfigMAXLEN_COMPNAME=" + str(self.max_comp_namelen) + "\n"
         else:
           new_output += line
 
@@ -284,6 +298,8 @@ class Compartmentalize:
 
     #self.linkcmd_add_compartments_libs(comp_list);
     self.linkcmd_add_compartments_objs(comp_list);
+
+    self.comps_gen_c_table(comp_list)
 
   def Usage(self):
     pass

@@ -117,6 +117,7 @@ else
 ifeq ($(PROG),main_compartment_test)
 	CFLAGS += -DmainDEMO_TYPE=4
 DEMO_SRC += demo/compartments/loader.c
+DEMO_SRC += comp_strtab_generated.c
 	CFLAGS += -I./demo/compartments/include
 else
 	$(info unknown demo: $(PROG))
