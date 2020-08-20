@@ -16,9 +16,9 @@
 #if !defined (_RTEMS_RTL_ELF_H_)
 #define _RTEMS_RTL_ELF_H_
 
-#include <rtems/rtl/rtl-fwd.h>
-#include <rtems/rtl/rtl-obj-fwd.h>
-#include <rtems/rtl/rtl-sym.h>
+#include <rtl/rtl-fwd.h>
+#include <rtl/rtl-obj-fwd.h>
+#include <rtl/rtl-sym.h>
 
 #ifdef __cplusplus
 extern "C" {

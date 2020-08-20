@@ -16,8 +16,8 @@
 #if !defined (_RTEMS_RTL_BIT_ALLOC_H_)
 #define _RTEMS_RTL_BIT_ALLOC_H_
 
-#include <rtems/rtl/rtl-fwd.h>
-#include <rtems/rtl/rtl-obj-fwd.h>
+#include <rtl/rtl-fwd.h>
+#include <rtl/rtl-obj-fwd.h>
 
 #ifdef __cplusplus
 extern "C" {

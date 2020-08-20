@@ -57,7 +57,7 @@
 #if !defined (_RTEMS_RTL_TRAMPOLINE_H_)
 #define _RTEMS_RTL_TRAMPOLINE_H_
 
-#include <rtems/rtl/rtl-unresolved.h>
+#include <rtl/rtl-unresolved.h>
 
 #ifdef __cplusplus
 extern "C" {

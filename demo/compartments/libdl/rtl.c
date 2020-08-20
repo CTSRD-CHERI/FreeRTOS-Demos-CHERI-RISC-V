@@ -23,11 +23,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <rtems/libio_.h>
-
-#include <rtems/rtl/rtl.h>
-#include <rtems/rtl/rtl-allocator.h>
-#include <rtems/rtl/rtl-trace.h>
+#include <rtl/rtl.h>
+#include <rtl/rtl-allocator.h>
+#include <rtl/rtl-trace.h>
 #include "rtl-chain-iterator.h"
 #include "rtl-error.h"
 #include "rtl-string.h"

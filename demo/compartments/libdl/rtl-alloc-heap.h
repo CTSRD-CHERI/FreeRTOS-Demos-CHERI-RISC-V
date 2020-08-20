@@ -16,7 +16,7 @@
 #if !defined (_RTEMS_RTL_ALLOC_HEAP_H_)
 #define _RTEMS_RTL_ALLOC_HEAP_H_
 
-#include <rtems/rtl/rtl-allocator.h>
+#include <rtl/rtl-allocator.h>
 
 #ifdef __cplusplus
 extern "C" {

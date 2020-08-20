@@ -16,8 +16,8 @@
 #if !defined (_RTEMS_RTL_FIND_FILE_H_)
 #define _RTEMS_RTL_FIND_FILE_H_
 
-#include <rtems.h>
-#include <rtems/chain.h>
+#include <FreeRTOS.h>
+#include "list.h"
 
 #ifdef __cplusplus
 extern "C" {

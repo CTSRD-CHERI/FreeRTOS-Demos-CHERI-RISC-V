@@ -20,12 +20,13 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <rtems/chain.h>
+#include <FreeRTOS.h>
+#include "list.h"
 
 /**
  * Chain iterator handler.
  */
-typedef bool (*rtems_chain_iterator) (rtems_chain_node* node, void* data);
+typedef bool (*rtems_chain_iterator) (ListItem_t* node, void* data);
 
 /**
  * Iterate a chain of nodes invoking the iterator handler. Supply a data
@@ -40,7 +41,7 @@ typedef bool (*rtems_chain_iterator) (rtems_chain_node* node, void* data);
  * @retval false The iterator returned false.
  */
 bool
-rtems_rtl_chain_iterate (rtems_chain_control* chain,
+rtems_rtl_chain_iterate (List_t*              chain,
                          rtems_chain_iterator iterator,
                          void*                data);
 
@@ -50,7 +51,7 @@ rtems_rtl_chain_iterate (rtems_chain_control* chain,
  * @param chain The chain to count the nodes of.
  * @return int The number of nodes.
  */
-int rtems_rtl_chain_count (rtems_chain_control* chain);
+int rtems_rtl_chain_count (List_t* chain);
 
 #ifdef __cplusplus
 }
