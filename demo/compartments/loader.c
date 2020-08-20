@@ -63,6 +63,7 @@ extern char comp_strtab[configCOMPARTMENTS_NUM][configMAXLEN_COMPNAME];
 typedef struct compartment {
   void        *cap;
   uintcap_t   *cap_list;
+  char        *name;
   // TCB?
   // Symtab?
 } compartment_t;
@@ -106,6 +107,7 @@ size_t headers_size =  (ptraddr_t) _headers_end - 0x080000000;
              phdr[i].p_memsz);
 
       comp_list[comp_id].cap = cap;
+      comp_list[comp_id].name = comp_strtab[comp_id];
     }
   }
 }
