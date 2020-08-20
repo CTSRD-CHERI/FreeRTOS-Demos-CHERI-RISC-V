@@ -31,12 +31,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <exec_elf.h>
+#include <dlfcn.h>
 
 /* Kernel includes. */
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+
+
+#include <sys/exec_elf.h>
 
 #include <inttypes.h>
 #if __riscv_xlen == 32
