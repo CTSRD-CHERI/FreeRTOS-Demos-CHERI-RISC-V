@@ -23,7 +23,7 @@
 #if !defined (_RTEMS_RTL_OBJ_COMP_H_)
 #define _RTEMS_RTL_OBJ_COMP_H_
 
-#include <rtems/rtl/rtl-obj-cache.h>
+#include <rtl/rtl-obj-cache.h>
 
 #ifdef __cplusplus
 extern "C" {

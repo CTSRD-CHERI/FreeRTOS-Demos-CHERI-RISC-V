@@ -22,7 +22,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <freertos.h>
+#include <FreeRTOS.h>
 #include "list.h"
 
 /**

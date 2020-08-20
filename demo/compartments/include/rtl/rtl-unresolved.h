@@ -52,8 +52,8 @@
 #if !defined (_RTEMS_RTL_UNRESOLVED_H_)
 #define _RTEMS_RTL_UNRESOLVED_H_
 
-#include <rtems.h>
-#include <rtems/chain.h>
+#include <FreeRTOS.h>
+#include "list.h"
 #include "rtl-obj-fwd.h"
 
 #ifdef __cplusplus
@@ -144,7 +144,7 @@ typedef struct rtems_rtl_unresolv_rec
  */
 typedef struct rtems_rtl_unresolv_block
 {
-  rtems_chain_node       link;  /**< Blocks are chained. */
+  ListItem_t             link;  /**< Blocks are chained. */
   uint32_t               recs;  /**< The number of records in the block. */
   rtems_rtl_unresolv_rec rec[]; /**< The records. More follow. */
 } rtems_rtl_unresolv_block;
@@ -156,7 +156,7 @@ typedef struct rtems_rtl_unresolved
 {
   uint32_t            marker;     /**< Block marker. */
   size_t              block_recs; /**< The records per blocks allocated. */
-  rtems_chain_control blocks;     /**< List of blocks. */
+  List_t              blocks;     /**< List of blocks. */
 } rtems_rtl_unresolved;
 
 /**

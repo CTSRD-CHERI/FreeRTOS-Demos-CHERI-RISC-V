@@ -1,4 +1,5 @@
 /*
+ *  Copyright (C) 2020 Hesham Almatary <hesham.almatary@cl.cam.ac.uk>
  *  COPYRIGHT (c) 2018 Chris Johns <chrisj@rtems.org>
  *
  *  The license and distribution terms for this file may be
@@ -29,9 +30,8 @@
 #if !defined (_RTEMS_RTL_ARCHIVE_H_)
 #define _RTEMS_RTL_ARCHIVE_H_
 
-#include <rtems.h>
-#include <rtems/chain.h>
-#include <rtems/printer.h>
+#include <FreeRTOS.h>
+#include "list.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -105,7 +105,7 @@ typedef struct rtems_rtl_archives
   time_t              config_mtime;   /**< Config last modified time. */
   size_t              config_length;  /**< Length the config data. */
   char*               config;         /**< Config file contents. */
-  rtems_chain_control archives;       /**< The located archives. */
+  List_t              archives;       /**< The located archives. */
 } rtems_rtl_archives;
 
 /**

@@ -20,17 +20,19 @@
 #define _RTEMS_RTL_H_
 
 #include <link.h>
-#include <rtems/chain.h>
-#include <rtems/thread.h>
+#include <FreeRTOS.h>
+#include "list.h"
+#include "task.h"
+#include "semphr.h"
 
-#include <rtems/rtl/rtl-allocator.h>
-#include <rtems/rtl/rtl-archive.h>
-#include <rtems/rtl/rtl-fwd.h>
-#include <rtems/rtl/rtl-obj.h>
-#include <rtems/rtl/rtl-obj-cache.h>
-#include <rtems/rtl/rtl-obj-comp.h>
-#include <rtems/rtl/rtl-sym.h>
-#include <rtems/rtl/rtl-unresolved.h>
+#include <rtl/rtl-allocator.h>
+#include <rtl/rtl-archive.h>
+#include <rtl/rtl-fwd.h>
+#include <rtl/rtl-obj.h>
+#include <rtl/rtl-obj-cache.h>
+#include <rtl/rtl-obj-comp.h>
+#include <rtl/rtl-sym.h>
+#include <rtl/rtl-unresolved.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -105,10 +107,10 @@ typedef void (*rtems_rtl_cdtor)(void);
  */
 struct rtems_rtl_data
 {
-  rtems_recursive_mutex lock;           /**< The RTL lock */
+  SemaphoreHandle_t     lock;           /**< The RTL lock */
   rtems_rtl_alloc_data  allocator;      /**< The allocator data. */
-  rtems_chain_control   objects;        /**< List if loaded object files. */
-  rtems_chain_control   pending;        /**< Listof object files needing work. */
+  List_t                objects;        /**< List if loaded object files. */
+  List_t                pending;        /**< Listof object files needing work. */
   const char*           paths;          /**< Search paths for archives. */
   rtems_rtl_symbols     globals;        /**< Global symbol table. */
   rtems_rtl_archives    archives;       /**< Archive search and loader. */
@@ -152,18 +154,18 @@ const char* rtems_rtl_last_error_unprotected (void);
  * Get the RTL objects table with out locking. This call assumes the RTL
  * is locked.
  *
- * @return rtems_chain_control* The RTL objects chain.
+ * @return List_t* The RTL objects chain.
  * @retval NULL The RTL data is not initialised.
  */
-rtems_chain_control* rtems_rtl_objects_unprotected (void);
+List_t* rtems_rtl_objects_unprotected (void);
 
 /**
  * Get the RTL pending with out locking. This call assumes the RTL is locked.
  *
- * @return rtems_chain_control* The RTL pending list control.
+ * @return List_t* The RTL pending list control.
  * @retval NULL The RTL data is not initialised.
  */
-rtems_chain_control* rtems_rtl_pending_unprotected (void);
+List_t* rtems_rtl_pending_unprotected (void);
 
 /**
  * Get the RTL unresolved table with out locking. This call assumes the RTL

@@ -16,7 +16,8 @@
 #if !defined (_RTEMS_RTL_SYM_H_)
 #define _RTEMS_RTL_SYM_H_
 
-#include <rtems.h>
+#include <FreeRTOS.h>
+#include "list.h"
 #include "rtl-obj-fwd.h"
 
 #ifdef __cplusplus
@@ -28,7 +29,7 @@ extern "C" {
  */
 typedef struct rtems_rtl_obj_sym
 {
-  rtems_chain_node node;    /**< The node's link in the chain. */
+  ListItem_t       node;    /**< The node's link in the chain. */
   const char*      name;    /**< The symbol's name. */
   void*            value;   /**< The value of the symbol. */
   uint32_t         data;    /**< Format specific data. */
@@ -39,7 +40,7 @@ typedef struct rtems_rtl_obj_sym
  */
 typedef struct rtems_rtl_symbols
 {
-  rtems_chain_control* buckets;
+  List_t*              buckets;
   size_t               nbuckets;
 } rtems_rtl_symbols;
 

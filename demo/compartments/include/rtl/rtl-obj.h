@@ -16,10 +16,10 @@
 #if !defined (_RTEMS_RTL_OBJ_H_)
 #define _RTEMS_RTL_OBJ_H_
 
-#include <rtems.h>
-#include <rtems/chain.h>
-#include <rtems/rtl/rtl-sym.h>
-#include <rtems/rtl/rtl-unresolved.h>
+#include <FreeRTOS.h>
+#include "list.h"
+#include <rtl/rtl-sym.h>
+#include <rtl/rtl-unresolved.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -125,7 +125,7 @@ typedef struct rtems_rtl_loader_table
  */
 struct rtems_rtl_obj_sect
 {
-  rtems_chain_node node;        /**< The node's link in the chain. */
+  ListItem_t       node;        /**< The node's link in the chain. */
   int              section;     /**< The section number. */
   const char*      name;        /**< The section's name. */
   size_t           size;        /**< The size of the section in memory. */
@@ -148,7 +148,7 @@ struct rtems_rtl_obj_sect
  */
 struct rtems_rtl_obj_depends
 {
-  rtems_chain_node node;        /**< The node's link in the chain. */
+  ListItem_t       node;        /**< The node's link in the chain. */
   size_t           dependents;  /**< The number of dependent object pointers. */
   rtems_rtl_obj*   depends[];   /**< Dependtent objects. More follow. */
 };
@@ -179,7 +179,7 @@ typedef bool (*rtems_rtl_obj_depends_iterator) (rtems_rtl_obj* obj,
  */
 struct rtems_rtl_obj
 {
-  rtems_chain_node    link;         /**< The node's link in the chain. */
+  ListItem_t          link;         /**< The node's link in the chain. */
   uint32_t            flags;        /**< The status of the object file. */
   size_t              users;        /**< Users of this object file, number of loads. */
   size_t              refs;         /**< References to the object file. */
@@ -192,9 +192,9 @@ struct rtems_rtl_obj
                                      *   in a lib */
   off_t               ooffset;      /**< The object offset in the archive. */
   size_t              fsize;        /**< Size of the object file. */
-  rtems_chain_control sections;     /**< The sections of interest in the object
+  List_t              sections;     /**< The sections of interest in the object
                                      *   file. */
-  rtems_chain_control dependents;   /**< The dependent object files. */
+  List_t              dependents;   /**< The dependent object files. */
   rtems_rtl_obj_sym*  local_table;  /**< Local symbol table. */
   size_t              local_syms;   /**< Local symbol count. */
   size_t              local_size;   /**< Local symbol memory usage. */
