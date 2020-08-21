@@ -61,6 +61,25 @@ extern void *pvAlmightyDataCap;
 extern void *pvAlmightyCodeCap;
 #endif /* __CHERI_PURE_CAPABILITY__ */
 
+#define TEST_TRACE 1
+#if TEST_TRACE
+ #define DEBUG_TRACE (RTEMS_RTL_TRACE_DETAIL | \
+                      RTEMS_RTL_TRACE_WARNING | \
+                      RTEMS_RTL_TRACE_LOAD | \
+                      RTEMS_RTL_TRACE_UNLOAD | \
+                      RTEMS_RTL_TRACE_SYMBOL | \
+                      RTEMS_RTL_TRACE_RELOC | \
+                      RTEMS_RTL_TRACE_ALLOCATOR | \
+                      RTEMS_RTL_TRACE_UNRESOLVED | \
+                      RTEMS_RTL_TRACE_ARCHIVES | \
+                      RTEMS_RTL_TRACE_DEPENDENCY)
+ #define DL_DEBUG_TRACE DEBUG_TRACE /* RTEMS_RTL_TRACE_ALL */
+ #define DL_RTL_CMDS    1
+#else
+ #define DL_DEBUG_TRACE 0
+ #define DL_RTL_CMDS    0
+#endif
+
 extern char comp_strtab[configCOMPARTMENTS_NUM][configMAXLEN_COMPNAME];
 
 typedef struct compartment {
@@ -116,8 +135,23 @@ size_t headers_size =  (ptraddr_t) _headers_end - 0x080000000;
 }
 
 void vCompartmentsLoad(void) {
+  void *obj_handle;
+
   printf("Starting Compartments Loading\n");
 
   vCompartmentsElfPrint();
+
+#if DL_DEBUG_TRACE
+  rtems_rtl_trace_set_mask (DL_DEBUG_TRACE);
+#endif
+
+  printf("load: comp1.o\n");
+
+  obj_handle = dlopen ("comp1.o", RTLD_NOW | RTLD_GLOBAL);
+  if (!obj_handle)
+  {
+    printf("dlopen failed: %s\n", dlerror());
+  }
+
 }
 /*-----------------------------------------------------------*/
