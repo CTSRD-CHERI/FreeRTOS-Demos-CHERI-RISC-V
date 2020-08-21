@@ -31,6 +31,9 @@
 #include "rtl-error.h"
 #include "rtl-string.h"
 
+#include <FreeRTOS.h>
+#include "semphr.h"
+
 /**
  * Symbol table cache size. They can be big so the cache needs space to work.
  */
@@ -81,7 +84,7 @@ rtems_rtl_data_init (void)
    */
   if (!rtl)
   {
-    rtems_libio_lock ();
+    //rtems_libio_lock ();
 
     if (!rtl)
     {
@@ -92,7 +95,7 @@ rtems_rtl_data_init (void)
 
       if (rtl_data_init)
       {
-        rtems_libio_unlock ();
+        //rtems_libio_unlock ();
         return false;
       }
 
@@ -104,7 +107,7 @@ rtems_rtl_data_init (void)
       rtl = malloc (sizeof (rtems_rtl_data));
       if (!rtl)
       {
-        rtems_libio_unlock ();
+        //rtems_libio_unlock ();
         errno = ENOMEM;
         return false;
       }
@@ -119,8 +122,8 @@ rtems_rtl_data_init (void)
       /*
        * Create the RTL lock.
        */
-      rtems_recursive_mutex_init (&rtl->lock, "Run-Time Linker");
-      rtems_recursive_mutex_lock (&rtl->lock);
+      rtl->lock = xSemaphoreCreateRecursiveMutex ();
+      xSemaphoreTakeRecursive (rtl->lock, portMAX_DELAY);
 
       /*
        * Initialise the objects and pending list.
@@ -152,10 +155,10 @@ rtems_rtl_data_init (void)
       if (!rtems_rtl_unresolved_table_open (&rtl->unresolved,
                                             RTEMS_RTL_UNRESOLVED_BLOCK_SIZE))
       {
-        rtems_rtl_symbol_table_close (&rtl->globals);
-        rtems_recursive_mutex_destroy (&rtl->lock);
+        xSemaphoreGiveRecursive (rtl->lock);
+        vSemaphoreDelete (rtl->lock);
         free (rtl);
-        rtems_libio_unlock ();
+        //rtems_libio_unlock ();
         return false;
       }
 
@@ -164,9 +167,10 @@ rtems_rtl_data_init (void)
       {
         rtems_rtl_symbol_table_close (&rtl->globals);
         rtems_rtl_unresolved_table_close (&rtl->unresolved);
-        rtems_recursive_mutex_destroy (&rtl->lock);
+        xSemaphoreGiveRecursive (rtl->lock);
+        vSemaphoreDelete (rtl->lock);
         free (rtl);
-        rtems_libio_unlock ();
+        //rtems_libio_unlock ();
         return false;
       }
 
@@ -176,9 +180,10 @@ rtems_rtl_data_init (void)
         rtems_rtl_obj_cache_close (&rtl->symbols);
         rtems_rtl_unresolved_table_close (&rtl->unresolved);
         rtems_rtl_symbol_table_close (&rtl->globals);
-        rtems_recursive_mutex_destroy (&rtl->lock);
+        xSemaphoreGiveRecursive (rtl->lock);
+        vSemaphoreDelete (rtl->lock);
         free (rtl);
-        rtems_libio_unlock ();
+        //rtems_libio_unlock ();
         return false;
       }
 
@@ -189,9 +194,10 @@ rtems_rtl_data_init (void)
         rtems_rtl_obj_cache_close (&rtl->symbols);
         rtems_rtl_unresolved_table_close (&rtl->unresolved);
         rtems_rtl_symbol_table_close (&rtl->globals);
-        rtems_recursive_mutex_destroy (&rtl->lock);
+        xSemaphoreGiveRecursive (rtl->lock);
+        vSemaphoreDelete (rtl->lock);
         free (rtl);
-        rtems_libio_unlock ();
+        //rtems_libio_unlock ();
         return false;
       }
 
@@ -203,9 +209,10 @@ rtems_rtl_data_init (void)
         rtems_rtl_obj_cache_close (&rtl->symbols);
         rtems_rtl_unresolved_table_close (&rtl->unresolved);
         rtems_rtl_symbol_table_close (&rtl->globals);
-        rtems_recursive_mutex_destroy (&rtl->lock);
+        xSemaphoreGiveRecursive (rtl->lock);
+        vSemaphoreDelete (rtl->lock);
         free (rtl);
-        rtems_libio_unlock ();
+        //rtems_libio_unlock ();
         return false;
       }
 
@@ -218,9 +225,10 @@ rtems_rtl_data_init (void)
         rtems_rtl_obj_cache_close (&rtl->symbols);
         rtems_rtl_unresolved_table_close (&rtl->unresolved);
         rtems_rtl_symbol_table_close (&rtl->globals);
-        rtems_recursive_mutex_destroy (&rtl->lock);
+        xSemaphoreGiveRecursive (rtl->lock);
+        vSemaphoreDelete (rtl->lock);
         free (rtl);
-        rtems_libio_unlock ();
+        //rtems_libio_unlock ();
         return false;
       }
 
@@ -237,7 +245,7 @@ rtems_rtl_data_init (void)
       vListInsertEnd (&rtl->objects, &rtl->base->link);
     }
 
-    rtems_libio_unlock ();
+    //rtems_libio_unlock ();
 
     rtems_rtl_path_append (".");
 
@@ -407,7 +415,7 @@ rtems_rtl_lock (void)
   if (!rtems_rtl_data_init ())
     return NULL;
 
-  rtems_recursive_mutex_lock (&rtl->lock);
+  xSemaphoreTakeRecursive (rtl->lock, portMAX_DELAY);
 
   return rtl;
 }
@@ -415,7 +423,7 @@ rtems_rtl_lock (void)
 void
 rtems_rtl_unlock (void)
 {
-  rtems_recursive_mutex_unlock (&rtl->lock);
+  xSemaphoreGiveRecursive (rtl->lock);
 }
 
 rtems_rtl_obj*
