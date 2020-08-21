@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 #include <FreeRTOS.h>
 #include "semphr.h"
 #include "task.h"
@@ -11,7 +13,7 @@ void _RTEMS_Lock_allocator( void )
     configASSERT(_RTEMS_Allocator_Mutex != NULL);
   }
 
-  xSemaphoreTakeRecursive( _RTEMS_Allocator_Mutex );
+  xSemaphoreTakeRecursive( _RTEMS_Allocator_Mutex, portMAX_DELAY );
 }
 
 void _RTEMS_Unlock_allocator( void )
