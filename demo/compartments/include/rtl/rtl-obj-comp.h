@@ -49,7 +49,7 @@ typedef struct rtems_rtl_obj_cpmp
                                        *   buffer. */
   int                  fd;          /**< The file descriptor. */
   int                  compression; /**< The type of compression. */
-  off_t                offset;      /**< The base offset of the buffer. */
+  UBaseType_t          offset;      /**< The base offset of the buffer. */
   size_t               size;        /**< The size of the output buffer. */
   size_t               level;       /**< The amount of data in the buffer. */
   uint8_t*             buffer;      /**< The buffer */
@@ -95,7 +95,7 @@ void rtems_rtl_obj_comp_set (rtems_rtl_obj_comp*  comp,
                              rtems_rtl_obj_cache* cache,
                              int                  fd,
                              int                  compression,
-                             off_t                offset);
+                             UBaseType_t          offset);
 
 /**
  * Read decompressed data. The length contains the amount of data that should

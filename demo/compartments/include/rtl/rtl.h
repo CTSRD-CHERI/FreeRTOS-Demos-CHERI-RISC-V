@@ -217,7 +217,7 @@ void rtems_rtl_obj_decompress (rtems_rtl_obj_comp** decomp,
                                rtems_rtl_obj_cache* cache,
                                int                  fd,
                                int                  compression,
-                               off_t                offset);
+                               UBaseType_t          offset);
 
 /**
  * Update the mask in the object files. You can clear flags and then set

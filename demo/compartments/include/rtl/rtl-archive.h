@@ -89,8 +89,8 @@ typedef struct rtems_rtl_archive
   ListItem_t          node;     /**< Chain link. */
   const char*               name;     /**< Archive absolute path. */
   size_t                    size;     /**< Size of the archive. */
-  time_t                    mtime;    /**< Archive's last modified time. */
-  off_t                     enames;   /**< Extended file name offset, lazy load. */
+  UBaseType_t               mtime;    /**< Archive's last modified time. */
+  UBaseType_t               enames;   /**< Extended file name offset, lazy load. */
   rtems_rtl_archive_symbols symbols;  /**< Ranlib symbol table. */
   size_t                    refs;     /**< Loaded object modules. */
   uint32_t                  flags;    /**< Some flags. */
@@ -102,7 +102,7 @@ typedef struct rtems_rtl_archive
 typedef struct rtems_rtl_archives
 {
   const char*         config_name;    /**< Config file name. */
-  time_t              config_mtime;   /**< Config last modified time. */
+  UBaseType_t         config_mtime;   /**< Config last modified time. */
   size_t              config_length;  /**< Length the config data. */
   char*               config;         /**< Config file contents. */
   List_t              archives;       /**< The located archives. */
@@ -185,9 +185,9 @@ rtems_rtl_archive_search rtems_rtl_archive_obj_load (rtems_rtl_archives* archive
 bool rtems_rtl_obj_archive_find_obj (int                     fd,
                                      size_t                  fsize,
                                      const char**            name,
-                                     off_t*                  offset,
+                                     UBaseType_t*            offset,
                                      size_t*                 size,
-                                     off_t*                  extended_names,
+                                     UBaseType_t*            extended_names,
                                      rtems_rtl_archive_error error);
 
 #ifdef __cplusplus

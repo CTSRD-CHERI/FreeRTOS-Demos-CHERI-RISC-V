@@ -83,7 +83,7 @@ rtems_rtl_scan_decimal (const uint8_t* string, size_t len)
 }
 
 static bool
-rtems_rtl_seek_read (int fd, off_t off, size_t len, uint8_t* buffer)
+rtems_rtl_seek_read (int fd, UBaseType_t off, size_t len, uint8_t* buffer)
 {
   if (lseek (fd, off, SEEK_SET) < 0)
     return false;
@@ -236,7 +236,7 @@ typedef struct rtems_rtl_archive_obj_data
   const char*        symbol;   /**< The symbol to search for. */
   rtems_rtl_archive* archive;  /**< The archive the symbol is found
                                 *   in. */
-  off_t              offset;   /**< The offset in the archive if found
+  UBaseType_t        offset;   /**< The offset in the archive if found
                                 *   else 0 */
 } rtems_rtl_archive_obj_data;
 
@@ -609,7 +609,7 @@ rtems_rtl_archive_loader (rtems_rtl_archive* archive, void* data)
   if ((archive->flags & RTEMS_RTL_ARCHIVE_LOAD) != 0)
   {
     int         fd;
-    off_t       offset = 0;
+    UBaseType_t offset = 0;
     size_t      size = 0;
     const char* name = "/";
 
@@ -1038,9 +1038,9 @@ bool
 rtems_rtl_obj_archive_find_obj (int                     fd,
                                 size_t                  fsize,
                                 const char**            name,
-                                off_t*                  ooffset,
+                                UBaseType_t*            ooffset,
                                 size_t*                 osize,
-                                off_t*                  extended_file_names,
+                                UBaseType_t*            extended_file_names,
                                 rtems_rtl_archive_error error)
 {
   uint8_t header[RTEMS_RTL_AR_FHDR_SIZE];
@@ -1152,7 +1152,7 @@ rtems_rtl_obj_archive_find_obj (int                     fd,
      */
     if (header[0] == '/')
     {
-      off_t extended_off;
+      UBaseType_t extended_off;
 
       switch (header[1])
       {
@@ -1193,10 +1193,10 @@ rtems_rtl_obj_archive_find_obj (int                     fd,
 
           if (*extended_file_names == 0)
           {
-            off_t off = RTEMS_RTL_AR_IDENT_SIZE;
+            UBaseType_t off = RTEMS_RTL_AR_IDENT_SIZE;
             while (*extended_file_names == 0)
             {
-              off_t esize;
+              UBaseType_t esize;
 
               if (!rtems_rtl_seek_read (fd, off,
                                         RTEMS_RTL_AR_FHDR_SIZE, &header[0]))

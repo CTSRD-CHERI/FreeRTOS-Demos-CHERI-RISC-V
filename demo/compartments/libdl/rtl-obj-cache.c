@@ -73,7 +73,7 @@ rtems_rtl_obj_cache_flush (rtems_rtl_obj_cache* cache)
 bool
 rtems_rtl_obj_cache_read (rtems_rtl_obj_cache* cache,
                           int                  fd,
-                          off_t                offset,
+                          UBaseType_t          offset,
                           void**               buffer,
                           size_t*              length)
 {
@@ -240,7 +240,7 @@ rtems_rtl_obj_cache_read (rtems_rtl_obj_cache* cache,
 bool
 rtems_rtl_obj_cache_read_byval (rtems_rtl_obj_cache* cache,
                                 int                  fd,
-                                off_t                offset,
+                                UBaseType_t          offset,
                                 void*                buffer,
                                 size_t               length)
 {

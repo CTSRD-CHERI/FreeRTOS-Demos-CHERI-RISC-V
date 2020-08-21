@@ -356,7 +356,7 @@ rtems_rtl_obj_decompress (rtems_rtl_obj_comp** decomp,
                           rtems_rtl_obj_cache* cache,
                           int                  fd,
                           int                  compression,
-                          off_t                offset)
+                          UBaseType_t          offset)
 {
   if (!rtl)
   {
@@ -443,7 +443,7 @@ rtems_rtl_find_obj (const char* name)
   rtems_rtl_obj*    found = NULL;
   const char*       aname = NULL;
   const char*       oname = NULL;
-  off_t             ooffset;
+  UBaseType_t       ooffset;
 
   if (!rtems_rtl_parse_name (name, &aname, &oname, &ooffset))
     return NULL;

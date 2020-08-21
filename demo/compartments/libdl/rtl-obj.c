@@ -186,7 +186,7 @@ bool
 rtems_rtl_parse_name (const char*  name,
                       const char** aname,
                       const char** oname,
-                      off_t*       ooffset)
+                      UBaseType_t* ooffset)
 {
   const char* laname = NULL;
   const char* loname = NULL;
@@ -410,7 +410,7 @@ rtems_rtl_obj_add_section (rtems_rtl_obj* obj,
                            int            section,
                            const char*    name,
                            size_t         size,
-                           off_t          offset,
+                           UBaseType_t    offset,
                            uint32_t       alignment,
                            int            link,
                            int            info,
@@ -1376,7 +1376,7 @@ rtems_rtl_obj_load (rtems_rtl_obj* obj)
    */
   if (rtems_rtl_obj_aname_valid (obj))
   {
-    off_t enames = 0;
+    UBaseType_t enames = 0;
     if (!rtems_rtl_obj_archive_find_obj (fd,
                                          obj->fsize,
                                          &obj->oname,

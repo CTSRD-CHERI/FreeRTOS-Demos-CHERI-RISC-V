@@ -54,7 +54,7 @@ typedef struct rtems_rtl_obj_cache
 {
   int      fd;        /**< The file descriptor of the data in the cache. */
   size_t   file_size; /**< The size of the file. */
-  off_t    offset;    /**< The base offset of the buffer. */
+  UBaseType_t    offset;    /**< The base offset of the buffer. */
   size_t   size;      /**< The size of the cache. */
   size_t   level;     /**< The amount of data in the cache. A file can be
                        * smaller than the cache file. */
@@ -104,7 +104,7 @@ void rtems_rtl_obj_cache_flush (rtems_rtl_obj_cache* cache);
  */
 bool rtems_rtl_obj_cache_read (rtems_rtl_obj_cache* cache,
                                int                  fd,
-                               off_t                offset,
+                               UBaseType_t          offset,
                                void**               buffer,
                                size_t*              length);
 
@@ -121,7 +121,7 @@ bool rtems_rtl_obj_cache_read (rtems_rtl_obj_cache* cache,
  */
 bool rtems_rtl_obj_cache_read_byval (rtems_rtl_obj_cache* cache,
                                      int                  fd,
-                                     off_t                offset,
+                                     UBaseType_t          offset,
                                      void*                buffer,
                                      size_t               length);
 

@@ -129,7 +129,7 @@ struct rtems_rtl_obj_sect
   int              section;     /**< The section number. */
   const char*      name;        /**< The section's name. */
   size_t           size;        /**< The size of the section in memory. */
-  off_t            offset;      /**< Offset into the object file. Relative to
+  UBaseType_t      offset;      /**< Offset into the object file. Relative to
                                  *   the start of the object file. */
   uint32_t         alignment;   /**< Alignment of this section. */
   int              link;        /**< Section link field. */
@@ -190,7 +190,7 @@ struct rtems_rtl_obj
   const char*         aname;        /**< The archive name containing the
                                      *   object. NULL means the object is not
                                      *   in a lib */
-  off_t               ooffset;      /**< The object offset in the archive. */
+  UBaseType_t         ooffset;      /**< The object offset in the archive. */
   size_t              fsize;        /**< Size of the object file. */
   List_t              sections;     /**< The sections of interest in the object
                                      *   file. */
@@ -456,7 +456,7 @@ bool rtems_rtl_obj_unresolved (rtems_rtl_obj* obj);
 bool rtems_rtl_parse_name (const char*  name,
                            const char** aname,
                            const char** oname,
-                           off_t*       ooffset);
+                           UBaseType_t* ooffset);
 
 /**
  * Find an object file on disk that matches the name. The object descriptor is
@@ -489,7 +489,7 @@ bool rtems_rtl_obj_add_section (rtems_rtl_obj* obj,
                                 int            section,
                                 const char*    name,
                                 size_t         size,
-                                off_t          offset,
+                                UBaseType_t    offset,
                                 uint32_t       alignment,
                                 int            link,
                                 int            info,

@@ -68,7 +68,7 @@ rtems_rtl_obj_comp_set (rtems_rtl_obj_comp*  comp,
                         rtems_rtl_obj_cache* cache,
                         int                  fd,
                         int                  compression,
-                        off_t                offset)
+                        UBaseType_t          offset)
 {
   comp->cache = cache;
   comp->fd = fd;

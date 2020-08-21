@@ -462,7 +462,7 @@ rtems_rtl_elf_relocate_worker (rtems_rtl_obj*              obj,
     rtems_rtl_obj_sym* symbol = NULL;
     Elf_Sym            sym;
     const char*        symname = NULL;
-    off_t              off;
+    UBaseType_t        off;
     Elf_Word           rel_type;
     Elf_Word           symvalue = 0;
     bool               resolved;
@@ -666,7 +666,7 @@ rtems_rtl_elf_common (rtems_rtl_obj*      obj,
   for (sym = 0; sym < (sect->size / sizeof (Elf_Sym)); ++sym)
   {
     Elf_Sym symbol;
-    off_t   off;
+    UBaseType_t off;
 
     off = obj->ooffset + sect->offset + (sym * sizeof (symbol));
 
@@ -875,7 +875,7 @@ rtems_rtl_elf_symbols_load (rtems_rtl_obj*      obj,
   for (sym = 0; sym < (sect->size / sizeof (Elf_Sym)); ++sym)
   {
     Elf_Sym     symbol;
-    off_t       off;
+    UBaseType_t off;
     const char* name;
     size_t      len;
 
@@ -1022,7 +1022,7 @@ rtems_rtl_elf_symbols_load (rtems_rtl_obj*      obj,
   for (sym = 0; sym < (sect->size / sizeof (Elf_Sym)); ++sym)
   {
     Elf_Sym symbol;
-    off_t   off;
+    UBaseType_t off;
     size_t  len;
 
     off = obj->ooffset + sect->offset + (sym * sizeof (symbol));
@@ -1282,8 +1282,8 @@ rtems_rtl_elf_parse_sections (rtems_rtl_obj* obj, int fd, Elf_Ehdr* ehdr)
   rtems_rtl_obj_cache* sects;
   rtems_rtl_obj_cache* strings;
   int                  section;
-  off_t                sectstroff;
-  off_t                off;
+  UBaseType_t          sectstroff;
+  UBaseType_t          off;
   Elf_Shdr             shdr;
 
   rtems_rtl_obj_caches (&sects, &strings, NULL);
