@@ -54,7 +54,7 @@ rtems_rtl_trace_clear_mask (rtems_rtl_trace_mask mask)
 }
 
 int
-rtems_rtl_trace_shell_command (const rtems_printer* printer,
+rtems_rtl_trace_shell_command (const void*          printer,
                                int                  argc,
                                char*                argv[])
 {
