@@ -211,13 +211,9 @@ class Compartmentalize:
 
   def llvm_create_obj_from_sources(self, output_obj, srcs):
       logging.debug("CFLAG= %s\n", self.CFLAGS)
-      output = subprocess.call(["clang" + "-o " + output_obj + ".o" + " -c -combine " + " ".join(srcs) + " -target " + "riscv64-unknown-elf " +  self.CFLAGS],
-                    stdin =subprocess.PIPE,
-                    #stdout=subprocess.PIPE,
-                    #stderr=subprocess.PIPE,
-                    shell=True,
-                    #universal_newlines=True,
-                    bufsize=0)
+
+      for src in srcs:
+        self.llvm_compile_file(src)
 
       objs = [source.replace(".c", ".o") for source in srcs]
       objs = [obj.split("/")[-1] for obj in objs]
