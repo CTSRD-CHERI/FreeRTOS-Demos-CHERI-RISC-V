@@ -104,7 +104,7 @@ rtems_rtl_obj_free (rtems_rtl_obj* obj)
   rtems_rtl_obj_erase_trampoline (obj);
   rtems_rtl_obj_free_names (obj);
   if (obj->sec_num != NULL)
-    free (obj->sec_num);
+    vPortFree (obj->sec_num);
   if (obj->linkmap != NULL)
     rtems_rtl_alloc_del (RTEMS_RTL_ALLOC_OBJECT, (void*) obj->linkmap);
   rtems_rtl_alloc_del (RTEMS_RTL_ALLOC_OBJECT, obj);

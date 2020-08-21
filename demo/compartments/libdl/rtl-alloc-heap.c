@@ -33,7 +33,7 @@ rtems_rtl_alloc_heap (rtems_rtl_alloc_cmd cmd,
       *address = pvPortMalloc (size);
       break;
     case RTEMS_RTL_ALLOC_DEL:
-      free (*address);
+      vPortFree (*address);
       *address = NULL;
       break;
     case RTEMS_RTL_ALLOC_LOCK:

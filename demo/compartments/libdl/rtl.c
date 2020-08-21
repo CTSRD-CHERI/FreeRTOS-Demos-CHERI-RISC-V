@@ -139,7 +139,7 @@ rtems_rtl_data_init (void)
       {
         xSemaphoreGiveRecursive (rtl->lock);
         vSemaphoreDelete (rtl->lock);
-        free (rtl);
+        vPortFree (rtl);
         //rtems_libio_unlock ();
         return false;
       }
@@ -157,7 +157,7 @@ rtems_rtl_data_init (void)
       {
         xSemaphoreGiveRecursive (rtl->lock);
         vSemaphoreDelete (rtl->lock);
-        free (rtl);
+        vPortFree (rtl);
         //rtems_libio_unlock ();
         return false;
       }
@@ -169,7 +169,7 @@ rtems_rtl_data_init (void)
         rtems_rtl_unresolved_table_close (&rtl->unresolved);
         xSemaphoreGiveRecursive (rtl->lock);
         vSemaphoreDelete (rtl->lock);
-        free (rtl);
+        vPortFree (rtl);
         //rtems_libio_unlock ();
         return false;
       }
@@ -182,7 +182,7 @@ rtems_rtl_data_init (void)
         rtems_rtl_symbol_table_close (&rtl->globals);
         xSemaphoreGiveRecursive (rtl->lock);
         vSemaphoreDelete (rtl->lock);
-        free (rtl);
+        vPortFree (rtl);
         //rtems_libio_unlock ();
         return false;
       }
@@ -196,7 +196,7 @@ rtems_rtl_data_init (void)
         rtems_rtl_symbol_table_close (&rtl->globals);
         xSemaphoreGiveRecursive (rtl->lock);
         vSemaphoreDelete (rtl->lock);
-        free (rtl);
+        vPortFree (rtl);
         //rtems_libio_unlock ();
         return false;
       }
@@ -211,7 +211,7 @@ rtems_rtl_data_init (void)
         rtems_rtl_symbol_table_close (&rtl->globals);
         xSemaphoreGiveRecursive (rtl->lock);
         vSemaphoreDelete (rtl->lock);
-        free (rtl);
+        vPortFree (rtl);
         //rtems_libio_unlock ();
         return false;
       }
@@ -227,7 +227,7 @@ rtems_rtl_data_init (void)
         rtems_rtl_symbol_table_close (&rtl->globals);
         xSemaphoreGiveRecursive (rtl->lock);
         vSemaphoreDelete (rtl->lock);
-        free (rtl);
+        vPortFree (rtl);
         //rtems_libio_unlock ();
         return false;
       }
