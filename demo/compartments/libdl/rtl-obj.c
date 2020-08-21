@@ -845,8 +845,8 @@ rtems_rtl_obj_sect_sync_handler (ListItem_t* node, void* data)
     if ((sect->base <  sync_ctx->start_va) ||
         (new_start - old_end > sync_ctx->cache_line_size))
     {
-      rtems_cache_instruction_sync_after_code_change(sync_ctx->start_va,
-                             sync_ctx->end_va - sync_ctx->start_va + 1);
+      //rtems_cache_instruction_sync_after_code_change(sync_ctx->start_va,
+      //                       sync_ctx->end_va - sync_ctx->start_va + 1);
       sync_ctx->start_va = sect->base;
     }
   }
@@ -861,10 +861,11 @@ rtems_rtl_obj_synchronize_cache (rtems_rtl_obj* obj)
 {
   rtems_rtl_obj_sect_sync_ctx sync_ctx;
 
-  if (rtems_cache_get_instruction_line_size() == 0)
-    return;
+  //if (rtems_cache_get_instruction_line_size() == 0)
+  //  return;
 
-  sync_ctx.cache_line_size = rtems_cache_get_maximal_line_size();
+  //sync_ctx.cache_line_size = rtems_cache_get_maximal_line_size();
+  sync_ctx.cache_line_size = 64;
 
   sync_ctx.mask = RTEMS_RTL_OBJ_SECT_TEXT | RTEMS_RTL_OBJ_SECT_CONST |
                   RTEMS_RTL_OBJ_SECT_DATA | RTEMS_RTL_OBJ_SECT_BSS |
@@ -879,14 +880,14 @@ rtems_rtl_obj_synchronize_cache (rtems_rtl_obj* obj)
   if (sync_ctx.end_va != sync_ctx.start_va)
   {
     size_t size = sync_ctx.end_va - sync_ctx.start_va;
-    rtems_cache_instruction_sync_after_code_change(sync_ctx.start_va,
-                                                   size);
+    //rtems_cache_instruction_sync_after_code_change(sync_ctx.start_va,
+    //                                               size);
   }
 
   if (obj->trampoline != NULL)
   {
-    rtems_cache_instruction_sync_after_code_change(obj->trampoline,
-                                                   obj->tramps_size);
+    //rtems_cache_instruction_sync_after_code_change(obj->trampoline,
+    //                                               obj->tramps_size);
   }
 }
 
