@@ -30,7 +30,7 @@ rtems_rtl_alloc_heap (rtems_rtl_alloc_cmd cmd,
   switch (cmd)
   {
     case RTEMS_RTL_ALLOC_NEW:
-      *address = malloc (size);
+      *address = pvPortMalloc (size);
       break;
     case RTEMS_RTL_ALLOC_DEL:
       free (*address);

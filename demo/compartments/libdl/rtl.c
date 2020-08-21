@@ -104,7 +104,7 @@ rtems_rtl_data_init (void)
       /*
        * Always in the heap.
        */
-      rtl = malloc (sizeof (rtems_rtl_data));
+      rtl = pvPortMalloc (sizeof (rtems_rtl_data));
       if (!rtl)
       {
         //rtems_libio_unlock ();
