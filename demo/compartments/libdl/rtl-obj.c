@@ -393,12 +393,12 @@ rtems_rtl_obj_find_file (rtems_rtl_obj* obj, const char* name)
 
   rtl = rtems_rtl_lock ();
 
-  if (!rtems_rtl_find_file (pname, rtl->paths, &obj->fname, &obj->fsize))
+  /*if (!rtems_rtl_find_file (pname, rtl->paths, &obj->fname, &obj->fsize))
   {
     rtems_rtl_set_error (ENOENT, "file not found");
     rtems_rtl_unlock ();
     return false;
-  }
+  }*/
 
   rtems_rtl_unlock ();
 
@@ -1377,7 +1377,7 @@ rtems_rtl_obj_load (rtems_rtl_obj* obj)
   if (rtems_rtl_obj_aname_valid (obj))
   {
     UBaseType_t enames = 0;
-    if (!rtems_rtl_obj_archive_find_obj (fd,
+    /* if (!rtems_rtl_obj_archive_find_obj (fd,
                                          obj->fsize,
                                          &obj->oname,
                                          &obj->ooffset,
@@ -1387,7 +1387,7 @@ rtems_rtl_obj_load (rtems_rtl_obj* obj)
     {
       close (fd);
       return false;
-    }
+    }*/
   }
 
   /*

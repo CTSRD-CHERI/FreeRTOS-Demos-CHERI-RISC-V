@@ -350,8 +350,8 @@ rtems_rtl_unresolved_archive_iterator (rtems_rtl_unresolv_rec* rec,
         printf ("rtl: unresolv: archive lookup: %d: %s\n",
                 ard->name, rec->rec.name.name);
 
-      result = rtems_rtl_archive_obj_load (ard->archives,
-                                           rec->rec.name.name, true);
+      //result = rtems_rtl_archive_obj_load (ard->archives,
+      //                                     rec->rec.name.name, true);
       if (result != rtems_rtl_archive_search_not_found)
       {
         rec->rec.name.flags &= ~RTEMS_RTL_UNRESOLV_SYM_SEARCH_ARCHIVE;

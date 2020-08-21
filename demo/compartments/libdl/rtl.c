@@ -134,16 +134,17 @@ rtems_rtl_data_init (void)
       if (!rtems_rtl_symbol_table_open (&rtl->globals,
                                         RTEMS_RTL_SYMS_GLOBAL_BUCKETS))
       {
-        rtems_recursive_mutex_destroy (&rtl->lock);
+        xSemaphoreGiveRecursive (rtl->lock);
+        vSemaphoreDelete (rtl->lock);
         free (rtl);
-        rtems_libio_unlock ();
+        //rtems_libio_unlock ();
         return false;
       }
 
       /*
        * Open the archives.
        */
-      rtems_rtl_archives_open (&rtl->archives, "/etc/libdl.conf");
+      //rtems_rtl_archives_open (&rtl->archives, "/etc/libdl.conf");
 
       /*
        * Open the unresolved table.
@@ -572,7 +573,7 @@ rtems_rtl_load (const char* name, int mode)
   /*
    * Refesh the archives.
    */
-  rtems_rtl_archives_refresh (&rtl->archives);
+  //rtems_rtl_archives_refresh (&rtl->archives);
 
   /*
    * Collect the loaded object files.
