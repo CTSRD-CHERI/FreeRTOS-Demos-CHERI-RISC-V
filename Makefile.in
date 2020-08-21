@@ -108,6 +108,26 @@ APP_SRC = \
 	bsp/plic_driver.c \
 	bsp/syscalls.c \
 
+LIBDL_SRC = demo/compartments/libdl/dlfcn.c \
+            demo/compartments/libdl/fastlz.c \
+            demo/compartments/libdl/rtl-alloc-heap.c \
+            demo/compartments/libdl/rtl-allocator.c \
+            demo/compartments/libdl/rtl-alloc-lock.c \
+            demo/compartments/libdl/rtl-bit-alloc.c \
+            demo/compartments/libdl/rtl-chain-iterator.c \
+            demo/compartments/libdl/rtl-elf.c \
+            demo/compartments/libdl/rtl-error.c \
+            demo/compartments/libdl/rtl-mdreloc-riscv.c \
+            demo/compartments/libdl/rtl-obj-cache.c \
+            demo/compartments/libdl/rtl-obj-comp.c \
+            demo/compartments/libdl/rtl-obj.c \
+            demo/compartments/libdl/rtl-string.c \
+            demo/compartments/libdl/rtl-sym.c \
+            demo/compartments/libdl/rtl-trace.c \
+            demo/compartments/libdl/rtl-unresolved.c \
+            demo/compartments/libdl/rtl-unwind-dw2.c \
+            demo/compartments/libdl/rtl.c
+
 ifeq ($(PROG),main_blinky)
 	CFLAGS += -DmainDEMO_TYPE=1
 else
@@ -118,7 +138,9 @@ ifeq ($(PROG),main_compartment_test)
 	CFLAGS += -DmainDEMO_TYPE=4
 DEMO_SRC += demo/compartments/loader.c
 DEMO_SRC += comp_strtab_generated.c
+DEMO_SRC += $(LIBDL_SRC)
 	CFLAGS += -I./demo/compartments/include
+
 else
 	$(info unknown demo: $(PROG))
 endif
