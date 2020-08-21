@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 #include <rtl/rtl.h>
 #include <rtl/rtl-allocator.h>
