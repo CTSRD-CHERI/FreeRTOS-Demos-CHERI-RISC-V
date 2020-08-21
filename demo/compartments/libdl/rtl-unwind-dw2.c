@@ -52,7 +52,7 @@ rtems_rtl_elf_unwind_dw2_register (const rtems_rtl_obj* obj)
 
   if (sect != NULL && sect->size > 0 && sect->base != NULL)
   {
-    __register_frame (sect->base);
+    //__register_frame (sect->base);
   }
 
   return true;
@@ -64,7 +64,7 @@ bool rtems_rtl_elf_unwind_dw2_deregister (const rtems_rtl_obj* obj)
 
   if (sect != NULL && sect->size > 0 && sect->base != NULL)
   {
-    __deregister_frame (sect->base);
+    //__deregister_frame (sect->base);
   }
 
   return true;
