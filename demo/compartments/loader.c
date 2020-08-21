@@ -38,8 +38,8 @@
 #include "task.h"
 #include "queue.h"
 
-
 #include <sys/exec_elf.h>
+#include <rtl/rtl-trace.h>
 
 #include <inttypes.h>
 #if __riscv_xlen == 32
