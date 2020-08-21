@@ -20,6 +20,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include <stdbool.h>
+
 #include <FreeRTOS.h>
 #include "list.h"
 

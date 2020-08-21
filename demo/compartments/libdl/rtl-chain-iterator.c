@@ -19,6 +19,8 @@
 #include "config.h"
 #endif
 
+#include <stdbool.h>
+
 #include "rtl-chain-iterator.h"
 
 bool
@@ -49,7 +51,7 @@ rtems_rtl_count_iterator (ListItem_t* node, void* data)
 }
 
 int
-rtems_rtl_chain_count (rtems_chain_control* chain)
+rtems_rtl_chain_count (List_t* chain)
 {
   int count = 0;
   rtems_rtl_chain_iterate (chain, rtems_rtl_count_iterator, &count);
