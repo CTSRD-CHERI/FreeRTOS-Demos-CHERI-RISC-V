@@ -38,6 +38,14 @@ int _write(int file, char *ptr, int len) {
 #endif
 }
 
+int _open (const char *name,
+       int         flags,
+       int         mode)
+{
+  errno = ENOSYS;
+  return -1;
+}
+
 int _close(int fd) {
   (void)fd;
   errno = EBADF;
