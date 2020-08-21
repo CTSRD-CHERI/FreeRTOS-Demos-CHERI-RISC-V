@@ -86,7 +86,7 @@ typedef struct rtems_rtl_archive_symbols
  */
 typedef struct rtems_rtl_archive
 {
-  rtems_chain_node          node;     /**< Chain link. */
+  ListItem_t          node;     /**< Chain link. */
   const char*               name;     /**< Archive absolute path. */
   size_t                    size;     /**< Size of the archive. */
   time_t                    mtime;    /**< Archive's last modified time. */
