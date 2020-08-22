@@ -126,6 +126,7 @@ LIBDL_SRC = demo/compartments/libdl/dlfcn.c \
             demo/compartments/libdl/rtl-trace.c \
             demo/compartments/libdl/rtl-unresolved.c \
             demo/compartments/libdl/rtl-unwind-dw2.c \
+            demo/compartments/libdl/rtl-freertos-compartments.c \
             demo/compartments/libdl/rtl.c
 
 ifeq ($(PROG),main_blinky)
