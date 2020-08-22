@@ -119,6 +119,7 @@ size_t headers_size =  (ptraddr_t) _headers_end - 0x080000000;
              phdr[i].p_memsz);
 
       comp_list[comp_id].cap = cap;
+      comp_list[comp_id].size =  phdr[i].p_memsz;
       comp_list[comp_id].name = comp_strtab[comp_id];
     }
   }
