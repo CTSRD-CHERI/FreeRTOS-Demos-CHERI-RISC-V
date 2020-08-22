@@ -72,6 +72,7 @@ extern void *pvAlmightyCodeCap;
                       RTEMS_RTL_TRACE_ALLOCATOR | \
                       RTEMS_RTL_TRACE_UNRESOLVED | \
                       RTEMS_RTL_TRACE_ARCHIVES | \
+                      RTEMS_RTL_TRACE_CACHE | \
                       RTEMS_RTL_TRACE_DEPENDENCY)
  #define DL_DEBUG_TRACE DEBUG_TRACE /* RTEMS_RTL_TRACE_ALL */
  #define DL_RTL_CMDS    1
