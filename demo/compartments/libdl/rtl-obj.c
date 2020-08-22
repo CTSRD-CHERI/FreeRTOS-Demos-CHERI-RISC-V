@@ -32,6 +32,9 @@
 #include <rtl/rtl-trace.h>
 #include <rtl/rtl-freertos-compartments.h>
 
+#include <FreeRTOS.h>
+#include "list.h"
+
 #define RTEMS_RTL_ELF_LOADER 1
 
 #if RTEMS_RTL_ELF_LOADER
@@ -446,6 +449,7 @@ rtems_rtl_obj_add_section (rtems_rtl_obj* obj,
     sect->info = info;
     sect->flags = flags;
     sect->base = NULL;
+    vListInitialiseItem (&sect->node);
     vListInsertEnd (&obj->sections, &sect->node);
 
     if (rtems_rtl_trace (RTEMS_RTL_TRACE_SECTION))
