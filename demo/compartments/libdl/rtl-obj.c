@@ -400,6 +400,10 @@ rtems_rtl_obj_find_file (rtems_rtl_obj* obj, const char* name)
 
   rtl = rtems_rtl_lock ();
 
+#if __freertos__
+  obj->fname = name;
+#endif
+
   /*if (!rtems_rtl_find_file (pname, rtl->paths, &obj->fname, &obj->fsize))
   {
     rtems_rtl_set_error (ENOENT, "file not found");
