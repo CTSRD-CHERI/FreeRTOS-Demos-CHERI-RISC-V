@@ -40,6 +40,7 @@
 
 #include <sys/exec_elf.h>
 #include <rtl/rtl-trace.h>
+#include <rtl/rtl-freertos-compartments.h>
 
 #include <inttypes.h>
 #if __riscv_xlen == 32
@@ -80,18 +81,6 @@ extern void *pvAlmightyCodeCap;
  #define DL_DEBUG_TRACE 0
  #define DL_RTL_CMDS    0
 #endif
-
-extern char comp_strtab[configCOMPARTMENTS_NUM][configMAXLEN_COMPNAME];
-
-typedef struct compartment {
-  void        *cap;
-  uintcap_t   *cap_list;
-  char        *name;
-  // TCB?
-  // Symtab?
-} compartment_t;
-
-compartment_t comp_list[configCOMPARTMENTS_NUM];
 
 void vCompartmentsLoad(void);
 
