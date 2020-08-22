@@ -140,6 +140,7 @@ class Compartmentalize:
           #new_output += "COMPARTMENTS_NUM = " + str(self.num_comps) + "\n"
           new_output += "\nCFLAGS = -DconfigCOMPARTMENTS_NUM=" + str(self.num_comps) + "\n"
           new_output += "\nCFLAGS += -DconfigMAXLEN_COMPNAME=" + str(self.max_comp_namelen) + "\n"
+          new_output += "\nCFLAGS += -D__freertos__=1\n"
         else:
           new_output += line
 
@@ -174,6 +175,7 @@ class Compartmentalize:
           #new_output += "COMPARTMENTS_NUM = " + str(self.num_comps) + "\n"
           new_output += "\nCFLAGS = -DconfigCOMPARTMENTS_NUM=" + str(self.num_comps) + "\n"
           new_output += "\nCFLAGS += -DconfigMAXLEN_COMPNAME=" + str(self.max_comp_namelen) + "\n"
+          new_output += "\nCFLAGS += -D__freertos__=1\n"
         else:
           new_output += line
 
