@@ -43,6 +43,10 @@ ssize_t rtl_freertos_compartment_read(int fd, void *buffer, UBaseType_t offset, 
     return -1;
   }
 
+  if (offset + count > comp_list[fd].size) {
+    count = (offset + count) - comp_list[fd].size;
+  }
+
   if (memcpy(buffer, comp_list[fd].cap + offset, count)) {
     return count;
   }
