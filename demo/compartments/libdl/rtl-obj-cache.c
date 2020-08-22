@@ -227,8 +227,11 @@ rtems_rtl_obj_cache_read (rtems_rtl_obj_cache* cache,
     cache->offset = offset;
 
 #ifdef __freertos__
-    cache->fd = fd;
-    cache->file_size = rtl_freertos_compartment_getsize(fd);
+    if (cache->fd != fd)
+    {
+      cache->fd = fd;
+      cache->file_size = rtl_freertos_compartment_getsize(fd);
+    }
 #endif
 
 #ifdef __rtems__
