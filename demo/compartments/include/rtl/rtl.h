@@ -297,6 +297,9 @@ rtems_rtl_obj* rtems_rtl_find_obj_with_symbol (const rtems_rtl_obj_sym* sym);
  *  4. Relative archive and file in the search path. The encoding is the same
  *     as described in item 3 of this list.
  *
+ *  5. Custom object file name already loaded and embedded as a section in the
+ *     in ELF image part of the compartmentalize framework.
+ *
  * Assumes the RTL has been locked.
  *
  * @param name The name of the object file.
