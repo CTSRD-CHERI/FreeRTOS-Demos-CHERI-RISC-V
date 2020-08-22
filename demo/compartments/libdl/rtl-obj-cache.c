@@ -182,11 +182,13 @@ rtems_rtl_obj_cache_read (rtems_rtl_obj_cache* cache,
               offset, offset + buffer_read,
               (cache->file_size - offset));
 
+#ifdef __rtems__
     if (lseek (fd, offset + buffer_offset, SEEK_SET) < 0)
     {
       rtems_rtl_set_error (errno, "file seek failed");
       return false;
     }
+#endif
 
     /*
      * Loop reading the data from the file until either an error or 0 is
@@ -198,7 +200,11 @@ rtems_rtl_obj_cache_read (rtems_rtl_obj_cache* cache,
 
     while (buffer_read)
     {
+#ifdef __freertos__
+      int r = rtl_freertos_compartment_read(fd, cache->buffer + buffer_offset, buffer_offset, buffer_read);
+#else
       int r = read (fd, cache->buffer + buffer_offset, buffer_read);
+#endif
       if (r < 0)
       {
         rtems_rtl_set_error (errno, "file read failed");
@@ -220,6 +226,12 @@ rtems_rtl_obj_cache_read (rtems_rtl_obj_cache* cache,
 
     cache->offset = offset;
 
+#ifdef __freertos__
+    cache->fd = fd;
+    cache->file_size = rtl_freertos_compartment_getsize(fd);
+#endif
+
+#ifdef __rtems__
     if (cache->fd != fd)
     {
       cache->fd = fd;
@@ -232,6 +244,8 @@ rtems_rtl_obj_cache_read (rtems_rtl_obj_cache* cache,
 
       cache->file_size = sb.st_size;
     }
+#endif
+
   }
 
   return false;

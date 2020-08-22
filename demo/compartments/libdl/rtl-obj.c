@@ -30,6 +30,7 @@
 #include "rtl-find-file.h"
 #include "rtl-string.h"
 #include <rtl/rtl-trace.h>
+#include <rtl/rtl-freertos-compartments.h>
 
 #define RTEMS_RTL_ELF_LOADER 1
 
@@ -1364,6 +1365,20 @@ rtems_rtl_obj_load (rtems_rtl_obj* obj)
     return false;
   }
 
+#if __freertos__
+  fd = rtl_freertos_compartment_open(obj->fname);
+  if (fd < 0)
+  {
+    rtems_rtl_set_error (errno, "opening for object file");
+    return false;
+  }
+
+  if (!rtems_rtl_obj_file_load (obj, fd))
+  {
+    rtems_rtl_set_error (errno, "couldn't find object compartment");
+    return false;
+  }
+#else
   fd = open (rtems_rtl_obj_fname (obj), O_RDONLY);
   if (fd < 0)
   {
@@ -1399,6 +1414,9 @@ rtems_rtl_obj_load (rtems_rtl_obj* obj)
     close (fd);
     return false;
   }
+
+  close (fd);
+#endif
 
    /*
     * For GDB
