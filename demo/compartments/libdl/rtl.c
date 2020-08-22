@@ -235,7 +235,7 @@ rtems_rtl_data_init (void)
       /*
        * Need to malloc the memory so the free does not complain.
        */
-      rtl->base->oname = rtems_rtl_strdup ("rtems-kernel");
+      rtl->base->oname = rtems_rtl_strdup ("freertos-kernel");
 
       /*
        * Lock the base image and flag it as the base image.
