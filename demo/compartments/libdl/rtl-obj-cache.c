@@ -201,7 +201,7 @@ rtems_rtl_obj_cache_read (rtems_rtl_obj_cache* cache,
     while (buffer_read)
     {
 #ifdef __freertos__
-      int r = rtl_freertos_compartment_read(fd, cache->buffer + buffer_offset, buffer_offset, buffer_read);
+      int r = rtl_freertos_compartment_read(fd, cache->buffer + buffer_offset, offset, buffer_read);
 #else
       int r = read (fd, cache->buffer + buffer_offset, buffer_read);
 #endif
