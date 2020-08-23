@@ -90,27 +90,36 @@ static UBaseType_t default_exception_handler(uintptr_t *exception_frame);
 static void vSymEntryPrint( Elf_Sym *entry );
 static void elf_manip( void );
 
+#ifdef __CHERI_PURE_CAPABILITY__
 static void *cheri_create_cap(ptraddr_t base, size_t size) {
     void *return_cap;
     return_cap = cheri_setoffset( pvAlmightyCodeCap, base );
     return_cap = cheri_csetbounds( return_cap, size );
     return return_cap;
 }
+#endif
+
+extern char _headers_end[];
+char *size_headers = &_headers_end;
 
 static void vCompartmentsElfPrint( void )
 {
 Elf64_Phdr *phdr = (void *) 0x80000040;
-extern char _headers_end[];
-size_t headers_size =  (ptraddr_t) _headers_end - 0x080000000;
-    phdr = cheri_setoffset( pvAlmightyDataCap, ( ptraddr_t ) phdr );
-    phdr = cheri_csetbounds( ( void * ) phdr, (size_t) _headers_end );
+#ifdef __CHERI_PURE_CAPABILITY__
+    phdr = cheri_create_cap( (ptraddr_t) phdr, (size_t) _headers_end);
+#endif
 
-  for(int i = 0; i < (size_t) (_headers_end) / sizeof(Elf64_Phdr); i++) {
+  //for(int i = 0; i < (size_t) (_headers_end) / sizeof(Elf64_Phdr); i++) {
+  for(int i = 0; i < (size_t) (size_headers) / sizeof(Elf64_Phdr); i++) {
     if((phdr[i].p_flags & CHERI_ELF_PT_TYPE_MASK) == CHERI_ELF_PT_COMPARTMENT) {
 
       UBaseType_t comp_id = (phdr[i].p_flags & CHERI_ELF_PT_ID_MASK);
       printf("comp id = %u\n", comp_id);
+#ifdef __CHERI_PURE_CAPABILITY__
       void *cap = cheri_create_cap((ptraddr_t) phdr[i].p_paddr, phdr[i].p_memsz);
+#else
+      void *cap = (void *) phdr[i].p_paddr;
+#endif
 
       printf("- Compartment #%u with name: %s starting at 0x%lx of size %u\n",
              (phdr[i].p_flags & CHERI_ELF_PT_ID_MASK),

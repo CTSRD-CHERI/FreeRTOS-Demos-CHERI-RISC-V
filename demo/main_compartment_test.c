@@ -247,8 +247,15 @@ static void vTaskCompartment(void *pvParameters) {
 }
 /*-----------------------------------------------------------*/
 
-
+#ifdef __CHERI_PURE_CAPABILITY__
 static void cheri_print_cap(void *cap) {
+  size_t cause = 0;
+  size_t epc = 0;
+  asm volatile ("csrr %0, mcause" : "=r"(cause)::);
+  asm volatile ("csrr %0, mepc" : "=r"(epc)::);
+  printf("mcause = %u\n", cause);
+  printf("mepc = 0x%lx\n", epc);
+
   printf("cap: [v: %" PRIu8 " | f: %" PRIu8 " | sealed: %" PRIu8 " | addr: "
   PRINT_REG \
   " | base: " PRINT_REG " | length: " PRINT_REG " | offset: " PRINT_REG \
@@ -263,10 +270,13 @@ static void cheri_print_cap(void *cap) {
   __builtin_cheri_perms_get(cap)
   );
 }
+#endif
 
 static UBaseType_t cheri_exception_handler(uintptr_t *exception_frame)
 {
+#ifdef __CHERI_PURE_CAPABILITY__
   cheri_print_cap(*(++exception_frame));
+#endif
   while(1);
 }
 
