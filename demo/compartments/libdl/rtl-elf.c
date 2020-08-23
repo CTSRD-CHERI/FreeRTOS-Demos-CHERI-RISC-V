@@ -1252,18 +1252,25 @@ rtems_rtl_elf_loader (rtems_rtl_obj*      obj,
   uint8_t* base_offset;
   size_t   len;
 
+#if __rtems__
   if (lseek (fd, obj->ooffset + sect->offset, SEEK_SET) < 0)
   {
     rtems_rtl_set_error (errno, "section load seek failed");
     return false;
   }
+#endif
 
   base_offset = sect->base;
   len = sect->size;
 
   while (len)
   {
+#if __freertos__
+    ssize_t r = rtl_freertos_compartment_read(fd, base_offset, obj->ooffset + sect->offset, len);
+#else
     ssize_t r = read (fd, base_offset, len);
+#endif
+
     if (r <= 0)
     {
       rtems_rtl_set_error (errno, "section load read failed");
