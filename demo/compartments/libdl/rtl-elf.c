@@ -1148,7 +1148,6 @@ rtems_rtl_elf_symbols_load (rtems_rtl_obj*      obj,
           value = symbol.st_value;
         }
 
-        uxListRemove (&osym->node);
         memcpy (string, name, strlen (name) + 1);
         osym->name = string;
         osym->value = (uint8_t*) value;
