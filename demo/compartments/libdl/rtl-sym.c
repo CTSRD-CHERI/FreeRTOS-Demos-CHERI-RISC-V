@@ -48,7 +48,7 @@ rtems_rtl_symbol_hash (const char *s)
   return h & 0xffffffff;
 }
 
-static void
+void
 rtems_rtl_symbol_global_insert (rtems_rtl_symbols* symbols,
                                 rtems_rtl_obj_sym* symbol)
 {
