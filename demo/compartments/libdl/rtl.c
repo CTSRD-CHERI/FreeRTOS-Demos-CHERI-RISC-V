@@ -27,6 +27,7 @@
 #include <rtl/rtl.h>
 #include <rtl/rtl-allocator.h>
 #include <rtl/rtl-trace.h>
+#include <rtl/rtl-freertos-compartments.h>
 #include "rtl-chain-iterator.h"
 #include "rtl-error.h"
 #include "rtl-string.h"
@@ -68,9 +69,7 @@ void rtems_rtl_base_global_syms_init (void) __attribute__ ((weak));
 void
 rtems_rtl_base_global_syms_init (void)
 {
-  /*
-   * Do nothing.
-   */
+  rtl_freertos_global_symbols_add(rtl->base);
 }
 
 static bool
