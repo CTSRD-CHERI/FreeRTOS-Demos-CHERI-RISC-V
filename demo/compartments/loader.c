@@ -69,6 +69,7 @@ extern void *pvAlmightyCodeCap;
                       RTEMS_RTL_TRACE_LOAD | \
                       RTEMS_RTL_TRACE_UNLOAD | \
                       RTEMS_RTL_TRACE_SYMBOL | \
+                      RTEMS_RTL_TRACE_GLOBAL_SYM | \
                       RTEMS_RTL_TRACE_RELOC | \
                       RTEMS_RTL_TRACE_ALLOCATOR | \
                       RTEMS_RTL_TRACE_UNRESOLVED | \
@@ -135,8 +136,11 @@ Elf64_Phdr *phdr = (void *) 0x80000040;
   }
 }
 
+typedef int (*call_t)(void);
+
 void vCompartmentsLoad(void) {
   void *obj_handle;
+  call_t call;
 
   printf("Starting Compartments Loading\n");
 
@@ -154,5 +158,7 @@ void vCompartmentsLoad(void) {
     printf("dlopen failed: %s\n", dlerror());
   }
 
+  call = dlsym (obj_handle, "vComp1");
+  call();
 }
 /*-----------------------------------------------------------*/
