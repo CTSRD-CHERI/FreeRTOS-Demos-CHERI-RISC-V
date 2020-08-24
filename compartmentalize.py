@@ -100,8 +100,7 @@ class Compartmentalize:
   def linkcmd_add_comp_sections(self, compartments):
     section_string = ""
     for compartment in compartments:
-      section_string += '.' + compartment + ' : {\n' \
-                       "\t. = ALIGN(16);\n" \
+      section_string += '.' + compartment + ' : ALIGN(16) {\n' \
                        "\t" + compartment + "*\n" \
                        "\t} > dmem :" + compartment + "\n"
       #section_string += '.' + compartment+".symtab" + ' : {\n' \
