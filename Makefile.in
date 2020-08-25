@@ -140,6 +140,11 @@ ifeq ($(PROG),main_compartment_test)
 DEMO_SRC += demo/compartments/loader.c
 DEMO_SRC += comp_strtab_generated.c
 DEMO_SRC += $(LIBDL_SRC)
+
+ifeq ($(EXTENSION),cheri)
+DEMO_SRC += demo/compartments/cheri/cheri-riscv.c
+endif
+
 	CFLAGS += -I./demo/compartments/include
 
 else
