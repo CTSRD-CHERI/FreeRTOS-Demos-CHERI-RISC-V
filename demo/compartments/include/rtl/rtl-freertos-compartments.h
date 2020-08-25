@@ -1,4 +1,4 @@
-#if !defined (_FREERTOS_RTL__COMPARTMENTS_H_)
+#if !defined (_FREERTOS_RTL_COMPARTMENTS_H_)
 #define _FREERTOS_RTL_COMPARTMENTS_H_
 
 #include <FreeRTOS.h>
