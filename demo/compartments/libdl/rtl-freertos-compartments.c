@@ -103,7 +103,7 @@ uint32_t syms_count =  ((size_t) &__symtab_end - (size_t) &__symtab_start) / siz
   uint32_t globals_count = 0;
 
   for(int i = 0; i < syms_count; i++) {
-    if (((((uint32_t) (symtab_start[i]).st_info)) >> 4) == STB_GLOBAL) {
+    if (ELF_ST_BIND(symtab_start[i].st_info) == STB_GLOBAL) {
       globals_count++;
     }
   }

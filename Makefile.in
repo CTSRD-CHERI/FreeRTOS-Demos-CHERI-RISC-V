@@ -264,4 +264,8 @@ clean :
 	@rm -f $(PROG).map
 	@rm -f $(PROG).asm
 	@rm -f *.a
+	@rm -f demo/*.o
+	@rm -f demo/compartments/*.o
+	@rm -f demo/compartments/libdl/*.o
+	@rm -f *.o.wrapped
 	@rm -f *.o
