@@ -1,0 +1,8 @@
+- propagate changes to mb_modbus perms from cheri layer to macaroon layer
+- [Done] transmit macaroons in a side channel (i.e., not with modbus state)
+	- [Done] if we manage this, then macaroons layer doesn't need to receive state at all.  it currently only uses tab_string
+	- remove all the use of tab_string in the demo [Done], macaroons library [Done], and modbus
+	- Try to find a similar sidechannel for the cheribsd version...
+- find a way to avoid shared use of state variables like mb_mapping and ctx to avoid concurrency problems
+	- alt. consider use of a mutex
+	- alt. consider gatekeeper tasks
