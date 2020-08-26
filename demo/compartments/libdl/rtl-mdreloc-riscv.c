@@ -49,6 +49,65 @@
 #include "rtl-unwind.h"
 #include "rtl-unwind-dw2.h"
 
+#include <FreeRTOS.h>
+#include "list.h"
+
+typedef struct rela_hi20_table {
+  ListItem_t  node;
+  Elf_Word    symvalue;
+  Elf_Word    *hi20_pc;
+} hi20_reloc_t;
+
+static List_t hi20_relocs;
+
+static void
+rtems_rtl_elf_relocate_riscv_hi20_add (Elf_Word symvalue, Elf_Word *pc) {
+  hi20_reloc_t *hi20_reloc =  rtems_rtl_alloc_new (RTEMS_RTL_ALLOC_OBJECT, sizeof(hi20_reloc_t), true);
+  vListInitialiseItem(&hi20_reloc->node);
+
+  hi20_reloc->symvalue = symvalue;
+  hi20_reloc->hi20_pc = pc;
+  vListInsertEnd(&hi20_relocs, hi20_reloc);
+}
+
+static void
+rtems_rtl_elf_relocate_riscv_hi20_del (hi20_reloc_t *hi20_reloc) {
+  uxListRemove(&hi20_reloc->node);
+  rtems_rtl_alloc_del (RTEMS_RTL_ALLOC_OBJECT, hi20_reloc);
+}
+
+static bool
+rtems_rtl_elf_relocate_riscv_hi20_find (Elf_Word *hi20_pc, hi20_reloc_t** ret_reloc) {
+  ListItem_t *node = listGET_HEAD_ENTRY (&hi20_relocs);
+
+  while (listGET_END_MARKER (&hi20_relocs) != node)
+  {
+    hi20_reloc_t* reloc = (hi20_reloc_t*) node;
+
+    if (reloc->hi20_pc == hi20_pc) {
+      *ret_reloc = reloc;
+      return true;
+    }
+
+    node = listGET_NEXT (node);
+  }
+
+  return false;
+}
+
+static bool
+rtems_rtl_elf_relocate_riscv_hi20_table_free (void) {
+  ListItem_t *node = listGET_HEAD_ENTRY (&hi20_relocs);
+
+  while (listGET_END_MARKER (&hi20_relocs) != node)
+  {
+    hi20_reloc_t* reloc = (hi20_reloc_t*) node;
+    rtems_rtl_elf_relocate_riscv_hi20_del(reloc);
+
+    node = listGET_NEXT (node);
+  }
+}
+
 uint32_t
 rtems_rtl_elf_section_flags (const rtems_rtl_obj* obj,
                              const Elf_Shdr*      shdr) {
@@ -65,6 +124,11 @@ rtems_rtl_elf_arch_parse_section (const rtems_rtl_obj* obj,
   (void) section;
   (void) name;
   (void) shdr;
+
+  if ((flags & RTEMS_RTL_OBJ_SECT_RELA) == RTEMS_RTL_OBJ_SECT_RELA) {
+    vListInitialise (&hi20_relocs);
+  }
+
   return flags;
 }
 
@@ -307,6 +371,8 @@ rtems_rtl_elf_reloc_rela (rtems_rtl_obj*      obj,
     int64_t hi = SignExtend64(pcrel_val + 0x800, bits); //pcrel_val + 0x800;
     write32le(where, (read32le(where) & 0xFFF) | (hi & 0xFFFFF000));
 
+    rtems_rtl_elf_relocate_riscv_hi20_add(symvalue,  where);
+
   }
   break;
 
@@ -319,8 +385,24 @@ rtems_rtl_elf_reloc_rela (rtems_rtl_obj*      obj,
   break;
 
   case R_TYPE(PCREL_LO12_I): {
-    uint64_t hi = (pcrel_val + 0x800) >> 12;
-    uint64_t lo = pcrel_val - (hi << 12);
+    uint64_t hi;
+    uint64_t lo;
+    hi20_reloc_t *ret_reloc;
+    Elf_Word return_sym;
+    Elf_Addr hi20_rela_pc =  ((Elf_Word) where) + pcrel_val;
+
+    if (!rtems_rtl_elf_relocate_riscv_hi20_find(hi20_rela_pc, &ret_reloc)) {
+      rtems_rtl_set_error (EINVAL,
+                         "%s: Failed to find HI20 relocation for type %ld",
+                         sect->name, (uint32_t) ELF_R_TYPE(rela->r_info));
+      return rtems_rtl_elf_rel_failure;
+    } else {
+      return_sym = ret_reloc->symvalue;
+      pcrel_val = return_sym - ((Elf_Word) hi20_rela_pc);
+    }
+
+    hi = (pcrel_val + 0x800) >> 12;
+    lo = pcrel_val - (hi << 12);
     write32le(where, (read32le(where) & 0xFFFFF) | ((lo & 0xFFF) << 20));
   }
   break;
