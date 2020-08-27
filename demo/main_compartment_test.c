@@ -223,8 +223,6 @@ void main_compartment_test(void) {
     /* Setup an exception handler for CHERI */
     vPortSetExceptionHandler(0x1c, cheri_exception_handler);
 
-    vCompartmentsLoad();
-
     /* Start the tasks and timer running. */
     vTaskStartScheduler();
 
@@ -242,6 +240,9 @@ void main_compartment_test(void) {
 static void vTaskCompartment(void *pvParameters) {
 
   printf("Testing Compartment\n");
+
+  vCompartmentsLoad();
+
   _exit(0);
   while(1);
 }
