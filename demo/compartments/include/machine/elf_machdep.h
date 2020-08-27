@@ -119,6 +119,16 @@
 #define R_RISCV_ADDR32		R_RISCV_32
 #define R_RISCV_ADDR64		R_RISCV_64
 
+#ifdef __CHERI_PURE_CAPABILITY__
+#define R_RISCV_CHERI_CAPTAB_PCREL_HI20        192
+#define R_RISCV_CHERI_CAPABILITY               193
+#define R_RISCV_CHERI_CAPABILITY_CALL          194
+#define R_RISCV_CHERI_SIZE                     195
+#define R_RISCV_CHERI_TPREL_CINCOFFSET         196
+#define R_RISCV_CHERI_TLS_IE_CAPTAB_PCREL_HI20 197
+#define R_RISCV_CHERI_TLS_GD_CAPTAB_PCREL_HI20 198
+#endif
+
 #define R_TYPE(name)		R_RISCV_ ## name
 #if ELFSIZE == 32
 #define R_TYPESZ(name)		R_RISCV_ ## name ## 32
