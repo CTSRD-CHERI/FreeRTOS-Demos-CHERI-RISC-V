@@ -238,6 +238,10 @@ struct rtems_rtl_obj
   struct link_map*    linkmap;      /**< For GDB. */
   void*               loader;       /**< The file details specific to a
                                      *   loader. */
+#ifdef __CHERI_PURE_CAPABILITY__
+  void**              captable;     /* Capability table per object */
+  size_t              caps_count;   /* The number of capabilities */
+#endif
 };
 
 /**
@@ -539,6 +543,24 @@ rtems_rtl_obj_sect* rtems_rtl_obj_find_section_by_index (const rtems_rtl_obj* ob
 rtems_rtl_obj_sect* rtems_rtl_obj_find_section_by_mask (const rtems_rtl_obj* obj,
                                                         int                  index,
                                                         uint32_t             mask);
+
+#ifdef __CHERI_PURE_CAPABILITY__
+/**
+ * Allocate a table for capabilities.
+ *
+ * @param obj The object file's descriptor.
+ * @retval true The table was allocated.
+ * @retval false The alloction failed.
+ */
+bool rtems_rtl_obj_alloc_trampoline (rtems_rtl_obj* obj);
+
+/**
+ * Erase the object file descriptor's capability table..
+ *
+ * @param obj The object file's descriptor.
+ */
+void rtems_rtl_obj_erase_captable (rtems_rtl_obj* obj);
+#endif
 
 /**
  * Allocate a table for trampoline fixup calls.

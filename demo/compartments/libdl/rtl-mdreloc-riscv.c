@@ -235,6 +235,11 @@ rtems_rtl_elf_reloc_rela (rtems_rtl_obj*      obj,
   }
 
   if (parsing) {
+#ifdef __CHERI_PURE_CAPABILITY__
+    if (ELF_R_TYPE(rela->r_info) == R_TYPE(CHERI_CAPTAB_PCREL_HI20)) {
+      obj->caps_count++;
+    }
+#endif
     return rtems_rtl_elf_rel_no_error;
   }
 

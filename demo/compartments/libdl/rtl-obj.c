@@ -578,6 +578,29 @@ rtems_rtl_obj_find_section_by_mask (const rtems_rtl_obj* obj,
   return match.sect;
 }
 
+#ifdef __CHERI_PURE_CAPABILITY__
+bool
+rtems_rtl_obj_alloc_captable (rtems_rtl_obj* obj)
+{
+  if (obj->caps_count == 0)
+    return true;
+
+  obj->captable = rtems_rtl_alloc_new (RTEMS_RTL_ALLOC_OBJECT,
+                                         obj->caps_count * sizeof(void *),
+                                         true);
+  if (obj->captable == NULL)
+    rtems_rtl_set_error (ENOMEM, "no memory for the captable");
+
+  return obj->captable != NULL;
+}
+
+void
+rtems_rtl_obj_erase_captable (rtems_rtl_obj* obj)
+{
+  rtems_rtl_alloc_del (RTEMS_RTL_ALLOC_OBJECT, obj->captable);
+}
+#endif
+
 bool
 rtems_rtl_obj_alloc_trampoline (rtems_rtl_obj* obj)
 {

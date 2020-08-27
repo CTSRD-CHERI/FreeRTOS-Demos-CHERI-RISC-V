@@ -1760,6 +1760,11 @@ rtems_rtl_elf_file_load (rtems_rtl_obj* obj, int fd)
   if (!rtems_rtl_elf_alloc_trampoline (obj, relocs.unresolved))
     return false;
 
+#ifdef __CHERI_PURE_CAPABILITY__
+  if (!rtems_rtl_obj_alloc_captable (obj))
+    return false;
+#endif
+
   /*
    * Unlock the allocator.
    */
