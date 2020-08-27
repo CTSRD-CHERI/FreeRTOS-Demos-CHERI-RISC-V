@@ -422,8 +422,25 @@ rtems_rtl_elf_reloc_rela (rtems_rtl_obj*      obj,
   break;
 
   case R_TYPE(PCREL_LO12_S): {
-    uint64_t hi = (pcrel_val + 0x800) >> 12;
-    uint64_t lo = pcrel_val - (hi << 12);
+    uint64_t hi;
+    uint64_t lo;
+    hi20_reloc_t *ret_reloc;
+    Elf_Word return_sym;
+    Elf_Addr hi20_rela_pc =  ((Elf_Word) where) + pcrel_val;
+
+    if (!rtems_rtl_elf_relocate_riscv_hi20_find(hi20_rela_pc, &ret_reloc)) {
+      rtems_rtl_set_error (EINVAL,
+                         "%s: Failed to find HI20 relocation for type %ld",
+                         sect->name, (uint32_t) ELF_R_TYPE(rela->r_info));
+      return rtems_rtl_elf_rel_failure;
+    } else {
+      return_sym = ret_reloc->symvalue;
+      pcrel_val = return_sym - ((Elf_Word) hi20_rela_pc);
+    }
+
+    hi = (pcrel_val + 0x800) >> 12;
+    lo = pcrel_val - (hi << 12);
+
     uint32_t imm11_5 = extractBits(lo, 11, 5) << 25;
     uint32_t imm4_0 = extractBits(lo, 4, 0) << 7;
     write32le(where, (read32le(where) & 0x1FFF07F) | imm11_5 | imm4_0);
