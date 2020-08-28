@@ -40,7 +40,7 @@ to ticks using the pdMS_TO_TICKS() macro. */
 /* defines for microbenchmarking
  *
  * the number of iterations to perform over the critical section
- * 
+ *
  * the number of iterations to discard before performing microbenchmarking
  * to ensure the system is quiescent.
  */

@@ -114,15 +114,15 @@ void main_modbus(void)
   /* Create the request queue. Sized to hold one modbus_queue_msg_t* */
   xQueueClientServer = xQueueCreate(mainQUEUE_LENGTH, sizeof(modbus_queue_msg_t *));
 
-  /* Create the process queue. Sized to hold one modbus_queue_msg_t* */
+  /* Create the response queue. Sized to hold one modbus_queue_msg_t* */
   xQueueServerClient = xQueueCreate(mainQUEUE_LENGTH, sizeof(modbus_queue_msg_t *));
 
 #if defined(MACAROONS_LAYER)
   /* Create the request queue. Sized to hold a macaroons_queue_msg_t*, which is a serialised macaroon and it's length */
-  xQueueClientServerMacaroons = xQueueCreate(mainQUEUE_LENGTH, sizeof(macaroons_queue_msg_t *));
+  xQueueClientServerMacaroons = xQueueCreate(MACAROONS_QUEUE_LENGTH, sizeof(macaroons_queue_msg_t *));
 
-  /* Create the process queue. Sized to hold a macaroons_queue_msg_t*, which is a serialised macaroon and it's length */
-  xQueueServerClientMacaroons = xQueueCreate(mainQUEUE_LENGTH, sizeof(macaroons_queue_msg_t *));
+  /* Create the response queue. Sized to hold a macaroons_queue_msg_t*, which is a serialised macaroon and it's length */
+  xQueueServerClientMacaroons = xQueueCreate(MACAROONS_QUEUE_LENGTH, sizeof(macaroons_queue_msg_t *));
 #endif
 
   /* modbus connection variables */

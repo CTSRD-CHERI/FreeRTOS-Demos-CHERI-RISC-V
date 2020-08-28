@@ -64,10 +64,12 @@ extern void main_peekpoke(void);
 #elif mainDEMO_TYPE == 6
 #pragma message "Demo type : UDP/TCP/IP-based echo, CLI, HTTP, FTP and TFTP servers"
 extern void main_servers(void);
+#elif mainDEMO_TYPE == 42
+#pragma message "Demo type 42: Modbus"
+extern void main_modbus(void);
 #else
 #ifdef configPROG_ENTRY
-  extern void configPROG_ENTRY(void);
-#else
+extern void configPROG_ENTRY(void);
 #error "Unsupported demo type"
 #endif
 #endif
@@ -145,10 +147,14 @@ int demo_main(void) {
 #elif mainDEMO_TYPE == 5
   {
     main_peekpoke();
-  }
 #elif mainDEMO_TYPE == 6
   {
     main_servers();
+  }
+#elif mainDEMO_TYPE == 42
+  /* run the main_modbus demo */
+  {
+    main_modbus();
   }
 #else
 #ifdef configPROG_ENTRY

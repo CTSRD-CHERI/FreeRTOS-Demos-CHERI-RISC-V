@@ -58,6 +58,11 @@
 #include "modbus_macaroons.h"
 #endif
 
+/* Microbenchmark includes */
+#if defined(MICROBENCHMARK)
+#include "microbenchmark.h"
+#endif
+
 /*-----------------------------------------------------------*/
 
 /* Helper function for converting to libmodbus formats */
@@ -109,10 +114,13 @@ void vClientInitialization(char *ip, int port,
    *
    * this is a TOFU operation. the first client to dequeue it gets it...
    * */
-  rc = initialise_client_macaroon(ctx, xQueueServerClientMacaroons);
+  rc = initialise_client_macaroon(ctx);
   configASSERT(rc != -1);
 
-  printf("client macaroon initialised...\n");
+  if (modbus_get_debug(ctx))
+  {
+      printf("client macaroon initialised...\n");
+  }
 #endif
 }
 
@@ -161,6 +169,8 @@ void vClientTask(void *pvParameters)
   /* Allocate and initialize the memory to store the string */
   tab_rp_string = (uint8_t *)pvPortMalloc(MODBUS_MAX_STRING_LENGTH * sizeof(uint8_t));
   int nb_chars = convert_string_req((const char *)TEST_STRING, tab_rp_string);
+
+  printf("BEGIN_TEST\n");
 
   /**************
    * STRING TESTS
@@ -452,6 +462,13 @@ void vClientTask(void *pvParameters)
   configASSERT(rc == 1);
   configASSERT(tab_rp_registers[0] == 0x17);
   vTaskDelayUntil(&xNextWakeTime, mainQUEUE_SEND_FREQUENCY_MS);
+
+#if defined(MICROBENCHMARK)
+  /* print microbenchmark samples to stdout */
+  vPrintMicrobenchmarkSamples();
+#endif
+
+  printf("END_TEST\n");
 
   /* Kill the app after the last request. */
   _exit(0);

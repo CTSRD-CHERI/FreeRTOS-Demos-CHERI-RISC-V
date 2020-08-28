@@ -63,16 +63,9 @@
 #include "modbus_macaroons.h"
 #endif
 
-/*-----------------------------------------------------------*/
-
+/* Microbenchmark includes */
 #if defined(MICROBENCHMARK)
-typedef struct _PrintTaskStatus_t {
-    char pcModbusFunctionName[MODBUS_MAX_FUNCTION_NAME_LEN];
-    char pcTaskName[configMAX_TASK_NAME_LEN];
-    uint32_t ulRunTimeCounter;
-    uint16_t usStackHighWaterMark;
-    uint32_t ulTotalRunTime;
-} PrintTaskStatus_t;
+#include "microbenchmark.h"
 #endif
 
 /*-----------------------------------------------------------*/
@@ -81,15 +74,6 @@ static void prvCriticalSectionTask(void *pvParameters);
 
 static int prvCriticalSectionWrapper(const uint8_t *req, const int req_length,
         uint8_t *rsp, int *rsp_length);
-
-#if defined(MICROBENCHMARK)
-static void prvPrintStatsTask(void *pvParameters);
-
-static int prvBuildPrintTaskStatusStruct(const char *pcModbusFunctionName,
-        TaskStatus_t *pxTaskStatus,
-        PrintTaskStatus_t *pxPrintTaskStatus,
-        uint32_t *pulTotalRunTime);
-#endif
 
 /*-----------------------------------------------------------*/
 
@@ -104,11 +88,6 @@ QueueHandle_t xQueueRequest;
 
 /* The queue used to send responses from prvCriticalSectionTask */
 QueueHandle_t xQueueResponse;
-
-#if defined(MICROBENCHMARK)
-/* The queue used to send task stats to prvPrintStatsTask */
-QueueHandle_t xQueuePrint;
-#endif
 
 #if defined(MACAROONS_LAYER)
 /* The queue used to communicate Macaroons from client to server. */
@@ -200,14 +179,16 @@ void vServerInitialization(char *ip, int port,
    *
    * this is a TOFU operation. the first client to dequeue it gets it...
    * */
-  rc = queue_server_macaroon(ctx, xQueueServerClientMacaroons);
+  rc = queue_server_macaroon(ctx);
   configASSERT(rc != -1);
 #endif
 
   /* Initialise queues for comms with prvCriticalSectionTask */
   xQueueRequest = xQueueCreate(mainQUEUE_LENGTH, sizeof(modbus_queue_msg_t *));
-  xQueueResponse = xQueueCreate(mainQUEUE_LENGTH, sizeof(modbus_queue_msg_t *));
+  configASSERT(xQueueRequest != NULL);
 
+  xQueueResponse = xQueueCreate(mainQUEUE_LENGTH, sizeof(modbus_queue_msg_t *));
+  configASSERT(xQueueResponse != NULL);
 }
 
 /*-----------------------------------------------------------*/
@@ -243,34 +224,6 @@ void vServerTask(void *pvParameters)
           prvCRITICAL_SECTION_TASK_PRIORITY,
           NULL);
 
-#if defined(MICROBENCHMARK)
-  /* Create the task prvPrintStatsTask */
-  xTaskCreate( prvPrintStatsTask,
-          "print",
-          configMINIMAL_STACK_SIZE * 2U,
-          NULL,
-          prvPRINT_STATS_TASK_PRIORITY,
-          NULL);
-#endif
-
-#if defined(MICROBENCHMARK)
-  /* variables for microbenchmarking
-   *
-   * NOTE: using uxTaskGetNumberOfTasks() must occur AFTER creating the two tasks above */
-  UBaseType_t uxArraySize = uxTaskGetNumberOfTasks();
-  TaskStatus_t *pxTaskStatusArray = (TaskStatus_t *)pvPortMalloc(uxArraySize * sizeof(TaskStatus_t));
-  PrintTaskStatus_t xPrintTaskStatus;
-  UBaseType_t uxArraySizeReturned = 0;
-  uint32_t *pulTotalRunTime = (uint32_t *)pvPortMalloc(sizeof(uint32_t));
-
-  /* Initialise queue for comms with prvPrintStatsTask
-   *
-   * the queue needs to be able to hold a TaskStatus_t structure for all tasks for
-   * all the iterations for a given function, because we're only guaranteed idle time
-   * when we return to the client, which blocks for 200ms between commands.  */
-  xQueuePrint = xQueueCreate(mainMICROBENCHMARK_ITERATIONS * uxArraySize, sizeof(PrintTaskStatus_t));
-#endif
-
   for (;;)
   {
     /* Wait until something arrives in the queue - this task will block
@@ -287,39 +240,22 @@ void vServerTask(void *pvParameters)
     pcModbusFunctionName = modbus_get_function_name(ctx, req);
 
 #if defined(MICROBENCHMARK)
-    /* discard mainMICROBENCHMARK_DISCARD runs to ensure quiescence */
-    for (int i = 0; i < mainMICROBENCHMARK_DISCARD; ++i)
+    /* discard MICROBENCHMARK_DISCARD runs to ensure quiescence */
+    for (int i = 0; i < MICROBENCHMARK_DISCARD; ++i)
     {
         rc = prvCriticalSectionWrapper(req, req_length, rsp, &rsp_length);
         configASSERT(rc != -1);
 
-        uxArraySizeReturned = uxTaskGetSystemState(pxTaskStatusArray, uxArraySize,
-                pulTotalRunTime);
-
-        configASSERT(uxArraySizeReturned == uxArraySize);
-
+        xMicrobenchmarkSample(pcModbusFunctionName, pdFALSE);
     }
 
-    /* perform mainMICROBENCHMARK_ITERATIONS runs of the critical section */
-    for (int i = 0; i < mainMICROBENCHMARK_ITERATIONS; ++i)
+    /* perform MICROBENCHMARK_ITERATIONS runs of the critical section */
+    for (int i = 0; i < MICROBENCHMARK_ITERATIONS; ++i)
     {
         rc = prvCriticalSectionWrapper(req, req_length, rsp, &rsp_length);
         configASSERT(rc != -1);
 
-        uxArraySizeReturned = uxTaskGetSystemState(pxTaskStatusArray, uxArraySize,
-                pulTotalRunTime);
-
-        configASSERT(uxArraySizeReturned == uxArraySize);
-
-        for (int j = 0; j < uxArraySize; ++j)
-        {
-            rc = prvBuildPrintTaskStatusStruct(pcModbusFunctionName, &pxTaskStatusArray[j],
-                    &xPrintTaskStatus, pulTotalRunTime);
-            configASSERT(rc != -1);
-
-            xReturned = xQueueSend(xQueuePrint, &xPrintTaskStatus, 0U);
-            configASSERT(xReturned == pdPASS);
-        }
+        xMicrobenchmarkSample(pcModbusFunctionName, pdTRUE);
     }
 #else
     rc = prvCriticalSectionWrapper(req, req_length, rsp, &rsp_length);
@@ -359,7 +295,6 @@ static int prvCriticalSectionWrapper(const uint8_t *req, const int req_length,
     *rsp_length = pxQueueRsp->msg_length;
     memcpy(rsp, pxQueueRsp->msg, *rsp_length);
 
-    vPortFree(pxQueueReq);
 
     return 0;
 }
@@ -419,6 +354,8 @@ static void prvCriticalSectionTask(void *pvParameters)
         rc = modbus_process_request(ctx, req, req_length,
                 rsp, &rsp_length, mb_mapping);
 
+        vPortFree(pxQueueReq);
+
         /* critical access to mb_mapping and ctx is finished, so it's safe to exit */
         taskEXIT_CRITICAL();
 
@@ -432,57 +369,3 @@ static void prvCriticalSectionTask(void *pvParameters)
 
 /*-----------------------------------------------------------*/
 
-#if defined(MICROBENCHMARK)
-static void prvPrintStatsTask(void *pvParameters)
-{
-    PrintTaskStatus_t xPrintTaskStatus;
-	/* Print out column headings for the run-time stats table. */
-    printf("modbus_function_name, task_name, task_runtime_counter, stack_highwater_mark, total_runtime\n");
-    for(;;)
-    {
-        /* dequeue PrintTaskStatus_t structures */
-        xQueueReceive(xQueuePrint, &xPrintTaskStatus, portMAX_DELAY);
-        printf("%s, %s, %u, %u, %u\n",
-                xPrintTaskStatus.pcModbusFunctionName,
-                xPrintTaskStatus.pcTaskName,
-                xPrintTaskStatus.ulRunTimeCounter,
-                xPrintTaskStatus.usStackHighWaterMark,
-                xPrintTaskStatus.ulTotalRunTime);
-    }
-}
-#endif
-
-/*-----------------------------------------------------------*/
-
-#if defined(MICROBENCHMARK)
-static int prvBuildPrintTaskStatusStruct(const char *pcModbusFunctionName,
-        TaskStatus_t *pxTaskStatus,
-        PrintTaskStatus_t *pxPrintTaskStatus,
-        uint32_t *pulTotalRunTime)
-{
-    if(pcModbusFunctionName == NULL ||
-            pxTaskStatus == NULL ||
-            pxPrintTaskStatus == NULL ||
-            pulTotalRunTime == NULL)
-    {
-        return -1;
-    }
-
-    /* assign the pcModbusFunctionName */
-    size_t xModbusFunctionNameLen = strnlen(pcModbusFunctionName, MODBUS_MAX_FUNCTION_NAME_LEN);
-    strncpy(pxPrintTaskStatus->pcModbusFunctionName, pcModbusFunctionName, xModbusFunctionNameLen + 1);
-
-    /* assign the task name */
-    size_t xTaskNameLen = strnlen(pxTaskStatus->pcTaskName, configMAX_TASK_NAME_LEN);
-    strncpy(pxPrintTaskStatus->pcTaskName, pxTaskStatus->pcTaskName, xTaskNameLen + 1);
-
-    /* assign remaining elements of the PrintTaskStatus_t struct */
-    pxPrintTaskStatus->ulRunTimeCounter = pxTaskStatus->ulRunTimeCounter;
-    pxPrintTaskStatus->usStackHighWaterMark = pxTaskStatus->usStackHighWaterMark;
-    pxPrintTaskStatus->ulTotalRunTime = *pulTotalRunTime;
-
-    return 0;
-}
-#endif
-
-/*-----------------------------------------------------------*/

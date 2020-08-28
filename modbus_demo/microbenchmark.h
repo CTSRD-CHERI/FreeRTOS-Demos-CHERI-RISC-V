@@ -1,6 +1,6 @@
 /*
- * FreeRTOS Kernel V10.2.0
- * Copyright (C) 2017 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ * FreeRTOS Kernel V10.1.1
+ * Copyright (C) 2018 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -25,23 +25,26 @@
  * 1 tab == 4 spaces!
  */
 
-#ifndef _MODBUS_SERVER_H_
-#define _MODBUS_SERVER_H_
+#ifndef _MICROBENCHMARK_H_
+#define _MICROBENCHMARK_H_
 
-/* priority for tasks initialised by the server task */
-#define prvCRITICAL_SECTION_TASK_PRIORITY (tskIDLE_PRIORITY + 3)
+/*-----------------------------------------------------------*/
 
-/*
- * Receives a modbus request from a client and
- * sends it to libmodbus
- */
-void vServerTask(void *pvParameters);
+/* bound the number of functions that will be benchmarked */
+#define MAX_FUNCTIONS 20
 
-/*
- * Called by main_modbus() to initialise the server before
- * creating tasks and starting the scheduler
- */
-void vServerInitialization(char *ip, int port,
-                             QueueHandle_t xQueueRequest,
-                             QueueHandle_t xQueueResponse);
-#endif /* _MODBUS_SERVER_H_ */
+/* number of iterations of each function to be sampled and recorded */
+#define MICROBENCHMARK_ITERATIONS 100
+
+/* number of iterations to discard to ensure quiescense */
+#define MICROBENCHMARK_DISCARD 10
+
+/*-----------------------------------------------------------*/
+
+void xMicrobenchmarkSample(char *pcFunctionName, BaseType_t ToPrint);
+
+void vPrintMicrobenchmarkSamples(void);
+
+/*-----------------------------------------------------------*/
+
+#endif /* _MICROBENCHMARK_H_ */
