@@ -278,8 +278,8 @@ rtems_rtl_elf_reloc_rela (rtems_rtl_obj*            obj,
         if (ret_reloc->is_cap) {
           pcrel_val = ret_reloc->cap_addr - ((Elf_Word) hi20_rela_pc);
          }
-       }
   #endif
+      }
       hi = (pcrel_val + 0x800) >> 12;
       lo = pcrel_val - (hi << 12);
       write32le(where, (read32le(where) & 0xFFFFF) | ((lo & 0xFFF) << 20));
@@ -306,8 +306,8 @@ rtems_rtl_elf_reloc_rela (rtems_rtl_obj*            obj,
         if (ret_reloc->is_cap) {
           pcrel_val = ret_reloc->cap_addr - ((Elf_Word) hi20_rela_pc);
          }
-       }
   #endif
+      }
 
       hi = (pcrel_val + 0x800) >> 12;
       lo = pcrel_val - (hi << 12);
