@@ -194,6 +194,14 @@ class Compartmentalize:
                       bufsize=0)
         #logging.debug("The commandline is {}".format(output.args))
 
+  def llvm_compile_files(self, source_files):
+        logging.debug("CFLAG= %s\n", self.CFLAGS)
+        logging.debug("Compiling %s\n", source_files)
+        output = subprocess.call(["clang" + " -c " + ' '.join(source_files) + " -target " + "riscv64-unknown-elf -fpic -fno-pie " +  self.CFLAGS],
+                      stdin =subprocess.PIPE,
+                      shell=True,
+                      bufsize=0)
+
   def llvm_wrap_obj_in_elf(self, output_obj):
 
       self.comp_gen_assembly_file(output_obj)
@@ -213,8 +221,7 @@ class Compartmentalize:
   def llvm_create_obj_from_sources(self, output_obj, srcs):
       logging.debug("CFLAG= %s\n", self.CFLAGS)
 
-      for src in srcs:
-        self.llvm_compile_file(src)
+      self.llvm_compile_files(srcs)
 
       objs = [source.replace(".c", ".o") for source in srcs]
       objs = [obj.split("/")[-1] for obj in objs]
