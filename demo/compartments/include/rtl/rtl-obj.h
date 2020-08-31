@@ -196,6 +196,7 @@ struct rtems_rtl_obj
                                      *   file. */
   List_t              dependents;   /**< The dependent object files. */
   rtems_rtl_obj_sym*  local_table;  /**< Local symbol table. */
+  List_t              locals_list;  /* A list of local symbols */
   size_t              local_syms;   /**< Local symbol count. */
   size_t              local_size;   /**< Local symbol memory usage. */
   rtems_rtl_obj_sym*  global_table; /**< Global symbol table. */

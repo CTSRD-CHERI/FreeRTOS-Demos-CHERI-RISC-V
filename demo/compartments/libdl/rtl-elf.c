@@ -35,6 +35,10 @@
 #include "rtl-unwind.h"
 #include <rtl/rtl-unresolved.h>
 
+#ifdef __CHERI_PURE_CAPABILITY__
+#include <cheri/cheri-utility.h>
+#endif
+
 /**
  * The offsets in the reloc words.
  */
@@ -987,6 +991,7 @@ rtems_rtl_elf_symbols_load (rtems_rtl_obj*      obj,
     }
 
     obj->local_syms = locals;
+    vListInitialise(&obj->locals_list);
   }
 
   if (globals)
@@ -1091,6 +1096,7 @@ rtems_rtl_elf_symbols_load (rtems_rtl_obj*      obj,
           else
           {
             osym = gsym;
+            vListInitialiseItem(&osym->node);
             string = gstring;
             gstring += slen;
             ++gsym;
@@ -1104,8 +1110,10 @@ rtems_rtl_elf_symbols_load (rtems_rtl_obj*      obj,
           else
           {
             osym = lsym;
+            vListInitialiseItem(&osym->node);
             string = lstring;
             lstring += slen;
+            vListInsertEnd(&obj->locals_list, &osym->node);
             ++lsym;
           }
         }
