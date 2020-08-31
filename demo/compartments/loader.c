@@ -160,6 +160,10 @@ void vCompartmentsLoad(void) {
   }
 
   call = dlsym (obj_handle, "vComp1");
+  printf("Call = %p\n", call);
+#ifdef __CHERI_PURE_CAPABILITY__
+  cheri_print_cap(call);
+#endif
   call();
 }
 /*-----------------------------------------------------------*/
