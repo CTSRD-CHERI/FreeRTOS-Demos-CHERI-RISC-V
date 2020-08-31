@@ -257,6 +257,45 @@ rtems_rtl_symbol_obj_find (rtems_rtl_obj* obj, const char* name)
   return rtems_rtl_symbol_global_find (name);
 }
 
+rtems_rtl_obj_sym*
+rtems_rtl_symbol_obj_find_namevalue (rtems_rtl_obj* obj, const char* name, UBaseType_t value)
+{
+  ListItem_t *node = listGET_HEAD_ENTRY (&obj->locals_list);
+
+  while (listGET_END_MARKER (&obj->locals_list) != node)
+  {
+    rtems_rtl_obj_sym* sym = (rtems_rtl_obj_sym*) node;
+
+    if (strcmp(sym->name, name) == 0 && (UBaseType_t) sym->value == value) {
+      return sym;
+    }
+
+    node = listGET_NEXT (node);
+  }
+
+  return NULL;
+}
+
+rtems_rtl_obj_sym*
+rtems_rtl_symbol_obj_extract (rtems_rtl_obj* obj, const char* name)
+{
+  ListItem_t *node = listGET_HEAD_ENTRY (&obj->locals_list);
+
+  while (listGET_END_MARKER (&obj->locals_list) != node)
+  {
+    rtems_rtl_obj_sym* sym = (rtems_rtl_obj_sym*) node;
+
+    if (strcmp(sym->name, name) == 0) {
+      uxListRemove(node);
+      return sym;
+    }
+
+    node = listGET_NEXT (node);
+  }
+
+  return NULL;
+}
+
 void
 rtems_rtl_symbol_obj_add (rtems_rtl_obj* obj)
 {

@@ -118,6 +118,32 @@ rtems_rtl_obj_sym* rtems_rtl_symbol_obj_find (rtems_rtl_obj* obj,
                                               const char*    name);
 
 /**
+ * Find a symbol given the symbol label and value in the local object file.
+ * This should only be used after sections have been relocated to find
+ * a unique symbol entry even if the labels are duplicated.
+ *
+ * @param obj The object file to search.
+ * @param name The name as an ASCIIZ string.
+ * @param value The symvalue (address) after being relocated.
+ * @retval NULL No symbol found.
+ * @return rtems_rtl_obj_sym* Reference to the symbol.
+ */
+rtems_rtl_obj_sym* rtems_rtl_symbol_obj_find_namevalue (rtems_rtl_obj* obj,
+                                              const char*    name,
+                                              UBaseType_t    value);
+/**
+ * Find and extract a symbol given the symbol label in the local object file.
+ * The symbol is only extracted from the locals list.
+ *
+ * @param obj The object file to search.
+ * @param name The name as an ASCIIZ string.
+ * @retval NULL No symbol found.
+ * @return rtems_rtl_obj_sym* Reference to the symbol.
+ */
+rtems_rtl_obj_sym* rtems_rtl_symbol_obj_extract (rtems_rtl_obj* obj,
+                                                 const char*    name);
+
+/**
  * Add the object file's symbols to the global table.
  *
  * @param obj The object file the symbols are to be added.
