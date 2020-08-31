@@ -40,6 +40,9 @@ rtems_rtl_unresolved_block_alloc (rtems_rtl_unresolved* unresolved)
      (sizeof(rtems_rtl_unresolv_rec) * unresolved->block_recs));
   rtems_rtl_unresolv_block* block =
     rtems_rtl_alloc_new (RTEMS_RTL_ALLOC_EXTERNAL, size, true);
+
+  vListInitialiseItem(&block->link);
+
   if (block)
   {
     if (rtems_rtl_trace (RTEMS_RTL_TRACE_UNRESOLVED))

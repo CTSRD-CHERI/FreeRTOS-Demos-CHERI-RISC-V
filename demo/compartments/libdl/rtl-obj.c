@@ -632,6 +632,9 @@ rtems_rtl_obj_alloc_dependents (rtems_rtl_obj* obj, size_t dependents)
   depends = rtems_rtl_alloc_new (RTEMS_RTL_ALLOC_OBJECT,
                                  size,
                                  true);
+
+  vListInitialiseItem(&depends->node);
+
   if (depends == NULL)
   {
     rtems_rtl_set_error (ENOMEM, "no memory for the dependency");
