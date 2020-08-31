@@ -284,7 +284,7 @@ rtems_rtl_elf_reloc_rela (rtems_rtl_obj*            obj,
       lo = pcrel_val - (hi << 12);
       write32le(where, (read32le(where) & 0xFFFFF) | ((lo & 0xFFF) << 20));
 
-      //rtems_rtl_elf_relocate_riscv_hi20_del(ret_reloc);
+      rtems_rtl_elf_relocate_riscv_hi20_del(ret_reloc);
 
       return rtems_rtl_elf_rel_no_error;
     } else if (ELF_R_TYPE(rela->r_info) == R_TYPE(PCREL_LO12_S)) {
@@ -316,7 +316,7 @@ rtems_rtl_elf_reloc_rela (rtems_rtl_obj*            obj,
       uint32_t imm4_0 = extractBits(lo, 4, 0) << 7;
       write32le(where, (read32le(where) & 0x1FFF07F) | imm11_5 | imm4_0);
 
-      //rtems_rtl_elf_relocate_riscv_hi20_del(ret_reloc);
+      rtems_rtl_elf_relocate_riscv_hi20_del(ret_reloc);
 
       return rtems_rtl_elf_rel_no_error;
     } else {
