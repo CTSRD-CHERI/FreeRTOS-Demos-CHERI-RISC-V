@@ -152,6 +152,7 @@ void vCompartmentsLoad(void) {
 
   printf("load: comp1.o\n");
 
+  obj_handle = dlopen ("comp2.o", RTLD_NOW | RTLD_GLOBAL);
   obj_handle = dlopen ("comp1.o", RTLD_NOW | RTLD_GLOBAL);
   if (!obj_handle)
   {
