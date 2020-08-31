@@ -42,7 +42,7 @@ void vComp2(void);
 
 void vComp1(void) {
   printf("Hello World from Comp1\n");
-
+  printf("Jumping to vComp2 @ %p\n", &vComp2);
   vComp2();
 }
 /*-----------------------------------------------------------*/
