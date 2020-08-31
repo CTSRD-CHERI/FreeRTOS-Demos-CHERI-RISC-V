@@ -120,6 +120,12 @@ dlsym (void* handle, const char *symbol)
   if (sym)
     symval = sym->value;
 
+#ifdef __CHERI_PURE_CAPABILITY__
+    symval = sym->capability;
+#else
+    symval = sym->value;
+#endif
+
   rtems_rtl_unlock ();
 
   return symval;
