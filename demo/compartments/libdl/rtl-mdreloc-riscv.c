@@ -52,21 +52,35 @@
 #include <FreeRTOS.h>
 #include "list.h"
 
+#ifdef __CHERI_PURE_CAPABILITY__
+#include <cheri/cheri-utility.h>
+#endif
+
 typedef struct rela_hi20_table {
   ListItem_t  node;
   Elf_Word    symvalue;
   Elf_Word    *hi20_pc;
+#ifdef __CHERI_PURE_CAPABILITY__
+  bool        is_cap;
+  Elf_Word    cap_addr;
+#endif
 } hi20_reloc_t;
 
 static List_t hi20_relocs;
 
 static void
-rtems_rtl_elf_relocate_riscv_hi20_add (Elf_Word symvalue, Elf_Word *pc) {
+rtems_rtl_elf_relocate_riscv_hi20_add (Elf_Word symvalue, Elf_Word *pc, bool is_cap, Elf_Word cap_addr) {
   hi20_reloc_t *hi20_reloc =  rtems_rtl_alloc_new (RTEMS_RTL_ALLOC_OBJECT, sizeof(hi20_reloc_t), true);
   vListInitialiseItem(&hi20_reloc->node);
 
   hi20_reloc->symvalue = symvalue;
   hi20_reloc->hi20_pc = pc;
+
+#ifdef __CHERI_PURE_CAPABILITY__
+  hi20_reloc->is_cap = is_cap;
+  hi20_reloc->cap_addr = cap_addr;
+#endif
+
   vListInsertEnd(&hi20_relocs, hi20_reloc);
 }
 
@@ -444,7 +458,7 @@ rtems_rtl_elf_reloc_rela (rtems_rtl_obj*            obj,
     int64_t hi = SignExtend64(pcrel_val + 0x800, bits); //pcrel_val + 0x800;
     write32le(where, (read32le(where) & 0xFFF) | (hi & 0xFFFFF000));
 
-    rtems_rtl_elf_relocate_riscv_hi20_add(symvalue,  where);
+    rtems_rtl_elf_relocate_riscv_hi20_add(symvalue,  where, false, 0);
 
   }
   break;
@@ -497,6 +511,40 @@ rtems_rtl_elf_reloc_rela (rtems_rtl_obj*            obj,
   }
   break;
 
+#ifdef __CHERI_PURE_CAPABILITY__
+  case R_TYPE(CHERI_CAPTAB_PCREL_HI20): {
+
+    rtems_rtl_obj_sym *rtl_sym = rtems_rtl_symbol_obj_find_namevalue(obj, symname, symvalue);
+    if (rtl_sym == NULL) {
+      /* Not found in the local table, search the global one.
+       * TODO: Check that this obj has a capability to that global
+       */
+      rtl_sym = rtems_rtl_symbol_obj_find(obj, symname);
+
+      if (rtl_sym == NULL) {
+        rtems_rtl_set_error (EINVAL,
+                           "%s: Failed to find symbol %s of type %ld",
+                           sect->name, symname, (uint32_t) ELF_R_TYPE(rela->r_info));
+        return rtems_rtl_elf_rel_failure;
+      }
+    }
+
+    pcrel_val = ((Elf_Word) &rtl_sym->capability) - ((Elf_Word) where);
+    int64_t hi = SignExtend64(pcrel_val + 0x800, bits); //pcrel_val + 0x800;
+    write32le(where, (read32le(where) & 0xFFF) | (hi & 0xFFFFF000));
+
+    if (rtems_rtl_trace (RTEMS_RTL_TRACE_RELOC)) {
+      printf("riscv:sym %s - hi20 pc = %p\n", symname, where);
+      printf("riscv:sym %s - adding a cap reloc at address = %p\n", symname, &rtl_sym->capability);
+      printf("riscv:sym :%s - hi20_cap pcrel_val = %d\n", symname, pcrel_val);
+    }
+
+    /* Add a hi20 reloc to the table to be searched later for lo12 relocs */
+    rtems_rtl_elf_relocate_riscv_hi20_add(symvalue,  where, true, (Elf_Word) &rtl_sym->capability);
+  }
+  break;
+
+#endif
   default:
     rtems_rtl_set_error (EINVAL,
                          "%s: Unsupported relocation type %ld "
