@@ -211,12 +211,13 @@ static uint64_t read64le(void *loc) {
 }
 
 static rtems_rtl_elf_rel_status
-rtems_rtl_elf_reloc_rela (rtems_rtl_obj*      obj,
+rtems_rtl_elf_reloc_rela (rtems_rtl_obj*            obj,
                           const Elf_Rela*           rela,
                           const rtems_rtl_obj_sect* sect,
                           const char*               symname,
                           const Elf_Byte            syminfo,
                           const Elf_Word            symvalue,
+                          Elf_Word                  type,
                           const bool parsing) {
   Elf_Word *where;
   Elf_Word  tmp;
@@ -241,6 +242,73 @@ rtems_rtl_elf_reloc_rela (rtems_rtl_obj*      obj,
     }
 #endif
     return rtems_rtl_elf_rel_no_error;
+  }
+
+  if (type) {
+    if (ELF_R_TYPE(rela->r_info) == R_TYPE(PCREL_LO12_I)) {
+      uint64_t hi;
+      uint64_t lo;
+      hi20_reloc_t *ret_reloc;
+      Elf_Word return_sym;
+      Elf_Addr hi20_rela_pc =  ((Elf_Word) where) + pcrel_val;
+
+      if (!rtems_rtl_elf_relocate_riscv_hi20_find(hi20_rela_pc, &ret_reloc)) {
+        rtems_rtl_set_error (EINVAL,
+                           "%s: Failed to find HI20 relocation for type %ld",
+                           sect->name, (uint32_t) ELF_R_TYPE(rela->r_info));
+        return rtems_rtl_elf_rel_failure;
+      } else {
+        return_sym = ret_reloc->symvalue;
+        pcrel_val = return_sym - ((Elf_Word) hi20_rela_pc);
+  #ifdef __CHERI_PURE_CAPABILITY__
+        if (ret_reloc->is_cap) {
+          pcrel_val = ret_reloc->cap_addr - ((Elf_Word) hi20_rela_pc);
+         }
+       }
+  #endif
+      hi = (pcrel_val + 0x800) >> 12;
+      lo = pcrel_val - (hi << 12);
+      write32le(where, (read32le(where) & 0xFFFFF) | ((lo & 0xFFF) << 20));
+
+      //rtems_rtl_elf_relocate_riscv_hi20_del(ret_reloc);
+
+      return rtems_rtl_elf_rel_no_error;
+    } else if (ELF_R_TYPE(rela->r_info) == R_TYPE(PCREL_LO12_S)) {
+      uint64_t hi;
+      uint64_t lo;
+      hi20_reloc_t *ret_reloc;
+      Elf_Word return_sym;
+      Elf_Addr hi20_rela_pc =  ((Elf_Word) where) + pcrel_val;
+
+      if (!rtems_rtl_elf_relocate_riscv_hi20_find(hi20_rela_pc, &ret_reloc)) {
+        rtems_rtl_set_error (EINVAL,
+                           "%s: Failed to find HI20 relocation for type %ld",
+                           sect->name, (uint32_t) ELF_R_TYPE(rela->r_info));
+        return rtems_rtl_elf_rel_failure;
+      } else {
+        return_sym = ret_reloc->symvalue;
+        pcrel_val = return_sym - ((Elf_Word) hi20_rela_pc);
+  #ifdef __CHERI_PURE_CAPABILITY__
+        if (ret_reloc->is_cap) {
+          pcrel_val = ret_reloc->cap_addr - ((Elf_Word) hi20_rela_pc);
+         }
+       }
+  #endif
+
+      hi = (pcrel_val + 0x800) >> 12;
+      lo = pcrel_val - (hi << 12);
+
+      uint32_t imm11_5 = extractBits(lo, 11, 5) << 25;
+      uint32_t imm4_0 = extractBits(lo, 4, 0) << 7;
+      write32le(where, (read32le(where) & 0x1FFF07F) | imm11_5 | imm4_0);
+
+      //rtems_rtl_elf_relocate_riscv_hi20_del(ret_reloc);
+
+      return rtems_rtl_elf_rel_no_error;
+    } else {
+      rtems_rtl_set_error (EINVAL, "Can only selectively relocate LO12 types\n");
+      return rtems_rtl_elf_rel_failure;
+    }
   }
 
   switch (ELF_R_TYPE(rela->r_info)) {
@@ -389,61 +457,11 @@ rtems_rtl_elf_reloc_rela (rtems_rtl_obj*      obj,
   }
   break;
 
-  case R_TYPE(PCREL_LO12_I): {
-    uint64_t hi;
-    uint64_t lo;
-    hi20_reloc_t *ret_reloc;
-    Elf_Word return_sym;
-    Elf_Addr hi20_rela_pc =  ((Elf_Word) where) + pcrel_val;
-
-    if (!rtems_rtl_elf_relocate_riscv_hi20_find(hi20_rela_pc, &ret_reloc)) {
-      rtems_rtl_set_error (EINVAL,
-                         "%s: Failed to find HI20 relocation for type %ld",
-                         sect->name, (uint32_t) ELF_R_TYPE(rela->r_info));
-      return rtems_rtl_elf_rel_failure;
-    } else {
-      return_sym = ret_reloc->symvalue;
-      pcrel_val = return_sym - ((Elf_Word) hi20_rela_pc);
-    }
-
-    hi = (pcrel_val + 0x800) >> 12;
-    lo = pcrel_val - (hi << 12);
-    write32le(where, (read32le(where) & 0xFFFFF) | ((lo & 0xFFF) << 20));
-  }
-  break;
-
   case R_TYPE(LO12_I): {
 
     uint64_t hi = (symvalue + 0x800) >> 12;
     uint64_t lo = symvalue - (hi << 12);
     write32le(where, (read32le(where) & 0xFFFFF) | ((lo & 0xFFF) << 20));
-
-  }
-  break;
-
-  case R_TYPE(PCREL_LO12_S): {
-    uint64_t hi;
-    uint64_t lo;
-    hi20_reloc_t *ret_reloc;
-    Elf_Word return_sym;
-    Elf_Addr hi20_rela_pc =  ((Elf_Word) where) + pcrel_val;
-
-    if (!rtems_rtl_elf_relocate_riscv_hi20_find(hi20_rela_pc, &ret_reloc)) {
-      rtems_rtl_set_error (EINVAL,
-                         "%s: Failed to find HI20 relocation for type %ld",
-                         sect->name, (uint32_t) ELF_R_TYPE(rela->r_info));
-      return rtems_rtl_elf_rel_failure;
-    } else {
-      return_sym = ret_reloc->symvalue;
-      pcrel_val = return_sym - ((Elf_Word) hi20_rela_pc);
-    }
-
-    hi = (pcrel_val + 0x800) >> 12;
-    lo = pcrel_val - (hi << 12);
-
-    uint32_t imm11_5 = extractBits(lo, 11, 5) << 25;
-    uint32_t imm4_0 = extractBits(lo, 4, 0) << 7;
-    write32le(where, (read32le(where) & 0x1FFF07F) | imm11_5 | imm4_0);
 
   }
   break;
@@ -454,6 +472,18 @@ rtems_rtl_elf_reloc_rela (rtems_rtl_obj*      obj,
     uint32_t imm11_5 = extractBits(lo, 11, 5) << 25;
     uint32_t imm4_0 = extractBits(lo, 4, 0) << 7;
     write32le(where, (read32le(where) & 0x1FFF07F) | imm11_5 | imm4_0);
+  }
+  break;
+
+  /* Skip LO12 relocations as they will be handeled in another pass after HI20
+   * ones have been added
+   */
+  case R_TYPE(PCREL_LO12_I):
+  case R_TYPE(PCREL_LO12_S): {
+    if (type) {
+      /* Should have been handeled earlier, not here */
+      return rtems_rtl_elf_rel_failure;
+    }
   }
   break;
 
@@ -484,13 +514,15 @@ rtems_rtl_elf_relocate_rela (rtems_rtl_obj*            obj,
                              const rtems_rtl_obj_sect* sect,
                              const char*               symname,
                              const Elf_Byte            syminfo,
-                             const Elf_Word            symvalue) {
+                             const Elf_Word            symvalue,
+                             Elf_Word                  type) {
   return rtems_rtl_elf_reloc_rela (obj,
                                    rela,
                                    sect,
                                    symname,
                                    syminfo,
                                    symvalue,
+                                   type,
                                    false);
 }
 
@@ -507,6 +539,7 @@ rtems_rtl_elf_relocate_rela_tramp (rtems_rtl_obj*            obj,
                                    symname,
                                    syminfo,
                                    symvalue,
+                                   0,
                                    true);
 }
 

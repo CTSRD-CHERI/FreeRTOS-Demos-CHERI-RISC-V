@@ -156,6 +156,7 @@ rtems_rtl_elf_find_symbol (rtems_rtl_obj*      obj,
                            const Elf_Sym*      sym,
                            const char*         symname,
                            rtems_rtl_obj_sym** symbol,
+                           bool                extract,
                            Elf_Word*           value)
 {
   rtems_rtl_obj_sect* sect;
@@ -172,7 +173,10 @@ rtems_rtl_elf_find_symbol (rtems_rtl_obj*      obj,
     /*
      * Search the object file then the global table for the symbol.
      */
-    *symbol = rtems_rtl_symbol_obj_find (obj, symname);
+    if (extract)
+      *symbol = rtems_rtl_symbol_obj_extract (obj, symname);
+    else
+      *symbol = rtems_rtl_symbol_obj_find (obj, symname);
     if (!*symbol)
       return false;
 
@@ -203,6 +207,7 @@ typedef bool (*rtems_rtl_elf_reloc_handler)(rtems_rtl_obj*      obj,
                                             const char*         symname,
                                             Elf_Word            symvalue,
                                             bool                resolved,
+                                            Elf_Word            type,
                                             void*               data);
 
 /**
@@ -224,6 +229,7 @@ rtems_rtl_elf_reloc_parser (rtems_rtl_obj*      obj,
                             const char*         symname,
                             Elf_Word            symvalue,
                             bool                resolved,
+                            Elf_Word            type,
                             void*               data)
 {
   rtems_rtl_elf_reloc_data* rd = (rtems_rtl_elf_reloc_data*) data;
@@ -315,6 +321,7 @@ rtems_rtl_elf_reloc_relocator (rtems_rtl_obj*      obj,
                                const char*         symname,
                                Elf_Word            symvalue,
                                bool                resolved,
+                               Elf_Word            type,
                                void*               data)
 {
   const Elf_Rela* rela = (const Elf_Rela*) relbuf;
@@ -361,7 +368,8 @@ rtems_rtl_elf_reloc_relocator (rtems_rtl_obj*      obj,
                 (uintmax_t) symvalue, (int) ELF_R_TYPE (rela->r_info),
                 (uintmax_t) rela->r_offset, (int) rela->r_addend);
       rs = rtems_rtl_elf_relocate_rela (obj, rela, targetsect,
-                                        symname, sym->st_info, symvalue);
+                                        symname, sym->st_info, symvalue,
+                                        type);
       if (rs != rtems_rtl_elf_rel_no_error)
         return false;
     }
@@ -401,6 +409,7 @@ rtems_rtl_elf_relocate_worker (rtems_rtl_obj*              obj,
                                int                         fd,
                                rtems_rtl_obj_sect*         sect,
                                rtems_rtl_elf_reloc_handler handler,
+                               Elf_Word                    type,
                                void*                       data)
 {
   rtems_rtl_obj_cache* symbols;
@@ -523,16 +532,30 @@ rtems_rtl_elf_relocate_worker (rtems_rtl_obj*              obj,
 
     resolved = true;
 
-    if (rtems_rtl_elf_rel_resolve_sym (rel_type))
-      resolved = rtems_rtl_elf_find_symbol (obj,
-                                            &sym, symname,
-                                            &symbol, &symvalue);
+    if (type == 0) {
+      if (rtems_rtl_elf_rel_resolve_sym (rel_type))
+        resolved = rtems_rtl_elf_find_symbol (obj,
+                                              &sym, symname,
+                                              &symbol, false, &symvalue);
 
-    if (!handler (obj,
-                  is_rela, relbuf, targetsect,
-                  symbol, &sym, symname, symvalue, resolved,
-                  data))
-      return false;
+      if (!handler (obj,
+                    is_rela, relbuf, targetsect,
+                    symbol, &sym, symname, symvalue, resolved,
+                    type, data))
+        return false;
+    } else if (type == rel_type) {
+      if (rtems_rtl_elf_rel_resolve_sym (rel_type))
+        resolved = rtems_rtl_elf_find_symbol (obj,
+                                              &sym, symname,
+                                              &symbol, true, &symvalue);
+
+      if (!handler (obj,
+                    is_rela, relbuf, targetsect,
+                    symbol, &sym, symname, symvalue, resolved,
+                    type, data))
+        return false;
+
+    }
   }
 
   /*
@@ -551,7 +574,7 @@ rtems_rtl_elf_relocs_parser (rtems_rtl_obj*      obj,
                              void*               data)
 {
   bool r = rtems_rtl_elf_relocate_worker (obj, fd, sect,
-                                          rtems_rtl_elf_reloc_parser, data);
+                                          rtems_rtl_elf_reloc_parser, 0, data);
   return r;
 }
 
@@ -562,7 +585,21 @@ rtems_rtl_elf_relocs_locator (rtems_rtl_obj*      obj,
                               void*               data)
 {
   return rtems_rtl_elf_relocate_worker (obj, fd, sect,
-                                        rtems_rtl_elf_reloc_relocator, data);
+                                        rtems_rtl_elf_reloc_relocator, 0, data);
+}
+
+static bool
+rtems_rtl_elf_relocs_lo12_locator (rtems_rtl_obj*      obj,
+                                  int                 fd,
+                                  rtems_rtl_obj_sect* sect,
+                                  void*               data)
+{
+  if (!rtems_rtl_elf_relocate_worker (obj, fd, sect,
+                                        rtems_rtl_elf_reloc_relocator, R_RISCV_PCREL_LO12_I, data))
+    return false;
+
+  return rtems_rtl_elf_relocate_worker (obj, fd, sect,
+                                        rtems_rtl_elf_reloc_relocator, R_RISCV_PCREL_LO12_S, data);
 }
 
 bool
@@ -596,7 +633,7 @@ rtems_rtl_obj_relocate_unresolved (rtems_rtl_unresolv_reloc* reloc,
                   (int) ELF_R_SYM (rela.r_info), (int) ELF_R_TYPE (rela.r_info),
                   (uintmax_t) rela.r_offset, (int) rela.r_addend);
     rs = rtems_rtl_elf_relocate_rela (reloc->obj, &rela, sect,
-                                      sym->name, sym->data, symvalue);
+                                      sym->name, sym->data, symvalue, 0 /*FIXME*/);
     if (rs != rtems_rtl_elf_rel_no_error)
       return false;
   }
@@ -1790,7 +1827,13 @@ rtems_rtl_elf_file_load (rtems_rtl_obj* obj, int fd)
   if (!rtems_rtl_obj_relocate (obj, fd, rtems_rtl_elf_relocs_locator, &ehdr))
     return false;
 
-  rtems_rtl_symbol_obj_erase_local (obj);
+  /*
+   * Fix up the LO12 relocations.
+   */
+  if (!rtems_rtl_obj_relocate (obj, fd, rtems_rtl_elf_relocs_lo12_locator, &ehdr))
+    return false;
+
+  //rtems_rtl_symbol_obj_erase_local (obj);
 
   if (!rtems_rtl_elf_load_linkmap (obj))
   {

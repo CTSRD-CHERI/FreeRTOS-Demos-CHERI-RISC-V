@@ -219,6 +219,7 @@ rtems_rtl_elf_rel_status rtems_rtl_elf_relocate_rel (rtems_rtl_obj*            o
  * @param symname The symbol's name.
  * @param syminfo The ELF symbol info field.
  * @param symvalue If a symbol is referenced, this is the symbols value.
+ * @param type Selectively relocate only this arch type.
  * @retval rtems_rtl_elf_rel_status The result of the trampoline parsing.
  */
 rtems_rtl_elf_rel_status rtems_rtl_elf_relocate_rela (rtems_rtl_obj*            obj,
@@ -226,7 +227,8 @@ rtems_rtl_elf_rel_status rtems_rtl_elf_relocate_rela (rtems_rtl_obj*            
                                                       const rtems_rtl_obj_sect* sect,
                                                       const char*               symname,
                                                       const Elf_Byte            syminfo,
-                                                      const Elf_Word            symvalue);
+                                                      const Elf_Word            symvalue,
+                                                      Elf_Word                  type);
 
 /**
  * The ELF format check handler.
