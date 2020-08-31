@@ -131,7 +131,22 @@ uint32_t syms_count =  ((size_t) &__symtab_end - (size_t) &__symtab_start) / siz
       uint32_t str_idx = symtab_start[i].st_name;
       char *cap_str = strtab_start + str_idx;
 #ifdef __CHERI_PURE_CAPABILITY__
-      sym->name = cheri_build_data_cap((ptraddr_t) sym->name, strlen(cap_str) + 1, 0xff);
+      if (ELF_ST_TYPE(symtab_start[i].st_info) == STT_OBJECT) {
+        sym->capability = cheri_build_data_cap((ptraddr_t) symtab_start[i].st_value,
+        symtab_start[i].st_size,
+        __CHERI_CAP_PERMISSION_GLOBAL__ | \
+        __CHERI_CAP_PERMISSION_PERMIT_LOAD__ | \
+        __CHERI_CAP_PERMISSION_PERMIT_STORE__);
+      } else if (ELF_ST_TYPE(symtab_start[i].st_info) == STT_FUNC) {
+        sym->capability = cheri_build_code_cap((ptraddr_t) symtab_start[i].st_value,
+        symtab_start[i].st_size,
+        __CHERI_CAP_PERMISSION_GLOBAL__ | \
+        __CHERI_CAP_PERMISSION_PERMIT_EXECUTE__ | \
+        __CHERI_CAP_PERMISSION_PERMIT_LOAD__ | \
+        __CHERI_CAP_PERMISSION_PERMIT_LOAD_CAPABILITY__ | \
+        __CHERI_CAP_PERMISSION_PERMIT_STORE__ | \
+        __CHERI_CAP_PERMISSION_PERMIT_STORE_CAPABILITY__);
+      }
 #endif
       sym->value = symtab_start[i].st_value;
 

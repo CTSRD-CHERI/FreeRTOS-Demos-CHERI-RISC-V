@@ -33,6 +33,9 @@ typedef struct rtems_rtl_obj_sym
   const char*      name;    /**< The symbol's name. */
   void*            value;   /**< The value of the symbol. */
   uint32_t         data;    /**< Format specific data. */
+#ifdef __CHERI_PURE_CAPABILITY__
+  void*            capability;  /**< A potential cap for that symbol */
+#endif
 } rtems_rtl_obj_sym;
 
 /**
