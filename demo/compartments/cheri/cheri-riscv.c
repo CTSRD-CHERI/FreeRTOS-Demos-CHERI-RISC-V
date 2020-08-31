@@ -63,6 +63,9 @@ inline void *cheri_build_code_cap(size_t address, size_t size, size_t perms) {
   returned_cap = __builtin_cheri_perms_and(returned_cap, perms);
   returned_cap = __builtin_cheri_offset_set(returned_cap, address);
   returned_cap = __builtin_cheri_bounds_set(returned_cap, size);
+
+  __builtin_cheri_seal_entry(returned_cap);
+
   return returned_cap;
 }
 
