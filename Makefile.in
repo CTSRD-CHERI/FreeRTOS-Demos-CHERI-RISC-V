@@ -108,26 +108,32 @@ APP_SRC = \
 	bsp/plic_driver.c \
 	bsp/syscalls.c \
 
-LIBDL_SRC = demo/compartments/libdl/dlfcn.c \
-            demo/compartments/libdl/fastlz.c \
-            demo/compartments/libdl/rtl-alloc-heap.c \
-            demo/compartments/libdl/rtl-allocator.c \
-            demo/compartments/libdl/rtl-alloc-lock.c \
-            demo/compartments/libdl/rtl-bit-alloc.c \
-            demo/compartments/libdl/rtl-chain-iterator.c \
-            demo/compartments/libdl/rtl-elf.c \
-            demo/compartments/libdl/rtl-error.c \
-            demo/compartments/libdl/rtl-mdreloc-riscv.c \
-            demo/compartments/libdl/rtl-obj-cache.c \
-            demo/compartments/libdl/rtl-obj-comp.c \
-            demo/compartments/libdl/rtl-obj.c \
-            demo/compartments/libdl/rtl-string.c \
-            demo/compartments/libdl/rtl-sym.c \
-            demo/compartments/libdl/rtl-trace.c \
-            demo/compartments/libdl/rtl-unresolved.c \
-            demo/compartments/libdl/rtl-unwind-dw2.c \
-            demo/compartments/libdl/rtl-freertos-compartments.c \
-            demo/compartments/libdl/rtl.c
+FREERTOS_LIBDL_DIR = ../../../FreeRTOS-Labs/Source/FreeRTOS-libdl
+
+LIBDL_SRC = $(FREERTOS_LIBDL_DIR)/libdl/dlfcn.c \
+            $(FREERTOS_LIBDL_DIR)/libdl/fastlz.c \
+            $(FREERTOS_LIBDL_DIR)/libdl/rtl-alloc-heap.c \
+            $(FREERTOS_LIBDL_DIR)/libdl/rtl-allocator.c \
+            $(FREERTOS_LIBDL_DIR)/libdl/rtl-alloc-lock.c \
+            $(FREERTOS_LIBDL_DIR)/libdl/rtl-bit-alloc.c \
+            $(FREERTOS_LIBDL_DIR)/libdl/rtl-chain-iterator.c \
+            $(FREERTOS_LIBDL_DIR)/libdl/rtl-elf.c \
+            $(FREERTOS_LIBDL_DIR)/libdl/rtl-error.c \
+            $(FREERTOS_LIBDL_DIR)/libdl/rtl-mdreloc-riscv.c \
+            $(FREERTOS_LIBDL_DIR)/libdl/rtl-obj-cache.c \
+            $(FREERTOS_LIBDL_DIR)/libdl/rtl-obj-comp.c \
+            $(FREERTOS_LIBDL_DIR)/libdl/rtl-obj.c \
+            $(FREERTOS_LIBDL_DIR)/libdl/rtl-string.c \
+            $(FREERTOS_LIBDL_DIR)/libdl/rtl-sym.c \
+            $(FREERTOS_LIBDL_DIR)/libdl/rtl-trace.c \
+            $(FREERTOS_LIBDL_DIR)/libdl/rtl-unresolved.c \
+            $(FREERTOS_LIBDL_DIR)/libdl/rtl-unwind-dw2.c \
+            $(FREERTOS_LIBDL_DIR)/libdl/rtl-freertos-compartments.c \
+            $(FREERTOS_LIBDL_DIR)/libdl/rtl.c
+CFLAGS += -I$(FREERTOS_LIBDL_DIR)/include
+
+FREERTOS_LIBCHERI_DIR = ../../../FreeRTOS-Labs/Source/FreeRTOS-libcheri
+LIBCHERI_SRC = $(FREERTOS_LIBCHERI_DIR)/cheri/cheri-riscv.c
 
 ifeq ($(PROG),main_blinky)
 	CFLAGS += -DmainDEMO_TYPE=1
@@ -142,10 +148,10 @@ DEMO_SRC += comp_strtab_generated.c
 DEMO_SRC += $(LIBDL_SRC)
 
 ifeq ($(EXTENSION),cheri)
-DEMO_SRC += demo/compartments/cheri/cheri-riscv.c
+DEMO_SRC += $(LIBCHERI_SRC)
+CFLAGS += -I$(FREERTOS_LIBCHERI_DIR)/include
 endif
 
-	CFLAGS += -I./demo/compartments/include
 
 else
 	$(info unknown demo: $(PROG))
@@ -266,6 +272,7 @@ clean :
 	@rm -f *.a
 	@rm -f demo/*.o
 	@rm -f demo/compartments/*.o
-	@rm -f demo/compartments/libdl/*.o
-	@rm -f *.o.wrapped
+	@rm -f $(FREERTOS_LIBDL_DIR)/libdl/*.o
+	@rm -f $(FREERTOS_LIBCHERI_DIR)/cheri/*.o
+	@rm -f *.wrapped
 	@rm -f *.o
