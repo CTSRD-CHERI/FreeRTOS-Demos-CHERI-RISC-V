@@ -3,6 +3,8 @@
 
 #define configCLINT_BASE_ADDRESS 0x2000000
 #define configUART16550_BASE     0x10000000
+#define configUART16550_BAUD     115200LL
+#define configUART16550_REGSHIFT 1
 
 /**
  * PLIC defines
