@@ -26,7 +26,7 @@ int _write(int file, char *ptr, int len) {
   (void)file;
 #if PLATFORM_SPIKE || PLATFORM_SAIL
   return htif_console_write_polled(ptr, len);
-#elif PLATFORM_QEMU_VIRT || PLATFORM_PICCOLO
+#elif PLATFORM_QEMU_VIRT || PLATFORM_PICCOLO || PLATFORM_GFE
   return uart16550_txbuffer((uint8_t *) ptr, len);
 #elif PLATFORM_RVBS
   return plat_console_write(ptr, len);

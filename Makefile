@@ -133,7 +133,14 @@ else
 ifeq ($(PLATFORM),rvbs)
 	CFLAGS += -DPLATFORM_RVBS=1
 else
+ifeq ($(PLATFORM),gfe)
+	CFLAGS += -DPLATFORM_GFE=1
+MEM_START=0xC0000000
+APP_SRC += \
+	bsp/uart16550.c
+else
 	$(info unknown platform: $(PLATFORM))
+endif
 endif
 endif
 endif
