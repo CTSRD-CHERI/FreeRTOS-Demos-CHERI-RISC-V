@@ -9,6 +9,8 @@ PLATFORM ?=$(call BSP_CONFIGS,$*,1)
 ARCH ?=$(call BSP_CONFIGS,$*,2)
 ABI ?=$(call BSP_CONFIGS,$*,3)
 
+MEM_START?=0x80000000
+
 TARGET =$(CCPATH)riscv${RISCV_XLEN}-unknown-${RISCV_LIB}
 
 TOOLCHAIN ?=gcc
@@ -89,9 +91,6 @@ INCLUDES = \
 
 ASFLAGS  += -g -march=$(ARCH) -mabi=$(ABI)  -Wa,-Ilegacy -I$(FREERTOS_SOURCE_DIR)/portable/GCC/RISC-V/chip_specific_extensions/RV32I_CLINT_no_extensions -DportasmHANDLE_INTERRUPT=external_interrupt_handler
 
-CFLAGS += $(WARNINGS) $(INCLUDES)
-CFLAGS += -O2 -march=$(ARCH) -mabi=$(ABI)
-
 DEMO_SRC = main.c \
 	demo/$(PROG).c
 
@@ -148,6 +147,9 @@ endif
 
 ARFLAGS=crsv
 
+CFLAGS += $(WARNINGS) $(INCLUDES)
+CFLAGS += -O0 -g -march=$(ARCH) -mabi=$(ABI)
+
 #
 # Define all object files.
 #
@@ -159,7 +161,7 @@ PORT_ASM_OBJ = $(PORT_ASM:.S=.o)
 CRT0_OBJ = $(CRT0:.S=.o)
 OBJS = $(CRT0_OBJ) $(PORT_ASM_OBJ) $(PORT_OBJ) $(RTOS_OBJ) $(DEMO_OBJ) $(APP_OBJ)
 
-LDFLAGS	+= -T link.ld -nostartfiles -nostdlib -defsym=_STACK_SIZE=4K -march=$(ARCH) -mabi=$(ABI)
+LDFLAGS	+= -T link.ld -nostartfiles -nostdlib -Wl,--defsym=MEM_START=$(MEM_START) -defsym=_STACK_SIZE=4K -march=$(ARCH) -mabi=$(ABI)
 
 $(info ASFLAGS=$(ASFLAGS))
 $(info LDLIBS=$(LDLIBS))

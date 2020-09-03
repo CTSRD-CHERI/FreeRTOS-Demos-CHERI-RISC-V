@@ -84,9 +84,7 @@ _HEAP_SIZE = 0x4000;
  * Define memory layout
  ****************************************************************************/
 MEMORY {
-  cmem : ORIGIN = 0x81000000, LENGTH = 0x00800000
-	imem : ORIGIN = 0x80000000, LENGTH = 0x00080000
-	dmem : ORIGIN = 0x80080000, LENGTH = 0x00800000
+	cmem : ORIGIN = MEM_START, LENGTH = 0x10000000
 }
 
 /* Specify the default entry point to the program */
@@ -97,25 +95,20 @@ ENTRY(boot)
  * Define the sections, and where they are mapped in memory
  ****************************************************************************/
 SECTIONS {
-   .uncached : {
-      . = ALIGN(64);
-      *(.uncached);
-		*(.uncached.*);
-   } > cmem
 	.text : {
       . = ALIGN(8);
 	    *boot.o(.text);
 		*(.text);
 		*(.text.*);
-	} > imem
+	} > cmem
 
 	.init : {
 	   KEEP (*(.init))
-	} > imem
+	} > cmem
 
     .fini : {
        KEEP (*(.fini))
-    } > imem
+    } > cmem
 
     .rodata : {
        __rodata_start = .;
@@ -123,7 +116,7 @@ SECTIONS {
        *(.rodata.*)
        *(.gnu.linkonce.r.*)
        __rodata_end = .;
-	} > dmem
+	} > cmem
 
 	.sbss : {
 	   __sbss_start = .;
@@ -131,13 +124,13 @@ SECTIONS {
 	   *(.sbss.*)
 	   *(.gnu.linkonce.sb.*)
 	   __sbss_end = .;
-	} > dmem
+	} > cmem
 
     .sdata : {
         _gp = . + 0x800;
         *(.srodata.cst16) *(.srodata.cst8) *(.srodata.cst4) *(.srodata.cst2) *(.srodata*)
         *(.sdata .sdata.* .gnu.linkonce.s.*)
-     }	> dmem
+     }	> cmem
 
 	.data : {
 	   . = ALIGN(16);
@@ -146,23 +139,23 @@ SECTIONS {
 	   *(.data.*)
 	   *(.gnu.linkonce.d.*)
 	   __data_end = .;
-	} > dmem
+	} > cmem
 
 	.htif : {
 	   *(.htif)
-	} > dmem
+	} > cmem
 
 	.eh_frame : {
 	   *(.eh_frame)
-	} > dmem
+	} > cmem
 
     __cap_relocs : {
        . = ALIGN(16);
-    } > dmem
+    } > cmem
 
     .captable : {
        . = ALIGN(16);
-    } > dmem
+    } > cmem
 
     .bss : {
        . = ALIGN(16);
@@ -173,7 +166,7 @@ SECTIONS {
        *(COMMON)
        . = ALIGN(16);
        __bss_end = .;
-    } > dmem
+    } > cmem
 
     /* Generate Stack and Heap definitions */
 
@@ -183,7 +176,7 @@ SECTIONS {
        _heap_start = .;
        . += _HEAP_SIZE;
        _heap_end = .;
-    } > dmem
+    } > cmem
 
     .stack : {
        . = ALIGN(16);
@@ -193,7 +186,7 @@ SECTIONS {
        _stack = .;
        __stack = _stack;
        __freertos_irq_stack_top = .;
-    } > dmem
+    } > cmem
 
     _end = .;
 }
