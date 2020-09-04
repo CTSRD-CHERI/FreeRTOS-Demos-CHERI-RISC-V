@@ -2,6 +2,9 @@ RISCV_XLEN ?= 64
 RISCV_LIB  ?= elf
 CCPATH =
 
+configCPU_CLOCK_HZ ?=
+configMTIME_HZ ?=
+
 BSP ?= spike-rv32imac-ilp32
 BSP_CONFIGS = $(word $2,$(subst -, ,$(BSP)))
 
@@ -154,6 +157,14 @@ endif
 
 ARFLAGS=crsv
 
+# If configCPU_CLOCK_HZ is not empty, pass it as a definition
+ifneq ($(configCPU_CLOCK_HZ),)
+CFLAGS += -DconfigCPU_CLOCK_HZ=$(configCPU_CLOCK_HZ)
+endif
+# If configMTIME_HZ is not empty, pass it as a definition
+ifneq ($(configMTIME_HZ),)
+CFLAGS += -DconfigMTIME_HZ=$(configMTIME_HZ)
+endif
 CFLAGS += $(WARNINGS) $(INCLUDES)
 CFLAGS += -O0 -g -march=$(ARCH) -mabi=$(ABI)
 
