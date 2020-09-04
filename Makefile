@@ -3,6 +3,7 @@ RISCV_LIB  ?= elf
 CCPATH =
 
 configCPU_CLOCK_HZ ?=
+configPERIPH_CLOCK_HZ ?=
 configMTIME_HZ ?=
 
 BSP ?= spike-rv32imac-ilp32
@@ -165,6 +166,11 @@ endif
 ifneq ($(configMTIME_HZ),)
 CFLAGS += -DconfigMTIME_HZ=$(configMTIME_HZ)
 endif
+# If configPERIPH_CLOCK_HZ is not empty, pass it as a definition
+ifneq ($(configPERIPH_CLOCK_HZ),)
+CFLAGS += -DconfigPERIPH_CLOCK_HZ=$(configPERIPH_CLOCK_HZ)
+endif
+
 CFLAGS += $(WARNINGS) $(INCLUDES)
 CFLAGS += -O0 -g -march=$(ARCH) -mabi=$(ABI)
 
