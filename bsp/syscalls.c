@@ -4,7 +4,10 @@
 #include <sys/time.h>
 #include "bsp.h"
 #include "htif.h"
+
+#ifdef configUART16550_BASE
 #include "uart16550.h"
+#endif
 
 void *_sbrk(int nbytes);
 int _write(int file, char *ptr, int len);

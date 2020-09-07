@@ -1,6 +1,9 @@
 #include "bsp.h"
 #include "plic_driver.h"
+
+#ifdef configUART16550_BASE
 #include "uart16550.h"
+#endif
 
 plic_instance_t Plic;
 
