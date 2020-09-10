@@ -2,6 +2,9 @@ compartments:
   - comp1:
       type: component
       comp_type: files
+      interface:
+        type: all_globals
+        list: []
       connections:
         - comp2
       input:
@@ -9,6 +12,9 @@ compartments:
   - comp2:
       type: component
       comp_type: files
+      interface:
+        type: all_globals
+        list: null
       connections:
         - comp1
       input:

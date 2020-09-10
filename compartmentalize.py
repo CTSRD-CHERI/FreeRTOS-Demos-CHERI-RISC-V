@@ -285,6 +285,9 @@ class Compartmentalize:
         #logging.debug("Comp %s sources -> {}", comp_name, compartment[comp_name]["input"])
         comp_list.append(comp_name)
 
+        interface_type = compartment[comp_name]["interface"]["type"]
+        logging.debug("comp %s -> interface_type: %s", comp_name, interface_type)
+
         source_files =  compartment[comp_name]["input"]
 
         for source_file in source_files:
