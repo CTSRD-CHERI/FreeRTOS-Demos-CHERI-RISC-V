@@ -170,7 +170,7 @@ class Compartmentalize:
       for line in make:
         if "COMPARTMENTS ?=" in line:
           #new_output += "COMPARTMENTS = " + " ".join([compartment+".a" for compartment in compartments])
-          new_output += "COMPARTMENTS = " + " ".join([compartment+".o.wrapped" for compartment in compartments])
+          new_output += "COMPARTMENTS = " + " ".join([compartment+".wrapped.o" for compartment in compartments])
           #new_output += "COMPARTMENTS_NUM = " + str(self.num_comps) + "\n"
           new_output += "\nCFLAGS = -DconfigCOMPARTMENTS_NUM=" + str(self.num_comps) + "\n"
           new_output += "\nCFLAGS += -DconfigMAXLEN_COMPNAME=" + str(self.max_comp_namelen) + "\n"
@@ -206,7 +206,7 @@ class Compartmentalize:
 
       self.comp_gen_assembly_file(output_obj)
 
-      output = subprocess.call(["clang" + " -o " + output_obj + ".o.wrapped" " -c " + output_obj + ".S" + " -target " + "riscv64-unknown-elf " +  self.CFLAGS],
+      output = subprocess.call(["clang" + " -o " + output_obj + ".wrapped.o" " -c " + output_obj + ".S" + " -target " + "riscv64-unknown-elf " +  self.CFLAGS],
                       shell=True,
                       bufsize=0)
 

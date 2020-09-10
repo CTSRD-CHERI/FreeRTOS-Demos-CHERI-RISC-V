@@ -274,5 +274,5 @@ clean :
 	@rm -f demo/compartments/*.o
 	@rm -f $(FREERTOS_LIBDL_DIR)/libdl/*.o
 	@rm -f $(FREERTOS_LIBCHERI_DIR)/cheri/*.o
-	@rm -f *.wrapped
+	@rm -f *.wrapped.o
 	@rm -f *.o
