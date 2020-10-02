@@ -64,7 +64,7 @@ extern void *pvAlmightyCodeCap;
 
 #define TEST_TRACE 1
 #if TEST_TRACE
- #define DEBUG_TRACE (RTEMS_RTL_TRACE_DETAIL | \
+ /*#define DEBUG_TRACE (RTEMS_RTL_TRACE_DETAIL | \
                       RTEMS_RTL_TRACE_WARNING | \
                       RTEMS_RTL_TRACE_LOAD | \
                       RTEMS_RTL_TRACE_UNLOAD | \
@@ -77,7 +77,8 @@ extern void *pvAlmightyCodeCap;
                       RTEMS_RTL_TRACE_CACHE | \
                       RTEMS_RTL_TRACE_CHERI | \
                       RTEMS_RTL_TRACE_LOAD_SECT | \
-                      RTEMS_RTL_TRACE_DEPENDENCY)
+                      RTEMS_RTL_TRACE_DEPENDENCY) */
+ #define DEBUG_TRACE (RTEMS_RTL_TRACE_UNRESOLVED)
  #define DL_DEBUG_TRACE DEBUG_TRACE /* RTEMS_RTL_TRACE_ALL */
  #define DL_RTL_CMDS    1
 #else
