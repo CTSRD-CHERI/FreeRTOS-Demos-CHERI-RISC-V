@@ -45,6 +45,11 @@
 #define PRINT_REG "0x%016" PRIx64
 #endif
 
+#ifdef __CHERI_PURE_CAPABILITY__
+#include <cheri/cheri-utility.h>
+#include <rtl/rtl-freertos-compartments.h>
+#endif
+
 void vCompartmentsLoad(void);
 
 static void vTaskCompartment(void *pvParameters);
@@ -250,22 +255,34 @@ static void vTaskCompartment(void *pvParameters) {
 /*-----------------------------------------------------------*/
 
 #ifdef __CHERI_PURE_CAPABILITY__
-static void cheri_print_cap(void *cap) {
 
-  printf("cap: [v: %" PRIu8 " | f: %" PRIu8 " | sealed: %" PRIu8 " | addr: "
-  PRINT_REG \
-  " | base: " PRINT_REG " | length: " PRINT_REG " | offset: " PRINT_REG \
-  " | perms: " PRINT_REG "] \n",
-  (uint8_t) __builtin_cheri_tag_get(cap),
-  (uint8_t) __builtin_cheri_flags_get(cap),
-  (uint8_t) __builtin_cheri_sealed_get(cap),
-  __builtin_cheri_address_get(cap),
-  __builtin_cheri_base_get(cap),
-  __builtin_cheri_length_get(cap),
-  __builtin_cheri_offset_get(cap),
-  __builtin_cheri_perms_get(cap)
-  );
+static void ccall_handler(uintptr_t *exception_frame, ptraddr_t mepc) {
+  uint32_t *ccall_instruction;
+  uint8_t  code_reg_num, data_reg_num;
+  uint32_t *mepcc = (uint32_t *) *(exception_frame);
+  mepcc -= 1; // portASM has already stepped into the next isntruction;
+
+  ccall_instruction = mepcc;
+
+  // Decode the code/data pair passed to ccall
+  code_reg_num = (*ccall_instruction >> 15) & 0x1f;
+  data_reg_num = (*ccall_instruction >> 20) & 0x1f;
+
+  // Get the callee CompID (its otype)
+  size_t otype = __builtin_cheri_type_get(*(exception_frame + code_reg_num));
+
+  xCOMPARTMENT_RET ret = xTaskRunCompartment(cheri_unseal_cap(*(exception_frame + code_reg_num)),
+                    cheri_unseal_cap(*(exception_frame + data_reg_num)),
+                    exception_frame + 10,
+                    otype);
+
+  // Save the return registers in the context.
+  // FIXME: Some checks might be done here to check of the compartment traps and
+  // accordingly take some different action rather than just returning
+  *(exception_frame + 10) = ret.a0;
+  *(exception_frame + 11) = ret.a1;
 }
+
 #endif
 
 static UBaseType_t cheri_exception_handler(uintptr_t *exception_frame)
@@ -273,23 +290,33 @@ static UBaseType_t cheri_exception_handler(uintptr_t *exception_frame)
 #ifdef __CHERI_PURE_CAPABILITY__
   size_t cause = 0;
   size_t epc = 0;
+  size_t cheri_cause;
+
   asm volatile ("csrr %0, mcause" : "=r"(cause)::);
   asm volatile ("csrr %0, mepc" : "=r"(epc)::);
-
-  for(int i = 0; i < 32; i++) {
-    printf("x%i ", i); cheri_print_cap(*(exception_frame + i));
-  }
 
   size_t ccsr = 0;
   asm volatile ("csrr %0, mccsr" : "=r"(ccsr)::);
 
   uint8_t reg_num = (uint8_t) ((ccsr >> 10) & 0x1f);
   bool is_scr = ((ccsr >> 15) & 0x1);
+  cheri_cause = (unsigned) ((ccsr >> 5) & 0x1f);
+
+
+  // ccall
+  if (cheri_cause == 0x19) {
+    ccall_handler(exception_frame, epc);
+    return 0;
+  }
+
+  for(int i = 0; i < 35; i++) {
+    printf("x%i ", i); cheri_print_cap(*(exception_frame + i));
+  }
 
   printf("mepc = 0x%lx\n", epc);
   printf("TRAP: CCSR = 0x%lx (cause: %x reg: %u : scr: %u)\n",
                ccsr,
-               (unsigned) ((ccsr >> 5) & 0x1f),
+               cheri_cause,
                reg_num, is_scr);
 #endif
   while(1);
