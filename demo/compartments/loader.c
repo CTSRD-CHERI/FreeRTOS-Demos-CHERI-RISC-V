@@ -162,10 +162,15 @@ void vCompartmentsLoad(void) {
   }
 
   call = dlsym (obj_handle, "vComp1");
-  printf("Call = %p\n", call);
+  printf("Call vComp1 @ %p \n", call);
 #ifdef __CHERI_PURE_CAPABILITY__
-  cheri_print_cap(call);
-#endif
+  void* data_cap = NULL;
+  int ret = dlinfo(obj_handle, RTLD_DI_CHERI_CAPTABLE, &data_cap);
+  printf("CCalling code -> "); cheri_print_cap(call);
+  printf("CCalling captable -> "); cheri_print_cap(data_cap);
+  asm volatile(".balign 4\nccall %0, %1":: "C"(call), "C"(data_cap):);
+#else
   call();
+#endif
 }
 /*-----------------------------------------------------------*/
