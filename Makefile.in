@@ -85,7 +85,11 @@ FREERTOS_SRC = \
 APP_SOURCE_DIR	= ../Common/Minimal
 
 PORT_SRC = $(FREERTOS_SOURCE_DIR)/portable/GCC/RISC-V/port.c
+ifeq ($(EXTENSION),cheri)
+PORT_ASM = $(FREERTOS_SOURCE_DIR)/portable/GCC/RISC-V/chip_specific_extensions/CHERI/portASM.S
+else
 PORT_ASM = $(FREERTOS_SOURCE_DIR)/portable/GCC/RISC-V/portASM.S
+endif
 
 INCLUDES = \
 	-I. \
