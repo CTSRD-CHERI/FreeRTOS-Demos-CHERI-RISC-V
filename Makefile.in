@@ -139,6 +139,25 @@ CFLAGS += -I$(FREERTOS_LIBDL_DIR)/include
 FREERTOS_LIBCHERI_DIR = ../../../FreeRTOS-Labs/Source/FreeRTOS-libcheri
 LIBCHERI_SRC = $(FREERTOS_LIBCHERI_DIR)/cheri/cheri-riscv.c
 
+FREERTOS_IP_SRC = \
+    $(FREERTOS_TCP_SOURCE_DIR)/FreeRTOS_IP.c \
+    $(FREERTOS_TCP_SOURCE_DIR)/FreeRTOS_ARP.c \
+    $(FREERTOS_TCP_SOURCE_DIR)/FreeRTOS_DHCP.c \
+    $(FREERTOS_TCP_SOURCE_DIR)/FreeRTOS_DNS.c \
+    $(FREERTOS_TCP_SOURCE_DIR)/FreeRTOS_Sockets.c \
+    $(FREERTOS_TCP_SOURCE_DIR)/FreeRTOS_TCP_IP.c \
+    $(FREERTOS_TCP_SOURCE_DIR)/FreeRTOS_UDP_IP.c \
+    $(FREERTOS_TCP_SOURCE_DIR)/FreeRTOS_TCP_WIN.c \
+    $(FREERTOS_TCP_SOURCE_DIR)/FreeRTOS_Stream_Buffer.c \
+    $(FREERTOS_TCP_SOURCE_DIR)/portable/BufferManagement/BufferAllocation_2.c \
+    $(FREERTOS_TCP_SOURCE_DIR)/portable/NetworkInterface/virtio/NetworkInterface.c \
+    bsp/rand.c
+
+FREERTOS_IP_INCLUDE = \
+    -I$(FREERTOS_TCP_SOURCE_DIR) \
+    -I$(FREERTOS_TCP_SOURCE_DIR)/include \
+    -I$(FREERTOS_TCP_SOURCE_DIR)/portable/Compiler/GCC
+
 ifeq ($(PROG),main_blinky)
 	CFLAGS += -DmainDEMO_TYPE=1
 else
@@ -156,12 +175,17 @@ DEMO_SRC += $(LIBCHERI_SRC)
 CFLAGS += -I$(FREERTOS_LIBCHERI_DIR)/include
 endif
 
-
+else
+ifeq ($(PROG),main_tcpip)
+	CFLAGS += -DmainDEMO_TYPE=5
+	INCLUDES += $(FREERTOS_IP_INCLUDE)
+	FREERTOS_SRC += $(FREERTOS_IP_SRC)
 else
 	$(info unknown demo: $(PROG))
-endif
-endif
-endif
+endif # main_blinky
+endif # main_tests
+endif # main_compartment_test
+endif # main_tcpip
 
 # PLATFORM Variants
 ifeq ($(PLATFORM),spike)
@@ -231,12 +255,6 @@ DEMO_OBJ = $(DEMO_SRC:.c=.o)
 PORT_ASM_OBJ = $(PORT_ASM:.S=.o)
 CRT0_OBJ = $(CRT0:.S=.o)
 OBJS = $(CRT0_OBJ) $(PORT_ASM_OBJ) $(PORT_OBJ) $(RTOS_OBJ) $(DEMO_OBJ) $(APP_OBJ)
-#OBJS = $(CRT0_OBJ) $(PORT_ASM_OBJ) $(PORT_OBJ) $(RTOS_OBJ) $(APP_OBJ)
-
-#DEMO_COMP = $(PROG).a
-#$(DEMO_COMP): $(DEMO_OBJ)
-#	llvm-ar ru $@ $^
-#	llvm-ranlib $@
 
 LDFLAGS	+= -T link.ld.generated -nostartfiles -nostdlib -defsym=_STACK_SIZE=4K -march=$(ARCH) -mabi=$(ABI)
 
