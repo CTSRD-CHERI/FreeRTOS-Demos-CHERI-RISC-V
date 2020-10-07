@@ -158,6 +158,12 @@ FREERTOS_IP_INCLUDE = \
     -I$(FREERTOS_TCP_SOURCE_DIR)/include \
     -I$(FREERTOS_TCP_SOURCE_DIR)/portable/Compiler/GCC
 
+VIRTIO_SRC = \
+   bsp/libvirtio/virtio.c \
+   bsp/libvirtio/virtio-net.c
+
+VIRTIO_INCLUDE = -Ibsp/libvirtio
+
 ifeq ($(PROG),main_blinky)
 	CFLAGS += -DmainDEMO_TYPE=1
 else
@@ -202,8 +208,11 @@ ifeq ($(PLATFORM),sail)
 else
 ifeq ($(PLATFORM),qemu_virt)
 	CFLAGS += -DPLATFORM_QEMU_VIRT=1
+	CFLAGS += -DVTNET_LEGACY_TX=1
 	APP_SRC += bsp/uart16550.c
 	APP_SRC += bsp/sifive_test.c
+	FREERTOS_SRC += $(VIRTIO_SRC)
+	INCLUDES += $(VIRTIO_INCLUDE)
 else
 ifeq ($(PLATFORM),rvbs)
 	CFLAGS += -DPLATFORM_RVBS=1
