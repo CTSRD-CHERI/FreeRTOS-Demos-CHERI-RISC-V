@@ -27,8 +27,9 @@
 #define PLIC_MAX_TARGET 15871
 #define PLIC_TARGET_MASK 0x3FFF
 
-//TODO: This might be better in bsp.h
+#ifndef PLIC_NUM_INTERRUPTS
 #define PLIC_NUM_INTERRUPTS 16
+#endif
 
 /**
  * This data type defines an interrupt handler for a device.
