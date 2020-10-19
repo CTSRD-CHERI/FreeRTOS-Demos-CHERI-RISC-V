@@ -12,7 +12,10 @@ plic_instance_t Plic;
  */
 void prvSetupHardware(void) {
   // Resets PLIC, threshold 0, nothing enabled
-  //PLIC_init(&Plic, PLIC_BASE_ADDR, PLIC_NUM_SOURCES, PLIC_NUM_PRIORITIES);
+
+#ifdef PLATFORM_QEMU_VIRT
+  PLIC_init(&Plic, PLIC_BASE_ADDR, PLIC_NUM_SOURCES, PLIC_NUM_PRIORITIES);
+#endif
 
 #ifdef configUART16550_BASE
   uart16550_init(configUART16550_BASE);
