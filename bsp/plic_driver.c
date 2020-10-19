@@ -12,7 +12,7 @@
 static void volatile_memzero(uint8_t *base, unsigned int size);
 
 static void volatile_memzero(uint8_t *base, unsigned int size) {
-  volatile uint8_t *ptr;
+  volatile uint32_t *ptr;
   for (ptr = base; ptr < (base + size); ptr++) {
     *ptr = 0;
   }
@@ -67,21 +67,21 @@ void PLIC_set_threshold(plic_instance_t *this_plic,
 
 void PLIC_enable_interrupt(plic_instance_t *this_plic, plic_source source) {
 
-  volatile uint8_t *current_ptr = (volatile uint8_t *)(this_plic->base_addr +
+  volatile uint32_t *current_ptr = (volatile uint32_t *)(this_plic->base_addr +
                                                        PLIC_ENABLE_OFFSET +
-                                                       (source >> 3));
-  uint8_t current = *current_ptr;
-  current = current | (1 << (source & 0x7));
+                                                       ((source >> 5) << 2));
+  uint32_t current = *current_ptr;
+  current = current | (1 << (source & 0x1f));
   *current_ptr = current;
 }
 
 void PLIC_disable_interrupt(plic_instance_t *this_plic, plic_source source) {
 
-  volatile uint8_t *current_ptr = (volatile uint8_t *)(this_plic->base_addr +
+  volatile uint32_t *current_ptr = (volatile uint32_t *)(this_plic->base_addr +
                                                        PLIC_ENABLE_OFFSET +
-                                                       (source >> 3));
-  uint8_t current = *current_ptr;
-  current = current & ~((1 << (source & 0x7)));
+                                                       ((source >> 5) << 2));
+  uint32_t current = *current_ptr;
+  current = current & ~((1 << (source & 0x1f)));
   *current_ptr = current;
 }
 
