@@ -1,4 +1,9 @@
 /******************************************************************************
+ * Copyright (c) 2020 Hesham Almatary
+ * See LICENSE_CHERI for license details.
+ *****************************************************************************/
+
+/******************************************************************************
  * Copyright (c) 2011 IBM Corporation
  * All rights reserved.
  * This program and the accompanying materials
@@ -20,6 +25,10 @@
 #include "virtio.h"
 #include "helpers.h"
 #include "virtio-internal.h"
+
+#ifdef VIRTIO_USE_MMIO
+#include "virtio_mmio.h"
+#endif
 
 /* PCI virtio header offsets */
 #define VIRTIOHDR_DEVICE_FEATURES	0
@@ -82,6 +91,7 @@ struct virtio_dev_common {
 	le64 q_used;
 } __attribute__ ((packed));
 
+#ifdef VIRTIO_USE_PCI
 /* virtio 1.0 Spec: 4.1.3 PCI Device Layout
  *
  * Fields of different sizes are present in the device configuration regions.
@@ -148,13 +158,50 @@ static void virtio_process_cap(struct virtio_device *dev, uint8_t cap_ptr)
 	virtio_cap_set_base_addr(cap, offset);
 	cap->cap_id = cfg_type;
 }
+#endif
+
+#ifdef VIRTIO_USE_MMIO
+void virtio_mmio_print_configs(uint32_t* device_base)
+{
+	printf("MagicValue:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_MAGIC_VALUE));
+	printf("Version:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_VERSION));
+	printf("DeviceID:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_DEVICE_ID));
+	printf("VendorID:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_VENDOR_ID));
+	printf("DeviceFeatures0:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_HOST_FEATURES));
+	printf("DeviceFeaturesSel0:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_HOST_FEATURES_SEL));
+	virtio_mmio_write32(device_base, VIRTIO_MMIO_HOST_FEATURES_SEL, 1);
+	printf("DeviceFeatures1:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_HOST_FEATURES));
+	printf("DriverFeatures:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_GUEST_FEATURES));
+	printf("DriverFeaturesSel:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_GUEST_FEATURES_SEL));
+	printf("PageSize:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_GUEST_PAGE_SIZE));
+	printf("QueueSel:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_QUEUE_SEL));
+	printf("QueueNumMax:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_QUEUE_NUM_MAX));
+	printf("QueueNum:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_QUEUE_NUM));
+	printf("QueueAlign:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_QUEUE_ALIGN));
+	printf("QueuePFN:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_QUEUE_PFN));
+	printf("QueueReady:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_QUEUE_READY));
+	printf("QueueNotify:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_QUEUE_NOTIFY));
+	printf("InterruptStatus:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_INTERRUPT_STATUS));
+	printf("InterruptACK:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_INTERRUPT_ACK));
+	printf("Status:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_STATUS));
+	printf("QueueDescLow:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_QUEUE_DESC_LOW));
+	printf("QueueDescHigh:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_QUEUE_DESC_HIGH));
+	printf("QueueDriverLow:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_QUEUE_AVAIL_LOW));
+	printf("QueueDriverHigh:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_QUEUE_AVAIL_HIGH));
+	printf("QueueDeviceLow:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_QUEUE_USED_LOW));
+	printf("QueueDeviceHigh:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_QUEUE_USED_HIGH));
+	printf("ConfigGeneration:\t 0x%x\n", virtio_mmio_read32(device_base, VIRTIO_MMIO_CONFIG_GENERATION));
+	printf("Config:\t 0x%x\n", virtio_mmio_read32(device_base,VIRTIO_MMIO_CONFIG));
+}
+#endif
 
 /**
  * Reads the virtio device capabilities, gets called from SLOF routines The
  * function determines legacy or modern device and sets up driver registers
  */
-struct virtio_device *virtio_setup_vd(void)
+struct virtio_device *virtio_setup_vd(void *device_base)
 {
+#ifdef VIRTIO_USE_PCI
 	uint8_t cap_ptr, cap_vndr;
 	struct virtio_device *dev;
 
@@ -182,6 +229,28 @@ struct virtio_device *virtio_setup_vd(void)
 		virtio_cap_set_base_addr(&dev->legacy, 0);
 	}
 	return dev;
+#elif VIRTIO_USE_MMIO
+	struct virtio_device *dev;
+
+	dev = SLOF_alloc_mem(sizeof(struct virtio_device));
+	if (!dev) {
+		printf("Failed to allocate memory");
+		return NULL;
+	}
+
+	if (virtio_mmio_read32(device_base, VIRTIO_MMIO_VERSION) & VIRTIO_F_VERSION_1) {
+		dev->features = VIRTIO_F_VERSION_1;
+		dev->mmio_base = device_base;
+	} else {
+		dev->features = 0;
+		dev->mmio_base = device_base;
+	}
+
+	virtio_mmio_write32(device_base, VIRTIO_MMIO_GUEST_PAGE_SIZE, 0x1000);
+	sync();
+
+	return dev;
+#endif
 }
 
 /**
@@ -204,6 +273,7 @@ unsigned long virtio_vring_size(unsigned int qsize)
  */
 unsigned int virtio_get_qsize(struct virtio_device *dev, int queue)
 {
+#ifdef VIRTIO_USE_PCI
 	unsigned int size = 0;
 
 	if (dev->features & VIRTIO_F_VERSION_1) {
@@ -221,6 +291,14 @@ unsigned int virtio_get_qsize(struct virtio_device *dev, int queue)
 	}
 
 	return size;
+#elif VIRTIO_USE_MMIO
+	virtio_mmio_write32(dev->mmio_base, VIRTIO_MMIO_QUEUE_SEL, queue);
+	// FIXME: This is always reading 0 even if it's written with a different
+	// value. Use VIRTIO_MMIO_QUEUE_NUM_MAX instead.
+	//return virtio_mmio_read32(VIRTIO_MMIO_QUEUE_NUM);
+	sync();
+	return virtio_mmio_read32(dev->mmio_base, VIRTIO_MMIO_QUEUE_NUM_MAX);
+#endif
 }
 
 
@@ -338,6 +416,7 @@ void virtio_reset_device(struct virtio_device *dev)
  */
 void virtio_queue_notify(struct virtio_device *dev, int queue)
 {
+#ifdef VIRTIO_USE_PCI
 	if (dev->features & VIRTIO_F_VERSION_1) {
 		void *q_sel = dev->common.addr + offset_of(struct virtio_dev_common, q_select);
 		void *q_ntfy = dev->common.addr + offset_of(struct virtio_dev_common, q_notify_off);
@@ -352,6 +431,9 @@ void virtio_queue_notify(struct virtio_device *dev, int queue)
 	} else {
 		ci_write_16(dev->legacy.addr+VIRTIOHDR_QUEUE_NOTIFY, cpu_to_le16(queue));
 	}
+#elif VIRTIO_USE_MMIO
+	virtio_mmio_write32(dev->mmio_base, VIRTIO_MMIO_QUEUE_NOTIFY, queue);
+#endif
 }
 
 /**
@@ -359,6 +441,7 @@ void virtio_queue_notify(struct virtio_device *dev, int queue)
  */
 static void virtio_set_qaddr(struct virtio_device *dev, int queue, unsigned long qaddr)
 {
+#ifdef VIRTIO_USE_PCI
 	if (dev->features & VIRTIO_F_VERSION_1) {
 		uint64_t q_desc = qaddr;
 		uint64_t q_avail;
@@ -395,6 +478,15 @@ static void virtio_set_qaddr(struct virtio_device *dev, int queue, unsigned long
 		ci_write_32(dev->legacy.addr+VIRTIOHDR_QUEUE_ADDRESS,
 			    cpu_to_le32(val));
 	}
+#elif VIRTIO_USE_MMIO
+	virtio_mmio_write32(dev->mmio_base, VIRTIO_MMIO_QUEUE_SEL, queue);
+	sync();
+
+	// Only legacy virtio is currently supported
+	virtio_mmio_write32(dev->mmio_base, VIRTIO_MMIO_QUEUE_PFN, qaddr >> 12);
+	virtio_mmio_write32(dev->mmio_base, VIRTIO_MMIO_QUEUE_NUM, 1024);
+	virtio_mmio_write32(dev->mmio_base, VIRTIO_MMIO_QUEUE_ALIGN, 0x1000);
+#endif
 }
 
 struct vqs *virtio_queue_init_vq(struct virtio_device *dev, unsigned int id)
@@ -470,12 +562,16 @@ void virtio_queue_term_vq(struct virtio_device *dev, struct vqs *vq, unsigned in
  */
 void virtio_set_status(struct virtio_device *dev, int status)
 {
+#ifdef VIRTIO_USE_PCI
 	if (dev->features & VIRTIO_F_VERSION_1) {
 		ci_write_8(dev->common.addr +
 			   offset_of(struct virtio_dev_common, dev_status), status);
 	} else {
 		ci_write_8(dev->legacy.addr+VIRTIOHDR_DEVICE_STATUS, status);
 	}
+#elif VIRTIO_USE_MMIO
+	virtio_mmio_write32(dev->mmio_base, VIRTIO_MMIO_STATUS, status);
+#endif
 }
 
 /**
@@ -483,20 +579,44 @@ void virtio_set_status(struct virtio_device *dev, int status)
  */
 void virtio_get_status(struct virtio_device *dev, int *status)
 {
+#ifdef VIRTIO_USE_PCI
 	if (dev->features & VIRTIO_F_VERSION_1) {
 		*status = ci_read_8(dev->common.addr +
 				    offset_of(struct virtio_dev_common, dev_status));
 	} else {
-		*status = ci_read_8(dev->legacy.addr+VIRTIOHDR_DEVICE_STATUS);
+		 *status = ci_read_8(dev->legacy.addr+VIRTIOHDR_DEVICE_STATUS);
 	}
+#elif VIRTIO_USE_MMIO
+	*status = virtio_mmio_read32(dev->mmio_base, VIRTIO_MMIO_STATUS);
+#endif
 }
 
+/**
+ * Get device interrupt status bits
+ */
+void virtio_get_interrupt_status(struct virtio_device *dev, int *status)
+{
+#if VIRTIO_USE_MMIO
+	*status = virtio_mmio_read32(dev->mmio_base, VIRTIO_MMIO_INTERRUPT_STATUS);
+#endif
+}
+
+/**
+ * Get device interrupt status bits
+ */
+void virtio_interrupt_ack(struct virtio_device *dev, int ack)
+{
+#if VIRTIO_USE_MMIO
+	virtio_mmio_write32(dev->mmio_base, VIRTIO_MMIO_INTERRUPT_ACK, ack);
+#endif
+}
 /**
  * Set guest feature bits
  */
 void virtio_set_guest_features(struct virtio_device *dev, uint64_t features)
 
 {
+#ifdef VIRTIO_USE_PCI
 	if (dev->features & VIRTIO_F_VERSION_1) {
 		uint32_t f1 = (features >> 32) & 0xFFFFFFFF;
 		uint32_t f0 = features & 0xFFFFFFFF;
@@ -514,6 +634,18 @@ void virtio_set_guest_features(struct virtio_device *dev, uint64_t features)
 	} else {
 		ci_write_32(dev->legacy.addr+VIRTIOHDR_GUEST_FEATURES, cpu_to_le32(features));
 	}
+#elif VIRTIO_USE_MMIO
+	uint32_t f1 = (features >> 32) & 0xFFFFFFFF;
+	uint32_t f0 = features & 0xFFFFFFFF;
+
+	virtio_mmio_write32(dev->mmio_base, VIRTIO_MMIO_GUEST_FEATURES_SEL, 0);
+	sync();
+	virtio_mmio_write32(dev->mmio_base, VIRTIO_MMIO_GUEST_FEATURES, f0);
+
+	virtio_mmio_write32(dev->mmio_base, VIRTIO_MMIO_GUEST_FEATURES_SEL, 1);
+	sync();
+	virtio_mmio_write32(dev->mmio_base, VIRTIO_MMIO_GUEST_FEATURES, f1);
+#endif
 }
 
 /**
@@ -522,6 +654,7 @@ void virtio_set_guest_features(struct virtio_device *dev, uint64_t features)
 uint64_t virtio_get_host_features(struct virtio_device *dev)
 
 {
+#ifdef VIRTIO_USE_PCI
 	uint64_t features = 0;
 	if (dev->features & VIRTIO_F_VERSION_1) {
 		uint32_t f0 = 0, f1 = 0;
@@ -541,10 +674,12 @@ uint64_t virtio_get_host_features(struct virtio_device *dev)
 		features = le32_to_cpu(ci_read_32(dev->legacy.addr+VIRTIOHDR_DEVICE_FEATURES));
 	}
 	return features;
+#endif
 }
 
 int virtio_negotiate_guest_features(struct virtio_device *dev, uint64_t features)
 {
+#ifdef VIRTIO_USE_PCI
 	uint64_t host_features = 0;
 	int status;
 
@@ -577,6 +712,7 @@ int virtio_negotiate_guest_features(struct virtio_device *dev, uint64_t features
 	dev->features = features;
 
 	return 0;
+#endif
 }
 
 /**
@@ -584,6 +720,7 @@ int virtio_negotiate_guest_features(struct virtio_device *dev, uint64_t features
  */
 uint64_t virtio_get_config(struct virtio_device *dev, int offset, int size)
 {
+#ifdef VIRTIO_USE_PCI
 	uint64_t val = ~0ULL;
 	uint32_t hi, lo;
 	void *confbase;
@@ -621,6 +758,31 @@ uint64_t virtio_get_config(struct virtio_device *dev, int offset, int size)
 	}
 
 	return val;
+#elif VIRTIO_USE_MMIO
+	uint64_t val = ~0ULL;
+	uint32_t hi, lo;
+
+	switch (size) {
+	case 1:
+		val = virtio_mmio_read8(dev->mmio_base, VIRTIO_MMIO_CONFIG + offset);
+		break;
+	case 2:
+		val = virtio_mmio_read16(dev->mmio_base, VIRTIO_MMIO_CONFIG + offset);
+		break;
+	case 4:
+		val = virtio_mmio_read32(dev->mmio_base, VIRTIO_MMIO_CONFIG + offset);
+		break;
+	case 8:
+		/* We don't support 8 bytes PIO accesses
+		 * in qemu and this is all PIO
+		 */
+		lo = virtio_mmio_read32(dev->mmio_base, VIRTIO_MMIO_CONFIG + offset);
+		hi = virtio_mmio_read32(dev->mmio_base, VIRTIO_MMIO_CONFIG + offset + 4);
+		val = (uint64_t)hi << 32 | lo;
+	}
+
+	return val;
+#endif
 }
 
 /**
@@ -629,6 +791,7 @@ uint64_t virtio_get_config(struct virtio_device *dev, int offset, int size)
 int __virtio_read_config(struct virtio_device *dev, void *dst,
 			 int offset, int len)
 {
+#ifdef VIRTIO_USE_PCI
 	void *confbase;
 	unsigned char *buf = dst;
 	int i;
@@ -642,4 +805,5 @@ int __virtio_read_config(struct virtio_device *dev, void *dst,
 		buf[i] = ci_read_8(confbase + offset + i);
 
 	return len;
+#endif
 }

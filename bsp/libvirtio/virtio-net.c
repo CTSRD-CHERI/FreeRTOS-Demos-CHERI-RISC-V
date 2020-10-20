@@ -1,4 +1,9 @@
 /******************************************************************************
+ * Copyright (c) 2020 Hesham Almatary
+ * See LICENSE_CHERI for license details.
+ *****************************************************************************/
+
+/******************************************************************************
  * Copyright (c) 2011 IBM Corporation
  * All rights reserved.
  * This program and the accompanying materials
@@ -35,7 +40,7 @@
 # define dprintf(fmt...)
 #endif
 
-#define sync()  asm volatile ("" ::: "memory")
+#define sync()  asm volatile ("fence o, i" ::: "memory")
 
 #define DRIVER_FEATURE_SUPPORT  (VIRTIO_NET_F_MAC | VIRTIO_F_VERSION_1)
 
@@ -74,6 +79,32 @@ static int virtionet_init_pci(struct virtio_net *vnet, struct virtio_device *dev
 	struct virtio_device *vdev = &vnet->vdev;
 
 	dprintf("virtionet: doing virtionet_init_pci!\n");
+
+	if (!dev)
+		return -1;
+
+	/* make a copy of the device structure */
+	memcpy(vdev, dev, sizeof(struct virtio_device));
+
+	/* Reset device */
+	virtio_reset_device(vdev);
+
+	/* Acknowledge device. */
+	virtio_set_status(vdev, VIRTIO_STAT_ACKNOWLEDGE);
+
+	return 0;
+}
+
+/**
+ * Module init for virtio via MMIO.
+ * Checks whether we're reponsible for the given device and set up
+ * the virtqueue configuration.
+ */
+static int virtionet_init_mmio(struct virtio_net *vnet, struct virtio_device *dev)
+{
+	struct virtio_device *vdev = &vnet->vdev;
+
+	dprintf("virtionet: doing virtionet_init_mmio!\n");
 
 	if (!dev)
 		return -1;
@@ -348,8 +379,15 @@ struct virtio_net *virtionet_open(struct virtio_device *dev)
 
 	vnet->driver.running = 0;
 
+#ifdef VIRTIO_USE_PCI
 	if (virtionet_init_pci(vnet, dev))
 		goto FAIL;
+#endif
+
+#ifdef VIRTIO_USE_MMIO
+	if (virtionet_init_mmio(vnet, dev))
+		goto FAIL;
+#endif
 
 	if (virtionet_init(vnet))
 		goto FAIL;

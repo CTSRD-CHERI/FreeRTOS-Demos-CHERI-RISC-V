@@ -124,7 +124,7 @@ void *virtio_desc_addr(struct virtio_device *vdev, int queue, int id);
 extern struct vqs *virtio_queue_init_vq(struct virtio_device *dev, unsigned int id);
 extern void virtio_queue_term_vq(struct virtio_device *dev, struct vqs *vq, unsigned int id);
 
-extern struct virtio_device *virtio_setup_vd(void);
+extern struct virtio_device *virtio_setup_vd(void *);
 extern void virtio_reset_device(struct virtio_device *dev);
 extern void virtio_queue_notify(struct virtio_device *dev, int queue);
 extern void virtio_set_status(struct virtio_device *dev, int status);
