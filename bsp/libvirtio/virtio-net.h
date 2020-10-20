@@ -1,4 +1,9 @@
 /******************************************************************************
+ * Copyright (c) 2020 Hesham Almatary
+ * See LICENSE_CHERI for license details.
+ *****************************************************************************/
+
+/******************************************************************************
  * Copyright (c) 2011 IBM Corporation
  * All rights reserved.
  * This program and the accompanying materials
@@ -36,5 +41,6 @@ extern struct virtio_net *virtionet_open(struct virtio_device *dev);
 extern void virtionet_close(struct virtio_net *vnet);
 extern int virtionet_read(struct virtio_net *vnet, char *buf, int len);
 extern int virtionet_write(struct virtio_net *vnet, char *buf, int len);
+extern void virtionet_handle_interrupt(struct virtio_net *vnet);
 
 #endif

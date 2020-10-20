@@ -602,7 +602,7 @@ void virtio_get_interrupt_status(struct virtio_device *dev, int *status)
 }
 
 /**
- * Get device interrupt status bits
+ * Ack device interrupt
  */
 void virtio_interrupt_ack(struct virtio_device *dev, int ack)
 {
