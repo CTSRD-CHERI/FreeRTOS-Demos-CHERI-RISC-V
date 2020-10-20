@@ -16,7 +16,7 @@
 #include <netdriver.h>
 #include "virtio.h"
 
-#define RX_QUEUE_SIZE		128
+#define RX_QUEUE_SIZE		1024
 #define BUFFER_ENTRY_SIZE	1514
 
 enum {
