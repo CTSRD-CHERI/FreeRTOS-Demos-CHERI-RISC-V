@@ -378,7 +378,7 @@ static int virtionet_receive(struct virtio_net *vnet, char *buf, int maxlen)
 		if ((i%16)==15)
 			printf("\n");
 	}
-	prinfk("\n");
+	printf("\n");
 #endif
 
 	/* Copy data to destination buffer */
