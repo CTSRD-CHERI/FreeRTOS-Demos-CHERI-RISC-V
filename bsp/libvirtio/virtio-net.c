@@ -214,6 +214,12 @@ static int virtionet_init(struct virtio_net *vnet)
 	for(i = 0; i < (int)sizeof(driver->mac_addr); i++) {
 		driver->mac_addr[i] = virtio_get_config(vdev, i, 1);
 	}
+
+	dprintf("virtionet_init(%02x:%02x:%02x:%02x:%02x:%02x)\n",
+		driver->mac_addr[0], driver->mac_addr[1],
+		driver->mac_addr[2], driver->mac_addr[3],
+		driver->mac_addr[4], driver->mac_addr[5]);
+
 	return 0;
 
 dev_error:
