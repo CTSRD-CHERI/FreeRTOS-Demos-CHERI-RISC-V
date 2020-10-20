@@ -68,6 +68,7 @@ struct virtio_net_hdr_v1 {
 };
 
 static uint16_t last_rx_idx;	/* Last index in RX "used" ring */
+static uint16_t last_tx_idx;	/* Last index in TX "used" ring */
 
 /**
  * Module init for virtio via PCI.
@@ -302,7 +303,13 @@ static int virtionet_xmit(struct virtio_net *vnet, char *buf, int len)
 	sync();
 
 	/* Tell HV that TX queue is ready */
+
+	last_tx_idx = (vq_tx->used->idx);
+
 	virtio_queue_notify(vdev, VQ_TX);
+
+	// Wait until the device has sent the packet
+	while (vq_tx->used->idx == last_tx_idx);
 
 	return len;
 }
