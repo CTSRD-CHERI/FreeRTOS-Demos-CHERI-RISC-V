@@ -204,7 +204,7 @@ static int virtionet_init(struct virtio_net *vnet)
 	vq_tx->avail->idx = 0;
 
 	/* Tell HV that setup succeeded */
-	status |= VIRTIO_STAT_DRIVER_OK;
+	status |= VIRTIO_STAT_DRIVER_OK | VIRTIO_STAT_FEATURES_OK;
 	virtio_set_status(vdev, status);
 
 	/* Tell HV that RX queues are ready */
