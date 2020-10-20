@@ -88,6 +88,7 @@ struct vqs {
 	uint64_t bus_desc;
 };
 
+#ifdef VIRTIO_USE_PCI
 struct virtio_device {
 	uint64_t features;
 	struct virtio_cap legacy;
@@ -99,6 +100,13 @@ struct virtio_device {
 	uint32_t notify_off_mul;
 	struct vqs vq[3];
 };
+#elif VIRTIO_USE_MMIO
+	struct virtio_device {
+	uint32_t     *mmio_base;
+	uint64_t     features;
+	struct vqs   vq[3];
+};
+#endif
 
 /* Parts of the virtqueue are aligned on a 4096 byte page boundary */
 #define VQ_ALIGN(addr)	(((addr) + 0xfff) & ~0xfff)
