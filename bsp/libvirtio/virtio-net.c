@@ -307,6 +307,24 @@ static int virtionet_xmit(struct virtio_net *vnet, char *buf, int len)
 	return len;
 }
 
+size_t virtionet_receive_check(struct virtio_net *vnet)
+{
+	uint32_t idx;
+	uint32_t len = 0;
+	struct virtio_device *vdev = &vnet->vdev;
+	struct vqs *vq_rx = &vdev->vq[VQ_RX];
+
+	idx = virtio_modern16_to_cpu(vdev, vq_rx->used->idx);
+
+	if (last_rx_idx == idx) {
+		/* Nothing received yet */
+		return 0;
+	}
+
+	len = virtio_modern32_to_cpu(vdev, vq_rx->used->ring[last_rx_idx % vq_rx->size].len);
+
+	return len;
+}
 
 /**
  * Receive a packet

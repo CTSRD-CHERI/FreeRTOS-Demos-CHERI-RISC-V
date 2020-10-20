@@ -42,5 +42,6 @@ extern void virtionet_close(struct virtio_net *vnet);
 extern int virtionet_read(struct virtio_net *vnet, char *buf, int len);
 extern int virtionet_write(struct virtio_net *vnet, char *buf, int len);
 extern void virtionet_handle_interrupt(struct virtio_net *vnet);
+extern size_t virtionet_receive_check(struct virtio_net *vnet);
 
 #endif
