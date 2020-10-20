@@ -64,4 +64,23 @@
 #define	VIRTIO_MMIO_INT_CONFIG		(1 << 1)
 #define	VIRTIO_MMIO_VRING_ALIGN		4096
 
+static inline uint32_t virtio_mmio_read32(uint32_t *base, size_t offset)
+{
+	return *((volatile uint32_t*) (((uintptr_t) base) + offset));
+}
+
+static inline uint16_t virtio_mmio_read16(uint32_t *base, size_t offset)
+{
+	return *((volatile uint16_t*) (((uintptr_t) base) + offset));
+}
+
+static inline uint8_t virtio_mmio_read8(uint32_t *base, size_t offset)
+{
+	return *((volatile uint8_t*) (((uintptr_t) base) + offset));
+}
+
+static inline void virtio_mmio_write32(uint32_t *base, size_t offset, uint32_t val)
+{
+	*((volatile uint32_t*) (((uintptr_t) base) + offset)) = val;
+}
 #endif /* _VIRTIO_MMIO_H */
