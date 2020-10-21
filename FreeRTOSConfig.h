@@ -98,7 +98,7 @@
 #ifdef configCUSTOM_HEAP_SIZE
     #define configTOTAL_HEAP_SIZE ((size_t)(configCUSTOM_HEAP_SIZE * 1024 * 1024))
 #else
-    #define configTOTAL_HEAP_SIZE ((size_t)(256 * 1024))
+    #define configTOTAL_HEAP_SIZE ((size_t)(1024 * 1024 * 32))
 #endif
 #define configMAX_TASK_NAME_LEN (16)
 #define configUSE_TRACE_FACILITY 1
