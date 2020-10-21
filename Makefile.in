@@ -64,6 +64,7 @@ $(info $$PROG is [${PROG}])
 FREERTOS_SOURCE_DIR	= ../../Source
 FREERTOS_PLUS_SOURCE_DIR = ../../../FreeRTOS-Plus/Source
 FREERTOS_TCP_SOURCE_DIR = $(FREERTOS_PLUS_SOURCE_DIR)/FreeRTOS-Plus-TCP
+FREERTOS_PROTOCOLS_DIR = ./protocols
 
 WARNINGS= -Wall -Wextra -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-align -Wsign-compare \
 		-Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wunused
@@ -158,11 +159,23 @@ FREERTOS_IP_INCLUDE = \
     -I$(FREERTOS_TCP_SOURCE_DIR)/include \
     -I$(FREERTOS_TCP_SOURCE_DIR)/portable/Compiler/GCC
 
-VIRTIO_SRC = \
-   bsp/libvirtio/virtio.c \
-   bsp/libvirtio/virtio-net.c
+FREERTOS_LIBVIRTIO_DIR = ../../../FreeRTOS-Labs/Source/FreeRTOS-libvirtio
+LIBVIRTIO_SRC = \
+   $(FREERTOS_LIBVIRTIO_DIR)/virtio.c \
+   $(FREERTOS_LIBVIRTIO_DIR)/virtio-net.c \
+   $(FREERTOS_LIBVIRTIO_DIR)/helpers.c
 
-VIRTIO_INCLUDE = -Ibsp/libvirtio
+LIBVIRTIO_INCLUDE = -I$(FREERTOS_LIBVIRTIO_DIR)
+
+FREERTOS_IP_DEMO_SRC = \
+    demo/TCPEchoClient_SingleTasks.c \
+    demo//SimpleUDPClientAndServer.c \
+    demo/SimpleTCPEchoServer.c
+
+ifeq ($(EXTENSION),cheri)
+DEMO_SRC += $(LIBCHERI_SRC)
+CFLAGS += -I$(FREERTOS_LIBCHERI_DIR)/include
+endif
 
 ifeq ($(PROG),main_blinky)
 	CFLAGS += -DmainDEMO_TYPE=1
@@ -176,16 +189,25 @@ DEMO_SRC += demo/compartments/loader.c
 DEMO_SRC += comp_strtab_generated.c
 DEMO_SRC += $(LIBDL_SRC)
 
-ifeq ($(EXTENSION),cheri)
-DEMO_SRC += $(LIBCHERI_SRC)
-CFLAGS += -I$(FREERTOS_LIBCHERI_DIR)/include
-endif
-
 else
-ifeq ($(PROG),main_tcpip)
+ifeq ($(PROG),main_peekpoke)
 	CFLAGS += -DmainDEMO_TYPE=5
-	INCLUDES += $(FREERTOS_IP_INCLUDE)
-	FREERTOS_SRC += $(FREERTOS_IP_SRC)
+    CFLAGS += -DmainCREATE_PEEKPOKE_SERVER_TASK=1
+    CFLAGS += -DmainCREATE_HTTP_SERVER=1
+    CFLAGS += -DipconfigUSE_HTTP=1
+    CFLAGS += '-DconfigHTTP_ROOT="/notused"'
+    CFLAGS += -DffconfigMAX_FILENAME=4096
+    INCLUDES += \
+        $(FREERTOS_IP_INCLUDE) \
+        -I$(FREERTOS_PROTOCOLS_DIR)/include
+    FREERTOS_SRC += \
+        $(FREERTOS_IP_SRC) \
+        $(FREERTOS_PROTOCOLS_DIR)/Common/FreeRTOS_TCP_server.c \
+        $(FREERTOS_PROTOCOLS_DIR)/HTTP/FreeRTOS_HTTP_server.c \
+        $(FREERTOS_PROTOCOLS_DIR)/HTTP/FreeRTOS_HTTP_commands.c \
+        $(FREERTOS_PROTOCOLS_DIR)/HTTP/peekpoke.c
+    DEMO_SRC += $(FREERTOS_IP_DEMO_SRC)
+
 else
 	$(info unknown demo: $(PROG))
 endif # main_blinky
@@ -209,10 +231,11 @@ else
 ifeq ($(PLATFORM),qemu_virt)
 	CFLAGS += -DPLATFORM_QEMU_VIRT=1
 	CFLAGS += -DVTNET_LEGACY_TX=1
+	CFLAGS += -DVIRTIO_USE_MMIO=1
 	APP_SRC += bsp/uart16550.c
 	APP_SRC += bsp/sifive_test.c
-	FREERTOS_SRC += $(VIRTIO_SRC)
-	INCLUDES += $(VIRTIO_INCLUDE)
+	FREERTOS_SRC += $(LIBVIRTIO_SRC)
+	INCLUDES += $(LIBVIRTIO_INCLUDE)
 else
 ifeq ($(PLATFORM),rvbs)
 	CFLAGS += -DPLATFORM_RVBS=1
@@ -300,10 +323,3 @@ clean :
 	@rm -f $(PROG).elf
 	@rm -f $(PROG).map
 	@rm -f $(PROG).asm
-	@rm -f *.a
-	@rm -f demo/*.o
-	@rm -f demo/compartments/*.o
-	@rm -f $(FREERTOS_LIBDL_DIR)/libdl/*.o
-	@rm -f $(FREERTOS_LIBCHERI_DIR)/cheri/*.o
-	@rm -f *.wrapped.o
-	@rm -f *.o

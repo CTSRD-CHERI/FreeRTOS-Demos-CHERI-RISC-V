@@ -59,8 +59,8 @@ extern void main_tests(void);
 #pragma message "Demo type 4: Compartment Tests"
 extern void main_compartment_test(void);
 #elif mainDEMO_TYPE == 5
-#pragma message "Demo type 5: TCP/IP Test"
-extern void main_tcpip(void);
+#pragma message "Demo type 5: TCP/IP peekpoke Test"
+extern void main_peekpoke(void);
 #else
 #error "Unsupported demo type"
 #endif
@@ -137,7 +137,7 @@ int main(void) {
   }
 #elif mainDEMO_TYPE == 5
   {
-    main_tcpip();
+    main_peekpoke();
   }
 #else
 #error "Unsupported Demo"
