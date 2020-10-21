@@ -98,8 +98,8 @@ _HEAP_SIZE = 0x4000;
  * Define memory layout
  ****************************************************************************/
 MEMORY {
-	imem : ORIGIN = 0x80001000, LENGTH = 0x00080000
-	dmem : ORIGIN = 0x80081000, LENGTH = 0x10000000
+	imem : ORIGIN = MEM_START + 0x1000, LENGTH = 0x00080000
+	dmem : ORIGIN = MEM_START + 0x81000, LENGTH = 0x10000000
 	uncached : ORIGIN = 0xa0000000, LENGTH = 0x0010000
 }
 

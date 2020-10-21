@@ -2,12 +2,18 @@ RISCV_XLEN ?= 64
 RISCV_LIB  ?= elf
 CCPATH =
 
+configCPU_CLOCK_HZ ?=
+configPERIPH_CLOCK_HZ ?=
+configMTIME_HZ ?=
+
 BSP ?= spike-rv32imac-ilp32
 BSP_CONFIGS = $(word $2,$(subst -, ,$(BSP)))
 
 PLATFORM ?=$(call BSP_CONFIGS,$*,1)
 ARCH ?=$(call BSP_CONFIGS,$*,2)
 ABI ?=$(call BSP_CONFIGS,$*,3)
+
+MEM_START?=0x80000000
 
 TARGET =$(CCPATH)riscv${RISCV_XLEN}-unknown-${RISCV_LIB}
 
@@ -86,7 +92,6 @@ APP_SOURCE_DIR	= ../Common/Minimal
 
 PORT_SRC = $(FREERTOS_SOURCE_DIR)/portable/GCC/RISC-V/port.c
 ifeq ($(EXTENSION),cheri)
-#PORT_ASM = $(FREERTOS_SOURCE_DIR)/portable/GCC/RISC-V/portASM.S
 PORT_ASM = $(FREERTOS_SOURCE_DIR)/portable/GCC/RISC-V/chip_specific_extensions/CHERI/portASM.S
 else
 PORT_ASM = $(FREERTOS_SOURCE_DIR)/portable/GCC/RISC-V/portASM.S
@@ -240,7 +245,14 @@ else
 ifeq ($(PLATFORM),rvbs)
 	CFLAGS += -DPLATFORM_RVBS=1
 else
+ifeq ($(PLATFORM),gfe)
+	CFLAGS += -DPLATFORM_GFE=1
+MEM_START=0xC0000000
+APP_SRC += \
+	bsp/uart16550.c
+else
 	$(info unknown platform: $(PLATFORM))
+endif
 endif
 endif
 endif
@@ -254,6 +266,22 @@ endif
 
 ARFLAGS=crsv
 
+# If configCPU_CLOCK_HZ is not empty, pass it as a definition
+ifneq ($(configCPU_CLOCK_HZ),)
+CFLAGS += -DconfigCPU_CLOCK_HZ=$(configCPU_CLOCK_HZ)
+endif
+# If configMTIME_HZ is not empty, pass it as a definition
+ifneq ($(configMTIME_HZ),)
+CFLAGS += -DconfigMTIME_HZ=$(configMTIME_HZ)
+endif
+# If configPERIPH_CLOCK_HZ is not empty, pass it as a definition
+ifneq ($(configPERIPH_CLOCK_HZ),)
+CFLAGS += -DconfigPERIPH_CLOCK_HZ=$(configPERIPH_CLOCK_HZ)
+endif
+
+CFLAGS += $(WARNINGS) $(INCLUDES)
+CFLAGS += -O0 -g -march=$(ARCH) -mabi=$(ABI)
+
 #
 # Define all object files.
 #
@@ -265,7 +293,7 @@ PORT_ASM_OBJ = $(PORT_ASM:.S=.o)
 CRT0_OBJ = $(CRT0:.S=.o)
 OBJS = $(CRT0_OBJ) $(PORT_ASM_OBJ) $(PORT_OBJ) $(RTOS_OBJ) $(DEMO_OBJ) $(APP_OBJ)
 
-LDFLAGS	+= -T link.ld.generated -nostartfiles -nostdlib -defsym=_STACK_SIZE=4K -march=$(ARCH) -mabi=$(ABI)
+LDFLAGS	+= -T link.ld.generated -nostartfiles -nostdlib -Wl,--defsym=MEM_START=$(MEM_START) -defsym=_STACK_SIZE=4K -march=$(ARCH) -mabi=$(ABI)
 
 $(info ASFLAGS=$(ASFLAGS))
 $(info LDLIBS=$(LDLIBS))
