@@ -70,7 +70,7 @@
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
 
-#include "bsp/spike.h"
+#include "bsp/qemu_virt.h"
 
 /*-----------------------------------------------------------
  * Application specific definitions.
@@ -89,8 +89,8 @@
 #define configUSE_PREEMPTION 1
 #define configUSE_IDLE_HOOK 1
 #define configUSE_TICK_HOOK 1
-#define configCPU_CLOCK_HZ ((unsigned long)(100000000))
-#define configPERIPH_CLOCK_HZ ((unsigned long)(1000000))
+#define configCPU_CLOCK_HZ ((unsigned long)(10000000))
+#define configPERIPH_CLOCK_HZ ((unsigned long)(10000000))
 #define configTICK_RATE_HZ ((TickType_t)1000)
 #define configMAX_PRIORITIES (5)
 #define configMINIMAL_STACK_SIZE ((uint32_t) 4096) /* Can be as low as 60 but some of the demo tasks that use this constant require it to be higher. */

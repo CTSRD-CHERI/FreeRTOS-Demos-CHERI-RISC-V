@@ -6,6 +6,9 @@
 #define configUART16550_BAUD     115200LL
 #define configUART16550_REGSHIFT 1
 
+#define configCPU_CLOCK_HZ ((unsigned long)(10000000))
+#define configPERIPH_CLOCK_HZ ((unsigned long)(10000000))
+
 /**
  * VIRTIO defines
  */
