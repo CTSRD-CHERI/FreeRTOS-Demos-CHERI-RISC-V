@@ -142,6 +142,8 @@ int main(void) {
 #else
 #error "Unsupported Demo"
 #endif
+	vTaskStartScheduler();
+	for (;;);
 }
 /*-----------------------------------------------------------*/
 
