@@ -136,7 +136,7 @@ SECTIONS {
        __rodata_end = .;
 	} > dmem
 
-	.sbss : {
+	.sbss (NOLOAD) : {
 	   __sbss_start = .;
 	   *(.sbss)
 	   *(.sbss.*)
@@ -159,7 +159,7 @@ SECTIONS {
 	   __data_end = .;
 	} > dmem
 
-	.htif : {
+	.htif (NOLOAD) : {
 	   *(.htif)
 	} > dmem
 
@@ -212,7 +212,7 @@ SECTIONS {
        . = ALIGN(16);
     } > dmem :captable
 
-    .bss : {
+    .bss (NOLOAD) : {
        . = ALIGN(16);
        __bss_start = .;
        *(.bss)
@@ -225,7 +225,7 @@ SECTIONS {
 
     /* Generate Stack and Heap definitions */
 
-    .heap : {
+    .heap (NOLOAD) : {
        . = ALIGN(16);
        _heap = .;
        _heap_start = .;
@@ -233,7 +233,7 @@ SECTIONS {
        _heap_end = .;
     } > dmem
 
-    .stack : {
+    .stack (NOLOAD) : {
        . = ALIGN(16);
        _stack_end = .;
        . += _STACK_SIZE;
@@ -243,7 +243,7 @@ SECTIONS {
        __freertos_irq_stack_top = .;
     } > dmem
 
-    .uncached : {
+    .uncached (NOLOAD) : {
        *(.uncached)
     } > uncached
 
