@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 RISCV_XLEN ?= 64
 RISCV_LIB  ?= elf
 CCPATH =
