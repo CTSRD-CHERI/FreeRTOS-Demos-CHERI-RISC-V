@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 RISCV_XLEN ?= 64
 RISCV_LIB  ?= elf
 CCPATH =
@@ -211,6 +212,8 @@ FREERTOS_IP_DEMO_SRC = \
     demo//SimpleUDPClientAndServer.c \
     demo/SimpleTCPEchoServer.c
 
+MODBUS_DEMO_INCLUDES = -I$(MODBUS_DEMO_DIR)/include
+
 LIBMODBUS_SRC = \
 	$(LIBMODBUS_DIR)/src/modbus.c \
 	$(LIBMODBUS_DIR)/src/modbus-data.c \
@@ -336,7 +339,9 @@ ifeq ($(PROG),modbus_baseline)
 		$(MODBUS_DEMO_DIR)/main_modbus.c \
 		$(MODBUS_DEMO_DIR)/modbus_server.c \
 		$(MODBUS_DEMO_DIR)/modbus_client.c
-	INCLUDES += $(LIBMODBUS_INCLUDES)
+	INCLUDES += \
+		$(MODBUS_DEMO_INCLUDES) \
+		$(LIBMODBUS_INCLUDES)
 	DEMO_SRC += $(LIBMODBUS_SRC)
 else
 ifeq ($(PROG),modbus_baseline_microbenchmark)
@@ -349,8 +354,11 @@ ifeq ($(PROG),modbus_baseline_microbenchmark)
 	DEMO_SRC += \
 		$(MODBUS_DEMO_DIR)/main_modbus.c \
 		$(MODBUS_DEMO_DIR)/modbus_server.c \
-		$(MODBUS_DEMO_DIR)/modbus_client.c
-	INCLUDES += $(LIBMODBUS_INCLUDES)
+		$(MODBUS_DEMO_DIR)/modbus_client.c \
+		$(MODBUS_DEMO_DIR)/microbenchmark.c
+	INCLUDES += \
+		$(MODBUS_DEMO_INCLUDES) \
+		$(LIBMODBUS_INCLUDES)
 	DEMO_SRC += $(LIBMODBUS_SRC)
 else
 ifeq ($(PROG),modbus_cheri_layer)
@@ -364,6 +372,7 @@ ifeq ($(PROG),modbus_cheri_layer)
 		$(MODBUS_DEMO_DIR)/modbus_server.c \
 		$(MODBUS_DEMO_DIR)/modbus_client.c
 	INCLUDES += \
+		$(MODBUS_DEMO_INCLUDES) \
 		$(LIBMODBUS_INCLUDES) \
 		$(LIBMODBUS_CHERI_INCLUDES)
 	DEMO_SRC += \
@@ -381,8 +390,10 @@ ifeq ($(PROG),modbus_cheri_layer_microbenchmark)
 	DEMO_SRC += \
 		$(MODBUS_DEMO_DIR)/main_modbus.c \
 		$(MODBUS_DEMO_DIR)/modbus_server.c \
-		$(MODBUS_DEMO_DIR)/modbus_client.c
+		$(MODBUS_DEMO_DIR)/modbus_client.c \
+		$(MODBUS_DEMO_DIR)/microbenchmark.c
 	INCLUDES += \
+		$(MODBUS_DEMO_INCLUDES) \
 		$(LIBMODBUS_INCLUDES) \
 		$(LIBMODBUS_CHERI_INCLUDES)
 	DEMO_SRC += \
@@ -400,6 +411,7 @@ ifeq ($(PROG),modbus_macaroons_layer)
 		$(MODBUS_DEMO_DIR)/modbus_server.c \
 		$(MODBUS_DEMO_DIR)/modbus_client.c
 	INCLUDES += \
+		$(MODBUS_DEMO_INCLUDES) \
 		$(LIBMODBUS_INCLUDES) \
 		$(LIBMODBUS_MACAROONS_INCLUDES) \
 		$(LIBMACAROONS_INCLUDES)
@@ -419,8 +431,10 @@ ifeq ($(PROG),modbus_macaroons_layer_microbenchmark)
 	DEMO_SRC += \
 		$(MODBUS_DEMO_DIR)/main_modbus.c \
 		$(MODBUS_DEMO_DIR)/modbus_server.c \
-		$(MODBUS_DEMO_DIR)/modbus_client.c
+		$(MODBUS_DEMO_DIR)/modbus_client.c \
+		$(MODBUS_DEMO_DIR)/microbenchmark.c
 	INCLUDES += \
+		$(MODBUS_DEMO_INCLUDES) \
 		$(LIBMODBUS_INCLUDES) \
 		$(LIBMODBUS_MACAROONS_INCLUDES) \
 		$(LIBMACAROONS_INCLUDES)
@@ -441,6 +455,7 @@ ifeq ($(PROG),modbus_cheri_macaroons_layers)
 		$(MODBUS_DEMO_DIR)/modbus_server.c \
 		$(MODBUS_DEMO_DIR)/modbus_client.c
 	INCLUDES += \
+		$(MODBUS_DEMO_INCLUDES) \
 		$(LIBMODBUS_INCLUDES) \
 		$(LIBMODBUS_CHERI_INCLUDES) \
 		$(LIBMODBUS_MACAROONS_INCLUDES) \
@@ -463,8 +478,10 @@ ifeq ($(PROG),modbus_cheri_macaroons_layers_microbenchmark)
 	DEMO_SRC += \
 		$(MODBUS_DEMO_DIR)/main_modbus.c \
 		$(MODBUS_DEMO_DIR)/modbus_server.c \
-		$(MODBUS_DEMO_DIR)/modbus_client.c
+		$(MODBUS_DEMO_DIR)/modbus_client.c \
+		$(MODBUS_DEMO_DIR)/microbenchmark.c
 	INCLUDES += \
+		$(MODBUS_DEMO_INCLUDES) \
 		$(LIBMODBUS_INCLUDES) \
 		$(LIBMODBUS_CHERI_INCLUDES) \
 		$(LIBMODBUS_MACAROONS_INCLUDES) \
