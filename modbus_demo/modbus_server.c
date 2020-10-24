@@ -243,6 +243,7 @@ void vServerTask(void *pvParameters)
     /* discard MICROBENCHMARK_DISCARD runs to ensure quiescence */
     for (int i = 0; i < MICROBENCHMARK_DISCARD; ++i)
     {
+        printf(". ");
         rc = prvCriticalSectionWrapper(req, req_length, rsp, &rsp_length);
         configASSERT(rc != -1);
 
@@ -252,6 +253,7 @@ void vServerTask(void *pvParameters)
     /* perform MICROBENCHMARK_ITERATIONS runs of the critical section */
     for (int i = 0; i < MICROBENCHMARK_ITERATIONS; ++i)
     {
+        printf(". ");
         rc = prvCriticalSectionWrapper(req, req_length, rsp, &rsp_length);
         configASSERT(rc != -1);
 
