@@ -36,18 +36,6 @@ find the queue full. */
 to ticks using the pdMS_TO_TICKS() macro. */
 #define mainQUEUE_SEND_FREQUENCY_MS pdMS_TO_TICKS(200)
 
-#if defined(MICROBENCHMARK)
-/* defines for microbenchmarking
- *
- * the number of iterations to perform over the critical section
- *
- * the number of iterations to discard before performing microbenchmarking
- * to ensure the system is quiescent.
- */
-#define mainMICROBENCHMARK_ITERATIONS 100 /* limited based on default stack and heap sizing */
-#define mainMICROBENCHMARK_DISCARD 10
-#endif
-
 /******************
  * TYPE DEFINITIONS
  *****************/
