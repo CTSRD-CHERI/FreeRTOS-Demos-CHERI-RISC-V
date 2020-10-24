@@ -71,9 +71,14 @@ FREERTOS_LIBCHERI_DIR = ../../../FreeRTOS-Labs/Source/FreeRTOS-libcheri
 FREERTOS_LIBDL_DIR = ../../../FreeRTOS-Labs/Source/FreeRTOS-libdl
 FREERTOS_DEMO_IP_PROTOCOLS_DIR = demo/servers/Common/Demo_IP_Protocols
 
+MODBUS_DEMO_DIR = ./modbus_demo
+LIBMACAROONS_DIR = $(MODBUS_DEMO_DIR)/libmacaroons
+LIBMODBUS_DIR = $(MODBUS_DEMO_DIR)/libmodbus
+LIBMODBUS_CHERI_DIR = $(MODBUS_DEMO_DIR)/libmodbus_cheri
+LIBMODBUS_MACAROONS_DIR = $(MODBUS_DEMO_DIR)/libmodbus_macaroons
+
 WARNINGS= -Wall -Wextra -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-align -Wsign-compare \
 		-Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wunused
-
 
 # Root of RISC-V tools installation
 RISCV ?= /opt/riscv
@@ -274,6 +279,167 @@ ifeq ($(PROG),main_servers)
     INCLUDES += -Idemo/servers/Common/FreeRTOS_Plus_TCP_Demos/include
     INCLUDES += -Idemo/servers/Common/FreeRTOS_Plus_CLI_Demos/include
     INCLUDES += -Idemo/servers/Common/Utilities/include
+ifeq ($(PROG),modbus_baseline)
+	CFLAGS += \
+		-DmainDEMO_TYPE=42 \
+		-D__freertos__=1 \
+		-DconfigCUSTOM_HEAP_SIZE=2
+	DEMO_SRC += \
+		$(MODBUS_DEMO_DIR)/main_modbus.c \
+		$(MODBUS_DEMO_DIR)/modbus_server.c \
+		$(MODBUS_DEMO_DIR)/modbus_client.c
+	INCLUDES += \
+		$(MODBUS_DEMO_INCLUDES) \
+		$(LIBMODBUS_INCLUDES)
+	DEMO_SRC += $(LIBMODBUS_SRC)
+else
+ifeq ($(PROG),modbus_baseline_microbenchmark)
+	CFLAGS += \
+		-DmainDEMO_TYPE=42 \
+		-D__freertos__=1 \
+		-DconfigCUSTOM_HEAP_SIZE=2 \
+		-DNDEBUG=1 \
+		-DMICROBENCHMARK=1
+	DEMO_SRC += \
+		$(MODBUS_DEMO_DIR)/main_modbus.c \
+		$(MODBUS_DEMO_DIR)/modbus_server.c \
+		$(MODBUS_DEMO_DIR)/modbus_client.c \
+		$(MODBUS_DEMO_DIR)/microbenchmark.c
+	INCLUDES += \
+		$(MODBUS_DEMO_INCLUDES) \
+		$(LIBMODBUS_INCLUDES)
+	DEMO_SRC += $(LIBMODBUS_SRC)
+else
+ifeq ($(PROG),modbus_cheri_layer)
+	CFLAGS += \
+		-DmainDEMO_TYPE=42 \
+		-DCHERI_LAYER=1 \
+		-D__freertos__=1 \
+		-DconfigCUSTOM_HEAP_SIZE=2
+	DEMO_SRC += \
+		$(MODBUS_DEMO_DIR)/main_modbus.c \
+		$(MODBUS_DEMO_DIR)/modbus_server.c \
+		$(MODBUS_DEMO_DIR)/modbus_client.c
+	INCLUDES += \
+		$(MODBUS_DEMO_INCLUDES) \
+		$(LIBMODBUS_INCLUDES) \
+		$(LIBMODBUS_CHERI_INCLUDES)
+	DEMO_SRC += \
+		$(LIBMODBUS_SRC) \
+		$(LIBMODBUS_CHERI_SRC)
+else
+ifeq ($(PROG),modbus_cheri_layer_microbenchmark)
+	CFLAGS += \
+		-DmainDEMO_TYPE=42 \
+		-DCHERI_LAYER=1 \
+		-D__freertos__=1 \
+		-DconfigCUSTOM_HEAP_SIZE=2 \
+		-DNDEBUG=1 \
+		-DMICROBENCHMARK=1
+	DEMO_SRC += \
+		$(MODBUS_DEMO_DIR)/main_modbus.c \
+		$(MODBUS_DEMO_DIR)/modbus_server.c \
+		$(MODBUS_DEMO_DIR)/modbus_client.c \
+		$(MODBUS_DEMO_DIR)/microbenchmark.c
+	INCLUDES += \
+		$(MODBUS_DEMO_INCLUDES) \
+		$(LIBMODBUS_INCLUDES) \
+		$(LIBMODBUS_CHERI_INCLUDES)
+	DEMO_SRC += \
+		$(LIBMODBUS_SRC) \
+		$(LIBMODBUS_CHERI_SRC)
+else
+ifeq ($(PROG),modbus_macaroons_layer)
+	CFLAGS += \
+		-DmainDEMO_TYPE=42 \
+		-DMACAROONS_LAYER=1 \
+		-D__freertos__=1 \
+		-DconfigCUSTOM_HEAP_SIZE=2
+	DEMO_SRC += \
+		$(MODBUS_DEMO_DIR)/main_modbus.c \
+		$(MODBUS_DEMO_DIR)/modbus_server.c \
+		$(MODBUS_DEMO_DIR)/modbus_client.c
+	INCLUDES += \
+		$(MODBUS_DEMO_INCLUDES) \
+		$(LIBMODBUS_INCLUDES) \
+		$(LIBMODBUS_MACAROONS_INCLUDES) \
+		$(LIBMACAROONS_INCLUDES)
+ 	DEMO_SRC += \
+		$(LIBMODBUS_SRC) \
+		$(LIBMODBUS_MACAROONS_SRC) \
+		$(LIBMACAROONS_SRC)
+else
+ifeq ($(PROG),modbus_macaroons_layer_microbenchmark)
+	CFLAGS += \
+		-DmainDEMO_TYPE=42 \
+		-DMACAROONS_LAYER=1 \
+		-D__freertos__=1 \
+		-DconfigCUSTOM_HEAP_SIZE=2 \
+		-DNDEBUG=1 \
+		-DMICROBENCHMARK=1
+	DEMO_SRC += \
+		$(MODBUS_DEMO_DIR)/main_modbus.c \
+		$(MODBUS_DEMO_DIR)/modbus_server.c \
+		$(MODBUS_DEMO_DIR)/modbus_client.c \
+		$(MODBUS_DEMO_DIR)/microbenchmark.c
+	INCLUDES += \
+		$(MODBUS_DEMO_INCLUDES) \
+		$(LIBMODBUS_INCLUDES) \
+		$(LIBMODBUS_MACAROONS_INCLUDES) \
+		$(LIBMACAROONS_INCLUDES)
+ 	DEMO_SRC += \
+		$(LIBMODBUS_SRC) \
+		$(LIBMODBUS_MACAROONS_SRC) \
+		$(LIBMACAROONS_SRC)
+else
+ifeq ($(PROG),modbus_cheri_macaroons_layers)
+	CFLAGS += \
+		-DmainDEMO_TYPE=42 \
+		-DMACAROONS_LAYER=1 \
+		-DCHERI_LAYER=1 \
+		-D__freertos__=1 \
+		-DconfigCUSTOM_HEAP_SIZE=2
+	DEMO_SRC += \
+		$(MODBUS_DEMO_DIR)/main_modbus.c \
+		$(MODBUS_DEMO_DIR)/modbus_server.c \
+		$(MODBUS_DEMO_DIR)/modbus_client.c
+	INCLUDES += \
+		$(MODBUS_DEMO_INCLUDES) \
+		$(LIBMODBUS_INCLUDES) \
+		$(LIBMODBUS_CHERI_INCLUDES) \
+		$(LIBMODBUS_MACAROONS_INCLUDES) \
+		$(LIBMACAROONS_INCLUDES)
+ 	DEMO_SRC += \
+		$(LIBMODBUS_SRC) \
+		$(LIBMODBUS_CHERI_SRC) \
+		$(LIBMODBUS_MACAROONS_SRC) \
+		$(LIBMACAROONS_SRC)
+else
+ifeq ($(PROG),modbus_cheri_macaroons_layers_microbenchmark)
+	CFLAGS += \
+		-DmainDEMO_TYPE=42 \
+		-DMACAROONS_LAYER=1 \
+		-DCHERI_LAYER=1 \
+		-D__freertos__=1 \
+		-DconfigCUSTOM_HEAP_SIZE=2 \
+		-DNDEBUG=1 \
+		-DMICROBENCHMARK
+	DEMO_SRC += \
+		$(MODBUS_DEMO_DIR)/main_modbus.c \
+		$(MODBUS_DEMO_DIR)/modbus_server.c \
+		$(MODBUS_DEMO_DIR)/modbus_client.c \
+		$(MODBUS_DEMO_DIR)/microbenchmark.c
+	INCLUDES += \
+		$(MODBUS_DEMO_INCLUDES) \
+		$(LIBMODBUS_INCLUDES) \
+		$(LIBMODBUS_CHERI_INCLUDES) \
+		$(LIBMODBUS_MACAROONS_INCLUDES) \
+		$(LIBMACAROONS_INCLUDES)
+ 	DEMO_SRC += \
+		$(LIBMODBUS_SRC) \
+		$(LIBMODBUS_CHERI_SRC) \
+		$(LIBMODBUS_MACAROONS_SRC) \
+		$(LIBMACAROONS_SRC)
 else
 	$(info unknown demo: $(PROG))
 endif # main_blinky
@@ -281,6 +447,14 @@ endif # main_tests
 endif # main_compartment_test
 endif # main_peekpoke
 endif # main_servers
+endif # modbus_baseline
+endif # modbus_baseline_microbenchmark
+endif # modbus_cheri_layer
+endif # modbus_cheri_layer_microbenchmark
+endif # modbus_macaroons_layer
+endif # modbus_macaroons_layer_microbenchmark
+endif # modbus_cheri_macaroons_layers
+endif # modbus_cheri_macaroons_layers_microbenchmark
 
 # PLATFORM Variants
 ifeq ($(PLATFORM),spike)
