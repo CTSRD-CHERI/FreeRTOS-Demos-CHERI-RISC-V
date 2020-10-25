@@ -309,14 +309,7 @@ use of the +FAT library. In some API's, a character buffer of size
 'ffconfigMAX_FILENAME' will be declared on stack. */
 #define	ffconfigMAX_FILENAME 250
 
-/* Defined in main.c as Visual Studio does not provide its own implementation. */
-struct tm *gmtime_r( const time_t *pxTime, struct tm *tmStruct );
-
-/* Prototype for the function used to print out.  In this case it prints to the
-console before the network is connected then a UDP port after the network has
-connected. */
-extern void vLoggingPrintf( const char *pcFormatString, ... );
-#define FF_PRINTF vLoggingPrintf
+#define FF_PRINTF printf
 
 /* Visual studio does not have an implementation of strcasecmp().
 _RB_ Cannot use FF_NOSTRCASECMP setting as the internal implementation of
