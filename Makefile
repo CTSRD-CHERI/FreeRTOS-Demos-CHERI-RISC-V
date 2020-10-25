@@ -180,6 +180,7 @@ FREERTOS_IP_DEMO_SRC = \
 ifeq ($(EXTENSION),cheri)
 DEMO_SRC += $(LIBCHERI_SRC)
 CFLAGS += -I$(FREERTOS_LIBCHERI_DIR)/include
+CFLAGS += -Werror=cheri-prototypes
 endif
 
 ifeq ($(PROG),main_blinky)
