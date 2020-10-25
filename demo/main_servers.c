@@ -228,12 +228,12 @@ See http://www.freertos.org/FreeRTOS-Plus/FreeRTOS_Plus_TCP/TCP_Echo_Server.html
 */
 #define mainCREATE_UDP_CLI_TASKS					1
 #define mainCREATE_TCP_CLI_TASKS					1
-#define mainCREATE_SIMPLE_UDP_CLIENT_SERVER_TASKS	1
+#define mainCREATE_SIMPLE_UDP_CLIENT_SERVER_TASKS	0
 #define mainCREATE_SELECT_UDP_SERVER_TASKS			0 /* _RB_ Requires retest. */
-#define mainCREATE_UDP_ECHO_TASKS					1
-#define mainCREATE_TCP_ECHO_TASKS_SINGLE			1
-#define mainCREATE_TCP_ECHO_TASKS_SEPARATE			1
-#define mainCREATE_SIMPLE_TCP_ECHO_SERVER			1
+#define mainCREATE_UDP_ECHO_TASKS					0
+#define mainCREATE_TCP_ECHO_TASKS_SINGLE			0
+#define mainCREATE_TCP_ECHO_TASKS_SEPARATE			0
+#define mainCREATE_SIMPLE_TCP_ECHO_SERVER			0
 #define mainCREATE_FTP_SERVER						1
 #define mainCREATE_HTTP_SERVER 						1
 #define mainCREATE_TFTP_SERVER						1
@@ -689,15 +689,6 @@ static volatile uint32_t ulEchoClientErrors_Single = 0, ulEchoClientErrors_Separ
 	/* Not all the demo tasks contain a check function yet - although an
 	assert() will be triggered if a task fails. */
 
-	#if( mainCREATE_TCP_ECHO_TASKS_SINGLE == 1 )
-	{
-		if( xAreSingleTaskTCPEchoClientsStillRunning() != pdPASS )
-		{
-			ulEchoClientErrors_Single++;
-		}
-	}
-	#endif
-
 	#if( mainCREATE_TCP_ECHO_TASKS_SEPARATE == 1 )
 	{
 		if( xAreSeparateTaskTCPEchoClientsStillRunning() != pdPASS )
@@ -712,15 +703,6 @@ static volatile uint32_t ulEchoClientErrors_Single = 0, ulEchoClientErrors_Separ
 		if( xAreTCPEchoServersStillRunning() != pdPASS )
 		{
 			ulEchoServerErrors++;
-		}
-	}
-	#endif
-
-	#if( mainCREATE_UDP_ECHO_TASKS == 1 )
-	{
-		if( xAreUDPEchoClientsStillRunning() != pdPASS )
-		{
-			ulUDPEchoClientErrors++;
 		}
 	}
 	#endif
