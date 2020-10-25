@@ -117,6 +117,9 @@
 #define configUSE_APPLICATION_TASK_TAG 0
 #define configUSE_COUNTING_SEMAPHORES 1
 
+/* FreeRTOS+FAT requires 2 pointers if a CWD is supported. */
+#define configNUM_THREAD_LOCAL_STORAGE_POINTERS 3
+
 // TODO: use only for debugging
 #define configGENERATE_RUN_TIME_STATS 1
 #define configRECORD_STACK_HIGH_ADDRESS (1)
@@ -154,6 +157,20 @@ extern uint32_t port_get_current_mtime(void);
 #ifndef uartPRIMARY_PRIORITY
 #define uartPRIMARY_PRIORITY (configMAX_PRIORITIES - 3)
 #endif
+
+/* If configINCLUDE_DEMO_DEBUG_STATS is set to one, then a few basic IP trace
+macros are defined to gather some UDP stack statistics that can then be viewed
+through the CLI interface. */
+#define configINCLUDE_DEMO_DEBUG_STATS 1
+
+/* The size of the global output buffer that is available for use when there
+are multiple command interpreters running at once (for example, one on a UART
+and one on TCP/IP).  This is done to prevent an output buffer being defined by
+each implementation - which would waste RAM.  In this case, there is only one
+command interpreter running, and it has its own local output buffer, so the
+global buffer is just set to be one byte long as it is not used and should not
+take up unnecessary RAM. */
+#define configCOMMAND_INT_MAX_OUTPUT_SIZE 1
 
 /* Set the following definitions to 1 to include the API function, or zero
 to exclude the API function. */
