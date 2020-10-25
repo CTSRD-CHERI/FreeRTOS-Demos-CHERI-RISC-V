@@ -136,11 +136,11 @@ though this is not implementing a real telnet server. */
 
 /* FTP and HTTP servers execute in the TCP server work task. */
 #define mainTCP_SERVER_TASK_PRIORITY					( tskIDLE_PRIORITY + 2 )
-#define	mainTCP_SERVER_STACK_SIZE						1400 /* Not used in the Win32 simulator. */
+#define	mainTCP_SERVER_STACK_SIZE						( configMINIMAL_STACK_SIZE * 2 )
 
 /* TFTP server parameters. */
 #define mainTFTP_SERVER_PRIORITY						( tskIDLE_PRIORITY + 1 )
-#define mainTFTP_SERVER_STACK_SIZE						1400 /* Not used in the Win32 simulator. */
+#define mainTFTP_SERVER_STACK_SIZE						( configMINIMAL_STACK_SIZE * 2 )
 
 /* Dimensions the buffer used to send UDP print and debug messages. */
 #define cmdPRINTF_BUFFER_SIZE		512
