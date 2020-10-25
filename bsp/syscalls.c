@@ -93,6 +93,10 @@ int _getpid(int n) {
   return 1;
 }
 
+int _gettimeofday(void *, void *) {
+  return 0;
+}
+
 void _exit(int x) {
   do {
 #if PLATFORM_QEMU_VIRT || PLATFORM_SPIKE || PLATFORM_SAIL
