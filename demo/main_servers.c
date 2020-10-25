@@ -107,7 +107,11 @@
 #include "UDPSelectServer.h"
 #include "SimpleTCPEchoServer.h"
 #include "TFTPServer.h"
-#include "demo_logging.h"
+//#include "demo_logging.h"
+
+#ifdef __CHERI_PURE_CAPABILITY__
+#include <cheri/cheri-utility.h>
+#endif
 
 /* UDP command server task parameters. */
 #define mainUDP_CLI_TASK_PRIORITY						( tskIDLE_PRIORITY )
@@ -325,6 +329,47 @@ static struct freertos_sockaddr xPrintUDPAddress;
 static TaskHandle_t xServerWorkTaskHandle = NULL;
 
 /*-----------------------------------------------------------*/
+
+static UBaseType_t cheri_exception_handler(uintptr_t *exception_frame)
+{
+#ifdef __CHERI_PURE_CAPABILITY__
+  size_t cause = 0;
+  size_t epc = 0;
+  size_t cheri_cause;
+
+  asm volatile ("csrr %0, mcause" : "=r"(cause)::);
+  asm volatile ("csrr %0, mepc" : "=r"(epc)::);
+
+  size_t ccsr = 0;
+  asm volatile ("csrr %0, mccsr" : "=r"(ccsr)::);
+
+  uint8_t reg_num = (uint8_t) ((ccsr >> 10) & 0x1f);
+  int is_scr = ((ccsr >> 15) & 0x1);
+  cheri_cause = (unsigned) ((ccsr >> 5) & 0x1f);
+
+  for(int i = 0; i < 35; i++) {
+    printf("x%i ", i); cheri_print_cap(*(exception_frame + i));
+  }
+
+  printf("mepc = 0x%lx\n", epc);
+  printf("TRAP: CCSR = 0x%lx (cause: %x reg: %u : scr: %u)\n",
+               ccsr,
+               cheri_cause,
+               reg_num, is_scr);
+#endif
+  while(1);
+}
+
+static UBaseType_t default_exception_handler(uintptr_t *exception_frame)
+{
+  size_t cause = 0;
+  size_t epc = 0;
+  asm volatile ("csrr %0, mcause" : "=r"(cause)::);
+  asm volatile ("csrr %0, mepc" : "=r"(epc)::);
+  printf("mcause = %u\n", cause);
+  printf("mepc = %llx\n", epc);
+  while(1);
+}
 
 /*
  * NOTE: Some versions of Visual Studio will generate erroneous compiler
@@ -745,6 +790,11 @@ uint32_t ulLoggingIPAddress;
 	FreeRTOS_debug_printf( ( "Seed for randomiser: %lu\n", xTimeNow ) );
 	prvSRand( ( uint32_t ) xTimeNow );
 	FreeRTOS_debug_printf( ( "Random numbers: %08X %08X %08X %08X\n", ipconfigRAND32(), ipconfigRAND32(), ipconfigRAND32(), ipconfigRAND32() ) );
+
+       #ifdef __CHERI_PURE_CAPABILITY__
+               /* Setup an exception handler for CHERI */
+               vPortSetExceptionHandler(0x1c, cheri_exception_handler);
+       #endif
 }
 /*-----------------------------------------------------------*/
 
