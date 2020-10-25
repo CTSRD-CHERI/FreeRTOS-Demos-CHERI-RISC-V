@@ -84,6 +84,10 @@ commands. */
 #include "FreeRTOS_IP.h"
 #include "FreeRTOS_Sockets.h"
 
+/* The example IP trace macros are included here so the definitions are
+available in all the FreeRTOS+TCP source files. */
+#include "DemoIPTrace.h"
+
 #ifndef  configINCLUDE_TRACE_RELATED_CLI_COMMANDS
 	#define configINCLUDE_TRACE_RELATED_CLI_COMMANDS 0
 #endif
