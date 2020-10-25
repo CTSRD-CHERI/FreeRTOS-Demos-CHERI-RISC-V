@@ -375,7 +375,7 @@ static UBaseType_t default_exception_handler(uintptr_t *exception_frame)
  * NOTE: Some versions of Visual Studio will generate erroneous compiler
  * warnings about variables being used before they are set.
  */
-int main( void )
+int main_servers( void )
 {
 const uint32_t ulLongTime_ms = 250UL, ulCheckTimerPeriod_ms = 15000UL;
 TimerHandle_t xCheckTimer;

@@ -65,6 +65,11 @@ FREERTOS_SOURCE_DIR	= ../../Source
 FREERTOS_PLUS_SOURCE_DIR = ../../../FreeRTOS-Plus/Source
 FREERTOS_TCP_SOURCE_DIR = $(FREERTOS_PLUS_SOURCE_DIR)/FreeRTOS-Plus-TCP
 FREERTOS_PROTOCOLS_DIR = ./protocols
+FREERTOS_FAT_SOURCE_DIR = ../../../FreeRTOS-Labs/Source/FreeRTOS-Plus-FAT
+FREERTOS_CLI_SOURCE_DIR = ../../../FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI/
+FREERTOS_LIBCHERI_DIR = ../../../FreeRTOS-Labs/Source/FreeRTOS-libcheri
+FREERTOS_LIBDL_DIR = ../../../FreeRTOS-Labs/Source/FreeRTOS-libdl
+FREERTOS_DEMO_IP_PROTOCOLS_DIR = demo/servers/Common/Demo_IP_Protocols
 
 WARNINGS= -Wall -Wextra -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-align -Wsign-compare \
 		-Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wunused
@@ -113,8 +118,6 @@ APP_SRC = \
 	bsp/plic_driver.c \
 	bsp/syscalls.c \
 
-FREERTOS_LIBDL_DIR = ../../../FreeRTOS-Labs/Source/FreeRTOS-libdl
-
 LIBDL_SRC = $(FREERTOS_LIBDL_DIR)/libdl/dlfcn.c \
             $(FREERTOS_LIBDL_DIR)/libdl/fastlz.c \
             $(FREERTOS_LIBDL_DIR)/libdl/rtl-alloc-heap.c \
@@ -137,7 +140,6 @@ LIBDL_SRC = $(FREERTOS_LIBDL_DIR)/libdl/dlfcn.c \
             $(FREERTOS_LIBDL_DIR)/libdl/rtl.c
 CFLAGS += -I$(FREERTOS_LIBDL_DIR)/include
 
-FREERTOS_LIBCHERI_DIR = ../../../FreeRTOS-Labs/Source/FreeRTOS-libcheri
 LIBCHERI_SRC = $(FREERTOS_LIBCHERI_DIR)/cheri/cheri-riscv.c
 
 FREERTOS_IP_SRC = \
@@ -158,6 +160,32 @@ FREERTOS_IP_INCLUDE = \
     -I$(FREERTOS_TCP_SOURCE_DIR) \
     -I$(FREERTOS_TCP_SOURCE_DIR)/include \
     -I$(FREERTOS_TCP_SOURCE_DIR)/portable/Compiler/GCC
+
+FREERTOS_FAT_SOURCE = \
+    $(FREERTOS_FAT_SOURCE_DIR)/ff_crc.c \
+    $(FREERTOS_FAT_SOURCE_DIR)/ff_dir.c \
+    $(FREERTOS_FAT_SOURCE_DIR)/ff_error.c \
+    $(FREERTOS_FAT_SOURCE_DIR)/ff_fat.c \
+    $(FREERTOS_FAT_SOURCE_DIR)/ff_file.c \
+    $(FREERTOS_FAT_SOURCE_DIR)/ff_format.c \
+    $(FREERTOS_FAT_SOURCE_DIR)/ff_ioman.c \
+    $(FREERTOS_FAT_SOURCE_DIR)/ff_locking.c \
+    $(FREERTOS_FAT_SOURCE_DIR)/ff_memory.c \
+    $(FREERTOS_FAT_SOURCE_DIR)/ff_string.c \
+    $(FREERTOS_FAT_SOURCE_DIR)/ff_sys.c \
+    $(FREERTOS_FAT_SOURCE_DIR)/ff_time.c \
+    $(FREERTOS_FAT_SOURCE_DIR)/ff_stdio.c \
+    $(FREERTOS_FAT_SOURCE_DIR)/portable/common/ff_ramdisk.c
+
+FREERTOS_FAT_INCLUDE = -I$(FREERTOS_FAT_SOURCE_DIR)/include \
+                       -I$(FREERTOS_FAT_SOURCE_DIR)/portable/common
+
+FREERTOS_CLI_SRC = $(FREERTOS_CLI_SOURCE_DIR)/FreeRTOS_CLI.c \
+
+FREERTOS_DEMO_IP_FTP_SRC = demo/servers/Common/Demo_IP_Protocols/FTP/FreeRTOS_FTP_server.c \
+                           demo/servers/Common/Demo_IP_Protocols/FTP/FreeRTOS_FTP_commands.c
+
+FREERTOS_DEMO_IP_TFTP_SRC = demo/servers/Common/FreeRTOS_Plus_TCP_Demos/TFTPServer.c
 
 FREERTOS_LIBVIRTIO_DIR = ../../../FreeRTOS-Labs/Source/FreeRTOS-libvirtio
 LIBVIRTIO_SRC = \
@@ -208,13 +236,49 @@ ifeq ($(PROG),main_peekpoke)
         $(FREERTOS_PROTOCOLS_DIR)/HTTP/FreeRTOS_HTTP_commands.c \
         $(FREERTOS_PROTOCOLS_DIR)/HTTP/peekpoke.c
     DEMO_SRC += $(FREERTOS_IP_DEMO_SRC)
+else
+ifeq ($(PROG),main_servers)
+	CFLAGS += -DmainDEMO_TYPE=6
+    CFLAGS += -DmainCREATE_HTTP_SERVER=1
+    CFLAGS += -DipconfigUSE_HTTP=1
+    CFLAGS += -DipconfigUSE_FTP=1
+    CFLAGS += '-DconfigHTTP_ROOT="/ram/websrc/"'
+    CFLAGS += -DffconfigMAX_FILENAME=256
+    INCLUDES += \
+        $(FREERTOS_IP_INCLUDE) \
+        $(FREERTOS_FAT_INCLUDE) \
+        -I$(FREERTOS_DEMO_IP_PROTOCOLS_DIR)/include
+    FREERTOS_SRC += \
+        $(FREERTOS_IP_SRC) \
+        $(FREERTOS_FAT_SOURCE) \
+        $(FREERTOS_CLI_SRC) \
 
+    DEMO_SRC += $(FREERTOS_IP_DEMO_SRC) \
+        $(FREERTOS_DEMO_IP_TFTP_SRC) \
+        $(FREERTOS_DEMO_IP_FTP_SRC) \
+        $(FREERTOS_DEMO_IP_PROTOCOLS_DIR)/Common/FreeRTOS_TCP_server.c \
+        $(FREERTOS_DEMO_IP_PROTOCOLS_DIR)/HTTP/FreeRTOS_HTTP_commands.c \
+        $(FREERTOS_DEMO_IP_PROTOCOLS_DIR)/HTTP/FreeRTOS_HTTP_server.c \
+        demo/servers/Common/FreeRTOS_Plus_FAT_Demos/CreateAndVerifyExampleFiles.c \
+        demo/servers/Common/FreeRTOS_Plus_FAT_Demos/test/ff_stdio_tests_with_cwd.c \
+        demo/servers/CLI-commands.c \
+        demo/servers/Common/FreeRTOS_Plus_CLI_Demos/TCPCommandConsole.c \
+        demo/servers/Common/FreeRTOS_Plus_CLI_Demos/UDPCommandConsole.c \
+        demo/servers/Common/FreeRTOS_Plus_CLI_Demos/File-related-CLI-commands.c \
+        demo/servers/TraceMacros/Example1/DemoIPTrace.c
+
+    INCLUDES += -Idemo/servers -Idemo/servers/TraceMacros/Example1
+    INCLUDES += -Idemo/servers/DemoTasks/include
+    INCLUDES += -Idemo/servers/Common/FreeRTOS_Plus_TCP_Demos/include
+    INCLUDES += -Idemo/servers/Common/FreeRTOS_Plus_CLI_Demos/include
+    INCLUDES += -Idemo/servers/Common/Utilities/include
 else
 	$(info unknown demo: $(PROG))
 endif # main_blinky
 endif # main_tests
 endif # main_compartment_test
-endif # main_tcpip
+endif # main_peekpoke
+endif # main_servers
 
 # PLATFORM Variants
 ifeq ($(PLATFORM),spike)

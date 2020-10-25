@@ -61,6 +61,9 @@ extern void main_compartment_test(void);
 #elif mainDEMO_TYPE == 5
 #pragma message "Demo type 5: TCP/IP peekpoke Test"
 extern void main_peekpoke(void);
+#elif mainDEMO_TYPE == 6
+#pragma message "Demo type : UDP/TCP/IP-based echo, CLI, HTTP, FTP and TFTP servers"
+extern void main_servers(void);
 #else
 #error "Unsupported demo type"
 #endif
@@ -138,6 +141,10 @@ int main(void) {
 #elif mainDEMO_TYPE == 5
   {
     main_peekpoke();
+  }
+#elif mainDEMO_TYPE == 6
+  {
+    main_servers();
   }
 #else
 #error "Unsupported Demo"
