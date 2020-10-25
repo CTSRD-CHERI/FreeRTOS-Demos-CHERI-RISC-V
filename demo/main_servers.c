@@ -319,7 +319,7 @@ const uint8_t ucMACAddress[ 6 ] = { configMAC_ADDR0, configMAC_ADDR1, configMAC_
 static struct freertos_sockaddr xPrintUDPAddress;
 
 /* Use by the pseudo random number generator. */
-static UBaseType_t ulNextRand;
+//static UBaseType_t ulNextRand;
 
 /* Handle of the task that runs the FTP and HTTP servers. */
 static TaskHandle_t xServerWorkTaskHandle = NULL;
@@ -384,18 +384,6 @@ TimerHandle_t xCheckTimer;
 
 	/* Start the RTOS scheduler. */
 	FreeRTOS_debug_printf( ("vTaskStartScheduler\n") );
-	vTaskStartScheduler();
-
-	/* If all is well, the scheduler will now be running, and the following
-	line will never be reached.  If the following line does execute, then
-	there was insufficient FreeRTOS heap memory available for the idle and/or
-	timer tasks	to be created.  See the memory management section on the
-	FreeRTOS web site for more details (this is standard text that is not not
-	really applicable to the Win32 simulator port). */
-	for( ;; )
-	{
-		Sleep( ulLongTime_ms );
-	}
 }
 /*-----------------------------------------------------------*/
 
@@ -488,6 +476,7 @@ FF_Disk_t *pxDisk;
 #endif /* ( ( mainCREATE_FTP_SERVER == 1 ) || ( mainCREATE_HTTP_SERVER == 1 ) ) */
 /*-----------------------------------------------------------*/
 
+#if 0
 void vApplicationIdleHook( void )
 {
 const uint32_t ulMSToSleep = 1;
@@ -498,8 +487,10 @@ const uint32_t ulMSToSleep = 1;
 	idle task just sleeps to lower the CPU usage. */
 	Sleep( ulMSToSleep );
 }
+#endif
 /*-----------------------------------------------------------*/
 
+#if 0
 void vAssertCalled( const char *pcFile, uint32_t ulLine )
 {
 const uint32_t ulLongSleep = 1000UL;
@@ -523,6 +514,7 @@ volatile uint32_t ulLineNumber = ulLine;
 	}
 	taskENABLE_INTERRUPTS();
 }
+#endif
 /*-----------------------------------------------------------*/
 
 /* Called by FreeRTOS+TCP when the network connects or disconnects.  Disconnect
@@ -669,6 +661,7 @@ static const char *pcInvalidData = "Ping reply received with invalid data - ";
 }
 /*-----------------------------------------------------------*/
 
+#if 0
 void vApplicationMallocFailedHook( void )
 {
 	/* Called if a call to pvPortMalloc() fails because there is insufficient
@@ -678,6 +671,7 @@ void vApplicationMallocFailedHook( void )
 	configTOTAL_HEAP_SIZE configuration constant in FreeRTOSConfig.h. */
 	vAssertCalled( __FILE__, __LINE__ );
 }
+#endif
 /*-----------------------------------------------------------*/
 
 static void prvCheckTimerCallback( TimerHandle_t xTimer )
@@ -718,6 +712,7 @@ static volatile uint32_t ulEchoClientErrors_Single = 0, ulEchoClientErrors_Separ
 }
 /*-----------------------------------------------------------*/
 
+#if 0
 UBaseType_t uxRand( void )
 {
 const uint32_t ulMultiplier = 0x015a4e35UL, ulIncrement = 1UL;
@@ -727,6 +722,7 @@ const uint32_t ulMultiplier = 0x015a4e35UL, ulIncrement = 1UL;
 	ulNextRand = ( ulMultiplier * ulNextRand ) + ulIncrement;
 	return( ( int ) ( ulNextRand >> 16UL ) & 0x7fffUL );
 }
+#endif
 /*-----------------------------------------------------------*/
 
 static void prvSRand( UBaseType_t ulSeed )
