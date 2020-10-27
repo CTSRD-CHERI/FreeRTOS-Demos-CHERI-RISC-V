@@ -185,7 +185,8 @@ FREERTOS_FAT_SOURCE = \
 FREERTOS_FAT_INCLUDE = -I$(FREERTOS_FAT_SOURCE_DIR)/include \
                        -I$(FREERTOS_FAT_SOURCE_DIR)/portable/common
 
-FREERTOS_CLI_SRC = $(FREERTOS_CLI_SOURCE_DIR)/FreeRTOS_CLI.c \
+FREERTOS_CLI_SRC = $(FREERTOS_CLI_SOURCE_DIR)/FreeRTOS_CLI.c
+FREERTOS_CLI_INCLUDE = -I$(FREERTOS_CLI_SOURCE_DIR)
 
 FREERTOS_DEMO_IP_FTP_SRC = demo/servers/Common/Demo_IP_Protocols/FTP/FreeRTOS_FTP_server.c \
                            demo/servers/Common/Demo_IP_Protocols/FTP/FreeRTOS_FTP_commands.c
@@ -252,6 +253,7 @@ ifeq ($(PROG),main_servers)
     INCLUDES += \
         $(FREERTOS_IP_INCLUDE) \
         $(FREERTOS_FAT_INCLUDE) \
+        $(FREERTOS_CLI_INCLUDE) \
         -I$(FREERTOS_DEMO_IP_PROTOCOLS_DIR)/include
     FREERTOS_SRC += \
         $(FREERTOS_IP_SRC) \
