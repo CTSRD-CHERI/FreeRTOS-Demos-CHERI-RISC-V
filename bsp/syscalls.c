@@ -93,7 +93,7 @@ int _getpid(int n) {
   return 1;
 }
 
-int _gettimeofday(void *, void *) {
+int _gettimeofday(void *x, void *y) {
   return 0;
 }
 

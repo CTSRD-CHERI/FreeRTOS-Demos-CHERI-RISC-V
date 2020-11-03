@@ -71,7 +71,8 @@ int htif_console_write_polled(
   return i;
 }
 
-void htif_poweroff( int32_t lExitCode) __attribute__( ( noreturn ) )
+void htif_poweroff( int32_t lExitCode) __attribute__( ( noreturn ) );
+void htif_poweroff( int32_t lExitCode)
 {
 	while ( 1 )
 	{
