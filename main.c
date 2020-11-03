@@ -65,7 +65,11 @@ extern void main_peekpoke(void);
 #pragma message "Demo type : UDP/TCP/IP-based echo, CLI, HTTP, FTP and TFTP servers"
 extern void main_servers(void);
 #else
+#ifdef configPROG_ENTRY
+  extern void configPROG_ENTRY(void);
+#else
 #error "Unsupported demo type"
+#endif
 #endif
 
 /* Prototypes for the standard FreeRTOS callback/hook functions implemented
@@ -147,7 +151,13 @@ int demo_main(void) {
     main_servers();
   }
 #else
+#ifdef configPROG_ENTRY
+  {
+    configPROG_ENTRY();
+  }
+#else
 #error "Unsupported Demo"
+#endif
 #endif
 	vTaskStartScheduler();
 	for (;;);
