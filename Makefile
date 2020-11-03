@@ -261,21 +261,21 @@ endif
 
 ifeq ($(PROG),main_blinky)
 	CFLAGS += -DmainDEMO_TYPE=1
-	DEMO_SRC += $(PROG).c
+	DEMO_SRC += demo/$(PROG).c
 else
 ifeq ($(PROG),main_tests)
 	CFLAGS += -DmainDEMO_TYPE=3
-	DEMO_SRC += $(PROG).c
+	DEMO_SRC += demo/$(PROG).c
 else
 ifeq ($(PROG),main_compartment_test)
 	CFLAGS += -DmainDEMO_TYPE=4
-	DEMO_SRC += $(PROG).c
+	DEMO_SRC += demo/$(PROG).c
 	DEMO_SRC += demo/compartments/loader.c
 	DEMO_SRC += comp_strtab_generated.c
 	DEMO_SRC += $(LIBDL_SRC)
 else
 ifeq ($(PROG),main_peekpoke)
-	CFLAGS += -DmainDEMO_TYPE=5
+    CFLAGS += -DmainDEMO_TYPE=5
     CFLAGS += -DmainCREATE_PEEKPOKE_SERVER_TASK=1
     CFLAGS += -DmainCREATE_HTTP_SERVER=1
     CFLAGS += -DipconfigUSE_HTTP=1
@@ -290,7 +290,7 @@ ifeq ($(PROG),main_peekpoke)
         $(FREERTOS_PROTOCOLS_DIR)/HTTP/FreeRTOS_HTTP_server.c \
         $(FREERTOS_PROTOCOLS_DIR)/HTTP/FreeRTOS_HTTP_commands.c \
         $(FREERTOS_PROTOCOLS_DIR)/HTTP/peekpoke.c
-	DEMO_SRC += $(PROG).c
+    DEMO_SRC += demo/$(PROG).c
     DEMO_SRC += $(FREERTOS_IP_DEMO_SRC)
 else
 ifeq ($(PROG),main_servers)
@@ -323,12 +323,14 @@ ifeq ($(PROG),main_servers)
         demo/servers/Common/FreeRTOS_Plus_CLI_Demos/UDPCommandConsole.c \
         demo/servers/Common/FreeRTOS_Plus_CLI_Demos/File-related-CLI-commands.c \
         demo/servers/TraceMacros/Example1/DemoIPTrace.c
+    DEMO_SRC += demo/main_servers.c
 
     INCLUDES += -Idemo/servers -Idemo/servers/TraceMacros/Example1
     INCLUDES += -Idemo/servers/DemoTasks/include
     INCLUDES += -Idemo/servers/Common/FreeRTOS_Plus_TCP_Demos/include
     INCLUDES += -Idemo/servers/Common/FreeRTOS_Plus_CLI_Demos/include
     INCLUDES += -Idemo/servers/Common/Utilities/include
+else
 ifeq ($(PROG),modbus_baseline)
 	CFLAGS += \
 		-DmainDEMO_TYPE=42 \
@@ -490,7 +492,6 @@ ifeq ($(PROG),modbus_cheri_macaroons_layers_microbenchmark)
 		$(LIBMODBUS_CHERI_SRC) \
 		$(LIBMODBUS_MACAROONS_SRC) \
 		$(LIBMACAROONS_SRC)
->>>>>>> 0b3b17fe5... modbus: create microbenchmark versions of all apps
 else
 	$(info unknown demo: $(PROG))
 endif # main_blinky

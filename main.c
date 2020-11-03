@@ -70,6 +70,7 @@ extern void main_modbus(void);
 #else
 #ifdef configPROG_ENTRY
 extern void configPROG_ENTRY(void);
+#else
 #error "Unsupported demo type"
 #endif
 #endif
@@ -147,6 +148,7 @@ int demo_main(void) {
 #elif mainDEMO_TYPE == 5
   {
     main_peekpoke();
+  }
 #elif mainDEMO_TYPE == 6
   {
     main_servers();
