@@ -620,7 +620,9 @@ def configure(ctx):
     if ctx.env.PURECAP:
         ctx.env.append_value('LIB_DEPS', ["cheri"])
 
-    if ctx.env.PROGRAM_PATH:
+    print(ctx.path.find_resource(ctx.env.PROGRAM_PATH + '/wscript'))
+    if ctx.env.PROGRAM_PATH and ctx.path.find_resource(ctx.env.PROGRAM_PATH +
+                                                       '/wscript'):
         ctx.recurse(ctx.env.PROGRAM_PATH)
 
     # CFLAGS - Shared required CFLAGS
@@ -631,6 +633,7 @@ def configure(ctx):
     # PROG - For legacy compatibility
     if not any('configPROG_ENTRY' in define for define in ctx.env.DEFINES):
         ctx.env.append_value('DEFINES', ['configPROG_ENTRY=' + ctx.env.PROG])
+
 
 def build(bld):
 
@@ -649,7 +652,8 @@ def build(bld):
         bld.env.libs[lib].build(bld)
 
     # PROG - FreeRTOS Program
-    if bld.env.PROGRAM_PATH:
+    if bld.env.PROGRAM_PATH and bld.path.find_resource(bld.env.PROGRAM_PATH +
+                                                       '/wscript'):
         # The program defines its own script
         try:
             bld.recurse(bld.env.PROGRAM_PATH)
