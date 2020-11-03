@@ -625,9 +625,8 @@ def configure(ctx):
         ['-g', '-O0', '-march=' + ctx.env.MARCH, '-mabi=' + ctx.env.MABI])
 
     # PROG - For legacy compatibility
-    if 'configPROG_ENTRY' not in ctx.env.DEFINES:
+    if not any('configPROG_ENTRY' in define for define in ctx.env.DEFINES):
         ctx.env.append_value('DEFINES', ['configPROG_ENTRY=' + ctx.env.PROG])
-
 
 def build(bld):
 
