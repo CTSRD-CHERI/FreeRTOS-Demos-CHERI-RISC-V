@@ -120,7 +120,7 @@ uint32_t port_get_current_mtime(void)
 }
 /*-----------------------------------------------------------*/
 
-int main(void) {
+int demo_main(void) {
 
   prvSetupHardware();
 

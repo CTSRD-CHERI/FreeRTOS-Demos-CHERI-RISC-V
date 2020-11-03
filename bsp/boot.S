@@ -207,7 +207,7 @@ init_stack:
     csetoffset      ct0, ct0, t1
     cspecialrw      cnull, mtcc, ct0 # Write MTCC.
 
-    la              t1, main
+    la              t1, demo_main
     csetoffset      ct0, ct0, t1
     cjalr           cra, ct0 # jump to main
 #else
@@ -215,7 +215,7 @@ init_stack:
     la	sp, _stack
 #endif /* CONFIG_ENABLE_CHERI */
 
-	j	main
+	j	demo_main
 
 /* Fills memory blocks */
 fill_block:
