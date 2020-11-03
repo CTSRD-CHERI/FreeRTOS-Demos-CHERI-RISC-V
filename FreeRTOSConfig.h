@@ -71,7 +71,9 @@
 #define FREERTOS_CONFIG_H
 
 #include "stdint.h"
+#ifndef __waf__
 #include "bsp/qemu_virt.h"
+#endif
 
 /*-----------------------------------------------------------
  * Application specific definitions.

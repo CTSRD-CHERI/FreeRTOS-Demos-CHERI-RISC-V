@@ -34,9 +34,12 @@
 #ifndef _RISCV_SIFIVE_TEST_H
 #define _RISCV_SIFIVE_TEST_H
 
-#include <bsp/qemu_virt.h>
 #include <inttypes.h>
 #include <stddef.h>
+
+#ifndef __waf__
+#include <bsp/qemu_virt.h>
+#endif
 
 #ifdef __CHERI_PURE_CAPABILITY__
 #include <cheric.h>
