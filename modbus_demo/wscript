@@ -48,7 +48,7 @@ def configure(ctx):
         'configCUSTOM_HEAP_SIZE             = 2'
     ])
 
-    ctx.env.append_value('LIB_DEPS', [])
+    ctx.env.append_value('LIB_DEPS', ['freertos_tcpip'])
 
 
 def build(bld):
@@ -70,6 +70,7 @@ def build(bld):
               use=[
                   "freertos_core",
                   "freertos_bsp",
+                  "freertos_tcpip",
               ],
               target="modbus")
 
