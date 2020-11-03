@@ -478,6 +478,10 @@ def options(ctx):
     arch_riscv.add_options(ctx)
 
     # Demo options
+    ctx.add_option('--prefix',
+                   action='store',
+                   default="/usr/local",
+                   help='The FreeRTOS prefix for install.')
     ctx.add_option('--demo',
                    action='store',
                    default="RISC-V-Generic",
