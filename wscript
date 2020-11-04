@@ -370,7 +370,7 @@ class FreeRTOSLibTCPIP(FreeRTOSLib):
             '/portable/NetworkInterface/virtio/NetworkInterface.c'
         ] if ctx.env.PLATFORM == "qemu_virt" else []
 
-        self.srcs = [
+        self.srcs = self.driver_srcs + [
             self.libtcpip_dir + '/FreeRTOS_IP.c', self.libtcpip_dir +
             '/FreeRTOS_ARP.c', self.libtcpip_dir + '/FreeRTOS_DHCP.c',
             self.libtcpip_dir + '/FreeRTOS_DNS.c', self.libtcpip_dir +
@@ -379,9 +379,15 @@ class FreeRTOSLibTCPIP(FreeRTOSLib):
             self.libtcpip_dir + '/FreeRTOS_TCP_WIN.c', self.libtcpip_dir +
             '/FreeRTOS_Stream_Buffer.c', self.libtcpip_dir +
             '/portable/BufferManagement/BufferAllocation_2.c'
-        ] + self.driver_srcs
+        ]
 
         FreeRTOSLib.__init__(self, ctx)
+
+    def build(self, ctx):
+        ctx.objects(source=self.srcs,
+                    includes=self.export_includes + ctx.env.INCLUDES,
+                    export_includes=self.includes,
+                    target='freertos_tcpip')
 
 
 class FreeRTOSLibFAT(FreeRTOSLib):
@@ -664,6 +670,9 @@ def build(bld):
         # to have main_xxx.c files under demo/ and don't define their own wscript.
         bld.stlib(source=['./demo/' + bld.env.PROG + '.c'],
                   target=bld.env.PROG)
+
+    # Remove freertos_tcpip from the libs as it is a collection of objects
+    bld.env.LIB_DEPS.remove("freertos_tcpip")
 
     # DEMO - Build the final statically linked ELF demo
     bld.program(

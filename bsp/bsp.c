@@ -22,6 +22,18 @@ void prvSetupHardware(void) {
 #endif
 }
 
+BaseType_t xNetworkInterfaceInitialise( void )
+__attribute__((weak)) {
+  printf("xNetworkInterfaceInitialise is not implemented, No NIC backend driver\n");
+  return pdPASS;
+}
+
+BaseType_t xNetworkInterfaceOutput( void * const pxNetworkBuffer, BaseType_t xReleaseAfterSend )
+__attribute__((weak)) {
+  printf("xNetworkInterfaceOutput is not implemented, No NIC backend driver\n");
+  return pdPASS;
+}
+
 /**
  * Define an external interrupt handler
  * cause = 0x8...000000b == Machine external interrupt
