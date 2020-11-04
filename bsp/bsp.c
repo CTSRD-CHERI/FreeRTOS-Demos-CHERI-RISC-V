@@ -22,14 +22,13 @@ void prvSetupHardware(void) {
 #endif
 }
 
-BaseType_t xNetworkInterfaceInitialise( void )
-__attribute__((weak)) {
+__attribute__((weak)) BaseType_t xNetworkInterfaceInitialise( void ) {
   printf("xNetworkInterfaceInitialise is not implemented, No NIC backend driver\n");
   return pdPASS;
 }
 
-BaseType_t xNetworkInterfaceOutput( void * const pxNetworkBuffer, BaseType_t xReleaseAfterSend )
-__attribute__((weak)) {
+__attribute__((weak))
+xNetworkInterfaceOutput( void * const pxNetworkBuffer, BaseType_t xReleaseAfterSend ) {
   printf("xNetworkInterfaceOutput is not implemented, No NIC backend driver\n");
   return pdPASS;
 }
