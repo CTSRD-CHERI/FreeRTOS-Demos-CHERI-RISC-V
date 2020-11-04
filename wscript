@@ -672,7 +672,8 @@ def build(bld):
                   target=bld.env.PROG)
 
     # Remove freertos_tcpip from the libs as it is a collection of objects
-    bld.env.LIB_DEPS.remove("freertos_tcpip")
+    if "freertos_tcpip" in bld.env.LIB_DEPS:
+      bld.env.LIB_DEPS.remove("freertos_tcpip")
 
     # DEMO - Build the final statically linked ELF demo
     bld.program(
