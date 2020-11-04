@@ -134,6 +134,11 @@ static BaseType_t prvPingCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
 static BaseType_t prvNetStatCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 
 /*
+ * Defines a command that sends a shutdown signal to the underlying platform.
+ */
+static BaseType_t prvShutDownCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+
+/*
  * Implements the "trace start" and "trace stop" commands;
  */
 #if configINCLUDE_TRACE_RELATED_CLI_COMMANDS == 1
@@ -243,6 +248,17 @@ static const CLI_Command_Definition_t xParameterEcho =
 	};
 #endif /* configINCLUDE_TRACE_RELATED_CLI_COMMANDS */
 
+#ifdef PLATFORM_QEMU_VIRT
+
+	/* Structure that defines the "shutdown" command line command */
+	static const CLI_Command_Definition_t xShutDown =
+	{
+		"shutdown",
+		"shutdown:\r\n Send a shutdown signal to the underlying platform\r\n\r\n",
+		prvShutDownCommand, /* The function to run. */
+		0 /* No parameters are expected. */
+	};
+#endif /* PLATFORM_QEMU_VIRT */
 /*-----------------------------------------------------------*/
 
 void vRegisterCLICommands( void )
@@ -279,6 +295,12 @@ static BaseType_t xCommandRegistered = pdFALSE;
 		#if configINCLUDE_TRACE_RELATED_CLI_COMMANDS == 1
 		{
 			FreeRTOS_CLIRegisterCommand( & xStartStopTrace );
+		}
+		#endif
+
+		#ifdef PLATFORM_QEMU_VIRT
+		{
+			FreeRTOS_CLIRegisterCommand( & xShutDown );
 		}
 		#endif
 
@@ -718,3 +740,13 @@ uint32_t ulAddress;
 	}
 
 #endif /* configINCLUDE_TRACE_RELATED_CLI_COMMANDS */
+
+#ifdef PLATFORM_QEMU_VIRT
+	static BaseType_t prvShutDownCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+	{
+		_exit(0);
+		return pdTRUE;
+	}
+	/*-----------------------------------------------------------*/
+
+#endif /* PLATFORM_QEMU_VIRT */
