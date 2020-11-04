@@ -334,24 +334,24 @@ configure the real network connection to use. */
 /* Default IP address configuration.  Used in ipconfigUSE_DNS is set to 0, or
 ipconfigUSE_DNS is set to 1 but a DNS server cannot be contacted. */
 #define configIP_ADDR0		10
-#define configIP_ADDR1		88
-#define configIP_ADDR2		88
-#define configIP_ADDR3		2
+#define configIP_ADDR1		0
+#define configIP_ADDR2		2
+#define configIP_ADDR3		15
 
 /* Default gateway IP address configuration.  Used in ipconfigUSE_DNS is set to
 0, or ipconfigUSE_DNS is set to 1 but a DNS server cannot be contacted. */
 #define configGATEWAY_ADDR0	10
-#define configGATEWAY_ADDR1	88
-#define configGATEWAY_ADDR2	88
-#define configGATEWAY_ADDR3	1
+#define configGATEWAY_ADDR1	0
+#define configGATEWAY_ADDR2	2
+#define configGATEWAY_ADDR3	2
 
 /* Default DNS server configuration.  OpenDNS addresses are 208.67.222.222 and
 208.67.220.220.  Used in ipconfigUSE_DNS is set to 0, or ipconfigUSE_DNS is set
 to 1 but a DNS server cannot be contacted.*/
-#define configDNS_SERVER_ADDR0 	4
-#define configDNS_SERVER_ADDR1 	2
+#define configDNS_SERVER_ADDR0 	10
+#define configDNS_SERVER_ADDR1 	0
 #define configDNS_SERVER_ADDR2 	2
-#define configDNS_SERVER_ADDR3 	2
+#define configDNS_SERVER_ADDR3 	3
 
 /* Default netmask configuration.  Used in ipconfigUSE_DNS is set to 0, or
 ipconfigUSE_DNS is set to 1 but a DNS server cannot be contacted. */
