@@ -326,6 +326,39 @@ class FreeRTOSLibCheri(FreeRTOSLib):
 
         FreeRTOSLib.__init__(self, ctx)
 
+class FreeRTOSLibDL(FreeRTOSLib):
+
+    libdl_dir = '../../../FreeRTOS-Labs/Source/FreeRTOS-libdl/'
+
+    def __init__(self, ctx):
+        self.name = "freertos_libdl"
+        self.srcs = [
+           self.libdl_dir + 'libdl/dlfcn.c',
+           self.libdl_dir + 'libdl/fastlz.c',
+           self.libdl_dir + 'libdl/rtl-alloc-heap.c',
+           self.libdl_dir + 'libdl/rtl-allocator.c',
+           self.libdl_dir + 'libdl/rtl-alloc-lock.c',
+           self.libdl_dir + 'libdl/rtl-bit-alloc.c',
+           self.libdl_dir + 'libdl/rtl-chain-iterator.c',
+           self.libdl_dir + 'libdl/rtl-elf.c',
+           self.libdl_dir + 'libdl/rtl-error.c',
+           self.libdl_dir + 'libdl/rtl-find-file.c',
+           self.libdl_dir + 'libdl/rtl-mdreloc-riscv.c',
+           self.libdl_dir + 'libdl/rtl-obj-cache.c',
+           self.libdl_dir + 'libdl/rtl-obj-comp.c',
+           self.libdl_dir + 'libdl/rtl-obj.c',
+           self.libdl_dir + 'libdl/rtl-string.c',
+           self.libdl_dir + 'libdl/rtl-sym.c',
+           self.libdl_dir + 'libdl/rtl-trace.c',
+           self.libdl_dir + 'libdl/rtl-unresolved.c',
+           self.libdl_dir + 'libdl/rtl-unwind-dw2.c',
+           self.libdl_dir + 'libdl/rtl-freertos-compartments.c',
+           self.libdl_dir + 'libdl/rtl.c'
+        ]
+
+        self.export_includes = [self.libdl_dir + '/include']
+
+        FreeRTOSLib.__init__(self, ctx)
 
 class FreeRTOSLibVirtIO(FreeRTOSLib):
 
@@ -445,6 +478,7 @@ def freertos_libs_init(bld_ctx):
     bld_ctx.env.libs["freertos_core"] = FreeRTOSLibCore(bld_ctx)
     bld_ctx.env.libs["freertos_bsp"] = FreeRTOSLibBsp(bld_ctx)
     bld_ctx.env.libs["freertos_tcpip"] = FreeRTOSLibTCPIP(bld_ctx)
+    bld_ctx.env.libs["freertos_libdl"] = FreeRTOSLibDL(bld_ctx)
     bld_ctx.env.libs["freertos_cli"] = FreeRTOSLibCLI(bld_ctx)
     bld_ctx.env.libs["freertos_fat"] = FreeRTOSLibFAT(bld_ctx)
     bld_ctx.env.libs["cheri"] = FreeRTOSLibCheri(bld_ctx)
