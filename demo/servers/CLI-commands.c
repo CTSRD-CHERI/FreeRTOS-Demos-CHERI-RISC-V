@@ -84,6 +84,12 @@ commands. */
 #include "FreeRTOS_IP.h"
 #include "FreeRTOS_Sockets.h"
 
+#ifdef ipconfigUSE_FAT_LIBDL
+/* FreeRTOS-libdl includes to dynamically load and link objects */
+#include <dlfcn.h>
+#include <rtl/rtl-trace.h>
+#endif
+
 /* The example IP trace macros are included here so the definitions are
 available in all the FreeRTOS+TCP source files. */
 #include "DemoIPTrace.h"
@@ -137,6 +143,16 @@ static BaseType_t prvNetStatCommand( char *pcWriteBuffer, size_t xWriteBufferLen
  * Defines a command that sends a shutdown signal to the underlying platform.
  */
 static BaseType_t prvShutDownCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+
+/*
+ * Defines a command that dynamically loads and links object files
+ */
+static BaseType_t prvDlOpenCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+
+/*
+ * Defines a command that dynamically loads, links and calls a function within a compartment
+ */
+static BaseType_t prvCCallCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 
 /*
  * Implements the "trace start" and "trace stop" commands;
@@ -261,6 +277,28 @@ static const CLI_Command_Definition_t xParameterEcho =
 #endif /* PLATFORM_QEMU_VIRT */
 /*-----------------------------------------------------------*/
 
+#ifdef ipconfigUSE_FAT_LIBDL
+	/* Structure that defines the "dlopen" command line command */
+	static const CLI_Command_Definition_t xDlOpen =
+	{
+		"dlopen",
+		"dlopen <object_file>:\r\n dynamically load and link <object_file> against this image \r\n\r\n",
+		prvDlOpenCommand, /* The function to run. */
+		1 /* One parameter is expected. Valid values are files */
+	};
+/*-----------------------------------------------------------*/
+
+	/* Structure that defines the "ccall" command line command */
+	static const CLI_Command_Definition_t xCCall =
+	{
+		"ccall",
+		"ccall <object_file> <function>:\r\n call function from object_file compartment  \r\n\r\n",
+		prvCCallCommand, /* The function to run. */
+		2 /* Two parameter are expected. Valid values are files and function names */
+	};
+#endif
+/*-----------------------------------------------------------*/
+
 void vRegisterCLICommands( void )
 {
 static BaseType_t xCommandRegistered = pdFALSE;
@@ -302,6 +340,11 @@ static BaseType_t xCommandRegistered = pdFALSE;
 		{
 			FreeRTOS_CLIRegisterCommand( & xShutDown );
 		}
+		#endif
+
+		#ifdef ipconfigUSE_FAT_LIBDL
+			FreeRTOS_CLIRegisterCommand( & xDlOpen );
+			FreeRTOS_CLIRegisterCommand( & xCCall );
 		#endif
 
 		xCommandRegistered = pdTRUE;
@@ -750,3 +793,89 @@ uint32_t ulAddress;
 	/*-----------------------------------------------------------*/
 
 #endif /* PLATFORM_QEMU_VIRT */
+
+#ifdef ipconfigUSE_FAT_LIBDL
+	static BaseType_t prvDlOpenCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+	{
+	const char *pcParameter;
+	BaseType_t lParameterStringLength;
+
+		/* Obtain the parameter string. */
+		pcParameter = FreeRTOS_CLIGetParameter
+						(
+							pcCommandString,		/* The command string itself. */
+							1,						/* Return the first parameter. */
+							&lParameterStringLength	/* Store the parameter string length. */
+						);
+
+		if ( !dlopen( pcParameter, RTLD_NOW | RTLD_GLOBAL ) ) {
+			memset( pcWriteBuffer, 0x00, xWriteBufferLen );
+			snprintf( pcWriteBuffer, xWriteBufferLen, "%s: %s ", "Failed to open", pcParameter );
+		}
+
+		/* There is no more data to return after this single string, so return
+		pdFALSE. */
+		return pdFALSE;
+	}
+	/*-----------------------------------------------------------*/
+
+	static BaseType_t prvCCallCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+	{
+	typedef int (*call_t)(void);
+	const char *pcParameter1;
+	const char *pcParameter2;
+	call_t call = NULL;
+
+	void *obj_handle;
+	BaseType_t lParameterStringLength;
+
+		/* Obtain the parameter string. */
+		pcParameter1 = FreeRTOS_CLIGetParameter
+						(
+							pcCommandString,		/* The command string itself. */
+							1,						/* Return the first parameter. */
+							&lParameterStringLength	/* Store the parameter string length. */
+						);
+
+		memcpy( pcWriteBuffer, pcParameter1, lParameterStringLength );
+		pcWriteBuffer[lParameterStringLength] = 0;
+
+		rtems_rtl_trace_set_mask ( RTEMS_RTL_TRACE_UNRESOLVED );
+
+		obj_handle = dlopen( pcWriteBuffer, RTLD_NOW | RTLD_GLOBAL );
+		if ( !obj_handle ) {
+			snprintf( pcWriteBuffer, xWriteBufferLen, "%s", "Failed to open file\n" );
+			return pdFALSE;
+		}
+
+		char *secondparam = pcWriteBuffer + lParameterStringLength + 1;
+
+		pcParameter2 = FreeRTOS_CLIGetParameter
+						(
+							pcCommandString,		/* The command string itself. */
+							2,						/* Return the second parameter. */
+							&lParameterStringLength	/* Store the parameter string length. */
+						);
+
+		memcpy(secondparam, pcParameter2, lParameterStringLength);
+		secondparam[lParameterStringLength] = 0;
+
+		call = dlsym( obj_handle, secondparam );
+		if ( !call ) {
+			printf( "Error: Couldn't find %s function in %s object \n", pcParameter2, pcParameter1 );
+			return pdFALSE;
+		}
+
+		#ifdef __CHERI_PURE_CAPABILITY__
+		void* data_cap = NULL;
+		int ret = dlinfo(obj_handle, RTLD_DI_CHERI_CAPTABLE, &data_cap);
+		asm volatile(".balign 4\nccall %0, %1":: "C"(call), "C"(data_cap):);
+		#else
+		call();
+		#endif /* __CHERI_PURE_CAPABILITY__ */
+		/* There is no more data to return after this single string, so return
+		pdFALSE. */
+		return pdFALSE;
+	}
+#endif
+	/*-----------------------------------------------------------*/
