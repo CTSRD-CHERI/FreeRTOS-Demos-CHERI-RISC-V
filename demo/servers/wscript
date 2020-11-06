@@ -48,14 +48,18 @@ def configure(ctx):
         'mainCREATE_HTTP_SERVER             = 1',
         'ipconfigUSE_HTTP                   = 1',
         'ipconfigUSE_FTP                    = 1',
+        'ipconfigUSE_FAT_LIBDL              = 1',
         'ffconfigMAX_FILENAME               = 1',
         'configHTTP_ROOT                    = "/ram/websrc/"',
-        'configUSE_NET_VIRTIO               = 1'
+        'configUSE_NET_VIRTIO               = 1',
+
+        'configCOMPARTMENTS_NUM             = 0',
+        'configMAXLEN_COMPNAME              = 32'
     ])
 
     ctx.env.append_value(
         'LIB_DEPS',
-        ['freertos_tcpip', 'freertos_cli', 'freertos_fat', 'virtio'])
+        ['freertos_tcpip', 'freertos_cli', 'freertos_libdl', 'freertos_fat', 'virtio'])
 
 
 def build(bld):
@@ -85,6 +89,6 @@ def build(bld):
         ],
         use=[
             "freertos_core", "freertos_bsp", "freertos_tcpip", "freertos_cli",
-            "freertos_fat", "virtio", "cheri"
+            "freertos_libdl", "freertos_fat", "virtio", "cheri"
         ],
         target=name)
