@@ -10,14 +10,18 @@
 #endif
 
 void *_sbrk(int nbytes);
+int _open (const char *name, int flags, int mode);
 int _write(int file, char *ptr, int len);
 int _close(int fd);
 int _fstat(int fd, void *buffer);
 long _lseek(int fd, long offset, int origin);
 int _read(int fd, void *buffer, unsigned int count);
+void _exit(int x);
 int _isatty(int fd);
 int _kill(int pid, int sig);
 int _getpid(int n);
+int _gettimeofday(void *x, void *y);
+int _stat(char *file, struct stat *st);
 
 void *_sbrk(int nbytes) {
   (void)nbytes;
@@ -73,6 +77,11 @@ int _fstat(int fd, void *buffer) {
   (void)buffer;
   errno = EBADF;
   return -1;
+}
+
+int _stat(char *file, struct stat *st) {
+  errno = EACCES;
+  return  -1;
 }
 
 int _isatty(int fd) {
