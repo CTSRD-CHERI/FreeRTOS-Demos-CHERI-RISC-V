@@ -126,18 +126,16 @@ void main_blinky(void) {
 
     xTaskCreate(prvQueueSendTask, "TX", configMINIMAL_STACK_SIZE * 2U, NULL, mainQUEUE_SEND_TASK_PRIORITY, NULL);
 
-    /* Start the tasks and timer running. */
-    vTaskStartScheduler();
+    /* vTaskStartScheduler is called by main.c after we return */
+    //vTaskStartScheduler();
   }
 
-  /* If all is well, the scheduler will now be running, and the following
-  line will never be reached.  If the following line does execute, then
-  there was insufficient FreeRTOS heap memory available for the Idle and/or
-  timer tasks to be created.  See the memory management section on the
-  FreeRTOS web site for more details on the FreeRTOS heap
-  http://www.freertos.org/a00111.html. */
-  for (;;)
-    ;
+  /* There are two cases main_blinky can execute in:
+   * 1) When called from main.c, in which case we're expected to return so that
+   * main.c calls vTaskStartScheduler.
+   * 2) When it gets dynamically loaded in which case the scheduler has already
+   * been started.
+   * In both cases, we need to return (to main.c or to whoever loaded us). */
 }
 /*-----------------------------------------------------------*/
 
