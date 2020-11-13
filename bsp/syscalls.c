@@ -21,7 +21,7 @@ int _isatty(int fd);
 int _kill(int pid, int sig);
 int _getpid(int n);
 int _gettimeofday(void *x, void *y);
-int _stat(char *file, struct stat *st);
+int _stat(char *file, void *st);
 
 void *_sbrk(int nbytes) {
   (void)nbytes;
@@ -79,7 +79,7 @@ int _fstat(int fd, void *buffer) {
   return -1;
 }
 
-int _stat(char *file, struct stat *st) {
+int _stat(char *file, void *st) {
   errno = EACCES;
   return  -1;
 }

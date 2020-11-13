@@ -53,6 +53,7 @@ def configure(ctx):
         'configHTTP_ROOT                    = "/ram/websrc/"',
         'configUSE_NET_VIRTIO               = 1',
 
+        '_STAT_H_                           = 1',
         'configCOMPARTMENTS_NUM             = 0',
         'configMAXLEN_COMPNAME              = 32'
     ])
