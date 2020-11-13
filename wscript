@@ -338,6 +338,7 @@ class FreeRTOSLibDL(FreeRTOSLib):
            self.libdl_dir + 'libdl/rtl-alloc-heap.c',
            self.libdl_dir + 'libdl/rtl-allocator.c',
            self.libdl_dir + 'libdl/rtl-alloc-lock.c',
+           self.libdl_dir + 'libdl/rtl-archive.c',
            self.libdl_dir + 'libdl/rtl-bit-alloc.c',
            self.libdl_dir + 'libdl/rtl-chain-iterator.c',
            self.libdl_dir + 'libdl/rtl-elf.c',
@@ -660,7 +661,6 @@ def configure(ctx):
     if ctx.env.PURECAP:
         ctx.env.append_value('LIB_DEPS', ["cheri"])
 
-    print(ctx.path.find_resource(ctx.env.PROGRAM_PATH + '/wscript'))
     if ctx.env.PROGRAM_PATH and ctx.path.find_resource(ctx.env.PROGRAM_PATH +
                                                        '/wscript'):
         ctx.recurse(ctx.env.PROGRAM_PATH)
