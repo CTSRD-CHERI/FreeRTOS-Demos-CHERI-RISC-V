@@ -29,7 +29,7 @@
 #define _MODBUS_SERVER_H_
 
 /* priority for tasks initialised by the server task */
-#define prvCRITICAL_SECTION_TASK_PRIORITY (tskIDLE_PRIORITY + 3)
+#define prvCRITICAL_SECTION_TASK_PRIORITY (tskIDLE_PRIORITY + 2)
 
 /*
  * Receives a modbus request from a client and
@@ -41,7 +41,5 @@ void vServerTask(void *pvParameters);
  * Called by main_modbus() to initialise the server before
  * creating tasks and starting the scheduler
  */
-void vServerInitialization(char *ip, int port,
-                             QueueHandle_t xQueueRequest,
-                             QueueHandle_t xQueueResponse);
+void vServerInitialization(char *ip, int port);
 #endif /* _MODBUS_SERVER_H_ */
