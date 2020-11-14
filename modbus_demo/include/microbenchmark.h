@@ -34,7 +34,7 @@
 #define MAX_FUNCTIONS 20
 
 /* number of iterations of each function to be sampled and recorded */
-#define MICROBENCHMARK_ITERATIONS 100
+#define MICROBENCHMARK_ITERATIONS 10
 
 /* number of iterations to discard to ensure quiescense */
 #define MICROBENCHMARK_DISCARD 10
