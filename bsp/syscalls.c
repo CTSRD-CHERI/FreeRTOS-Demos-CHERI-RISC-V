@@ -20,7 +20,7 @@ void _exit(int x);
 int _isatty(int fd);
 int _kill(int pid, int sig);
 int _getpid(int n);
-int _gettimeofday(void *x, void *y);
+int _gettimeofday(struct timeval *tv, struct timezone *tz);
 int _stat(char *file, void *st);
 
 void *_sbrk(int nbytes) {
@@ -102,7 +102,10 @@ int _getpid(int n) {
   return 1;
 }
 
-int _gettimeofday(void *x, void *y) {
+int _gettimeofday(struct timeval *tv, struct timezone *tz) {
+  uint64_t us = portGET_RUN_TIME_COUNTER_VALUE();
+  tv->tv_sec = us / 1000000;
+  tv->tv_usec= ( us % 1000000 );
   return 0;
 }
 
