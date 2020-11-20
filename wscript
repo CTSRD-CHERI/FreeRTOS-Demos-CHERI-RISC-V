@@ -233,7 +233,8 @@ class FreeRTOSLib:
         bld.env.append_value('DEFINES', self.defines)
 
     def build(self, bld):
-        print("Building lib ", self.name)
+        bld(export_includes=self.export_includes, name=self.name + "_headers")
+
         bld.stlib(features=['c'],
                   asflags=bld.env.CFLAGS + bld.env.ASFLAGS,
                   includes=bld.env.INCLUDES + self.includes,

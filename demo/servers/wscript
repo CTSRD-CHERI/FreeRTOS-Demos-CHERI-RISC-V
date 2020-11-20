@@ -89,7 +89,7 @@ def build(bld):
             'TraceMacros/Example1/DemoIPTrace.c'
         ],
         use=[
-            "freertos_core", "freertos_bsp", "freertos_tcpip", "freertos_cli",
-            "freertos_libdl", "freertos_fat", "virtio", "cheri"
+            "freertos_core_headers", "freertos_bsp_headers", "freertos_tcpip_headers", "freertos_cli_headers",
+            "freertos_libdl_headers", "freertos_fat_headers", "virtio_headers", "cheri_headers"
         ],
         target=name)
