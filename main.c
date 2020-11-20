@@ -30,6 +30,9 @@
  */
 
 /* FreeRTOS kernel includes. */
+
+#include <time.h>
+
 #include <FreeRTOS.h>
 #include <task.h>
 
@@ -173,6 +176,19 @@ int demo_main(void) {
 /*-----------------------------------------------------------*/
 
 /*-----------------------------------------------------------*/
+time_t FreeRTOS_time( time_t *pxTime )
+{
+time_t xReturn;
+
+    xReturn = time( &xReturn );
+
+    if( pxTime != NULL )
+    {
+        *pxTime = xReturn;
+    }
+
+    return xReturn;
+}
 
 // TODO: toggle a real LED at some point
 void vToggleLED(void) {
