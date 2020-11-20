@@ -341,6 +341,7 @@ class FreeRTOSLibDL(FreeRTOSLib):
            self.libdl_dir + 'libdl/rtl-archive.c',
            self.libdl_dir + 'libdl/rtl-bit-alloc.c',
            self.libdl_dir + 'libdl/rtl-chain-iterator.c',
+           self.libdl_dir + 'libdl/rtl-debugger.c',
            self.libdl_dir + 'libdl/rtl-elf.c',
            self.libdl_dir + 'libdl/rtl-error.c',
            self.libdl_dir + 'libdl/rtl-find-file.c',
