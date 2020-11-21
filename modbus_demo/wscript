@@ -40,12 +40,12 @@ def configure(ctx):
         ctx.path.abspath() + '/libmodbus/include/',
         ctx.path.abspath() + '/libmacaroons/include/',
         ctx.path.abspath() + '/libmodbus_cheri/include/',
-        ctx.path.abspath() + '/libmodbus_macaroons/include/',
+        ctx.path.abspath() + '/libmodbus_macaroons/include/'
     ])
 
     ctx.env.append_value('DEFINES', [
         'configPROG_ENTRY                   = main_modbus',
-        'configCUSTOM_HEAP_SIZE             = 2',
+        'configCUSTOM_HEAP_SIZE             = 2'
     ])
 
     ctx.env.append_value('LIB_DEPS', ['freertos_tcpip', 'virtio'])
@@ -70,26 +70,27 @@ def build(bld):
               use=[
                   "freertos_core",
                   "freertos_bsp",
-                  "freertos_tcpip",
+                  "freertos_tcpip"
               ],
               target="modbus")
 
-    bld.stlib(features=['c'],
-              source=[LIBMODBUS_CHERI_DIR + 'src/modbus_cheri.c'],
-              use=[
-                  "freertos_core",
-                  "freertos_bsp",
-                  "freertos_tcpip",
-              ],
-              defines=bld.env.DEFINES + ['CHERI_LAYER=1'],
-              target="modbus_cheri")
+    if bld.env.PURECAP:
+        bld.stlib(features=['c'],
+                  source=[LIBMODBUS_CHERI_DIR + 'src/modbus_cheri.c'],
+                  use=[
+                      "freertos_core",
+                      "freertos_bsp",
+                      "freertos_tcpip"
+                  ],
+                  defines=bld.env.DEFINES + ['CHERI_LAYER=1'],
+                  target="modbus_cheri")
 
     bld.stlib(features=['c'],
               source=[LIBMODBUS_MACAROONS_DIR + 'src/modbus_macaroons.c'],
               use=[
                   "freertos_core",
                   "freertos_bsp",
-                  "freertos_tcpip",
+                  "freertos_tcpip"
               ],
               target="modbus_macaroons")
 
@@ -109,7 +110,7 @@ def build(bld):
         ],
         use=[
             "freertos_core",
-            "freertos_bsp",
+            "freertos_bsp"
         ],
         target="macaroons")
 
@@ -122,7 +123,7 @@ def build(bld):
             use=[
                 "freertos_core",
                 "freertos_bsp",
-                "modbus",
+                "modbus"
             ],
             target="modbus_baseline")
 
@@ -142,40 +143,41 @@ def build(bld):
             defines=bld.env.DEFINES + ['NDEBUG=1', 'MICROBENCHMARK=1'],
             target="modbus_baseline_microbenchmark")
 
-    bld.stlib(features=['c'],
-            source=[
-                'main_modbus.c',
-                'modbus_server.c',
-                'modbus_client.c'
-            ],
-            use=[
-                "freertos_core",
-                "freertos_bsp",
-                "modbus",
-                "modbus_cheri"
-            ],
-            defines=bld.env.DEFINES + ['CHERI_LAYER=1'],
-            target="modbus_cheri_layer")
+    if bld.env.PURECAP:
+        bld.stlib(features=['c'],
+                source=[
+                    'main_modbus.c',
+                    'modbus_server.c',
+                    'modbus_client.c'
+                ],
+                use=[
+                    "freertos_core",
+                    "freertos_bsp",
+                    "modbus",
+                    "modbus_cheri"
+                ],
+                defines=bld.env.DEFINES + ['CHERI_LAYER=1'],
+                target="modbus_cheri_layer")
 
-    bld.stlib(features=['c'],
-            source=[
-                'main_modbus.c',
-                'modbus_server.c',
-                'modbus_client.c',
-                'microbenchmark.c'
-            ],
-            use=[
-                "freertos_core",
-                "freertos_bsp",
-                "modbus",
-                "modbus_cheri"
-            ],
-            defines=bld.env.DEFINES + [
-                'NDEBUG=1',
-                'CHERI_LAYER=1',
-                'MICROBENCHMARK=1'
-            ],
-            target="modbus_cheri_layer_microbenchmark")
+        bld.stlib(features=['c'],
+                source=[
+                    'main_modbus.c',
+                    'modbus_server.c',
+                    'modbus_client.c',
+                    'microbenchmark.c'
+                ],
+                use=[
+                    "freertos_core",
+                    "freertos_bsp",
+                    "modbus",
+                    "modbus_cheri"
+                ],
+                defines=bld.env.DEFINES + [
+                    'NDEBUG=1',
+                    'CHERI_LAYER=1',
+                    'MICROBENCHMARK=1'
+                ],
+                target="modbus_cheri_layer_microbenchmark")
 
     bld.stlib(features=['c'],
             source=[
@@ -214,44 +216,45 @@ def build(bld):
             ],
             target="modbus_macaroons_layer_microbenchmark")
 
-    bld.stlib(features=['c'],
-            source=[
-                'main_modbus.c',
-                'modbus_server.c',
-                'modbus_client.c'
-            ],
-            use=[
-                "freertos_core",
-                "freertos_bsp",
-                "freertos_tcpip",
-                "modbus",
-                "modbus_macaroons",
-                "macaroons",
-                "modbus_cheri"
-            ],
-            defines=bld.env.DEFINES + ['MACAROONS_LAYER=1', 'CHERI_LAYER=1'],
-            target="modbus_cheri_macaroons_layers")
+    if bld.env.PURECAP:
+        bld.stlib(features=['c'],
+                source=[
+                    'main_modbus.c',
+                    'modbus_server.c',
+                    'modbus_client.c'
+                ],
+                use=[
+                    "freertos_core",
+                    "freertos_bsp",
+                    "freertos_tcpip",
+                    "modbus",
+                    "modbus_macaroons",
+                    "macaroons",
+                    "modbus_cheri"
+                ],
+                defines=bld.env.DEFINES + ['MACAROONS_LAYER=1', 'CHERI_LAYER=1'],
+                target="modbus_cheri_macaroons_layers")
 
-    bld.stlib(features=['c'],
-            source=[
-                'main_modbus.c',
-                'modbus_server.c',
-                'modbus_client.c',
-                'microbenchmark.c'
-            ],
-            use=[
-                "freertos_core",
-                "freertos_bsp",
-                "freertos_tcpip",
-                "modbus",
-                "modbus_macaroons",
-                "macaroons",
-                "modbus_cheri"
-            ],
-            defines=bld.env.DEFINES + [
-                'MACAROONS_LAYER=1',
-                'CHERI_LAYER=1',
-                'MICROBENCHMARK=1',
-                'NDEBUG=1'
-            ],
-            target="modbus_cheri_macaroons_layers_microbenchmark")
+        bld.stlib(features=['c'],
+                source=[
+                    'main_modbus.c',
+                    'modbus_server.c',
+                    'modbus_client.c',
+                    'microbenchmark.c'
+                ],
+                use=[
+                    "freertos_core",
+                    "freertos_bsp",
+                    "freertos_tcpip",
+                    "modbus",
+                    "modbus_macaroons",
+                    "macaroons",
+                    "modbus_cheri"
+                ],
+                defines=bld.env.DEFINES + [
+                    'MACAROONS_LAYER=1',
+                    'CHERI_LAYER=1',
+                    'MICROBENCHMARK=1',
+                    'NDEBUG=1'
+                ],
+                target="modbus_cheri_macaroons_layers_microbenchmark")
