@@ -97,22 +97,6 @@ void vClientInitialization(char *ip, int port)
 #else
     modbus_set_debug(ctx, pdTRUE);
 #endif
-
-#if defined(MACAROONS_LAYER)
-    int rc;
-    /**
-     * serialise the macaroon and queue it for the client
-     *
-     * this is a TOFU operation. the first client to dequeue it gets it...
-     * */
-    rc = initialise_client_macaroon(ctx);
-    configASSERT(rc != -1);
-
-    if (modbus_get_debug(ctx))
-    {
-        printf("client macaroon initialised...\n");
-    }
-#endif
 }
 
 /*-----------------------------------------------------------*/
@@ -163,6 +147,23 @@ void vClientTask(void *pvParameters)
     /**************
      * STRING TESTS
      *************/
+
+#if defined(MACAROONS_LAYER)
+    /* when using macaroons, the server will initialise a macaroon and store
+     * it in mb_mapping->tab_string, so the client starts by reading that
+     * string and initialising it's own macaroon.
+     *
+     * this is basically a TOFU operation: we'll deserialise it and store
+     * it as the client's initial macaroon */
+    memset(tab_rp_string, 0, MODBUS_MAX_STRING_LENGTH * sizeof(uint8_t));
+    rc = modbus_read_string(ctx, tab_rp_string);
+    configASSERT(rc != -1);
+    //vTaskDelayUntil(&xNextWakeTime, modbusCLIENT_SEND_FREQUENCY_MS);
+
+    rc = initialise_client_macaroon(ctx, (char *)tab_rp_string, rc);
+    configASSERT(rc != -1);
+    //vTaskDelayUntil(&xNextWakeTime, modbusCLIENT_SEND_FREQUENCY_MS);
+#endif
 
     /* WRITE_STRING */
 #ifndef NDEBUG

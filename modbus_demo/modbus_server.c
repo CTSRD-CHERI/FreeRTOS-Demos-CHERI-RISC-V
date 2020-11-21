@@ -170,15 +170,11 @@ void vServerInitialization(char *ip, int port)
     char *id = "id for a bad secret";
     char *location = "https://www.modbus.com/macaroons/";
     rc = initialise_server_macaroon(ctx, location, key, id);
-    configASSERT(rc != -1);
-
-    /**
-     * serialise the macaroon and queue it for the client
-     *
-     * this is a TOFU operation. the first client to dequeue it gets it...
-     * */
-    rc = queue_server_macaroon(ctx);
-    configASSERT(rc != -1);
+    if (rc == -1) {
+        fprintf(stderr, "Failed to initialise server macaroon\n");
+        modbus_free(ctx);
+        _exit(0);
+    }
 #endif
 
     /* Initialise queues for comms with prvCriticalSectionTask */
@@ -204,6 +200,9 @@ void vServerTask(void *pvParameters)
     BaseType_t xReturned;
     char *pcModbusFunctionName;
     TickType_t xNextWakeTime;
+#if defined(MICROBENCHMARK)
+    BaseType_t xBenchmarkedWriteString = pdFALSE;
+#endif
 
     /* Initialise xNextWakeTime - this only needs to be done once. */
     xNextWakeTime = xTaskGetTickCount();
@@ -234,15 +233,6 @@ void vServerTask(void *pvParameters)
             modbusSERVER_TASK_PRIORITY,
             NULL);
 
-    /* Opens and binds the socket and
-     * places it in the listen state */
-    /* xServerSocket = modbus_tcp_listen(ctx, 1); */
-    /* configASSERT(xServerSocket != NULL); */
-
-    /* Wait for a client to connect. */
-    /* xServerSocket = modbus_tcp_accept(ctx, &xServerSocket); */
-    /* configASSERT(xServerSocket != FREERTOS_INVALID_SOCKET); */
-
     for (;;)
     {
         /* Check that the socket is connected */
@@ -261,26 +251,38 @@ void vServerTask(void *pvParameters)
                 pcModbusFunctionName = modbus_get_function_name(ctx, req);
 
 #if defined(MICROBENCHMARK)
-                /* discard MICROBENCHMARK_DISCARD runs to ensure quiescence */
-                for (int i = 0; i < MICROBENCHMARK_DISCARD; ++i)
-                {
-                    printf(". ");
+                /* only benchmark the modbus_write_string() operation (the client sending a macaroon) the first time */
+                if(strncmp(pcModbusFunctionName, "MODBUS_FC_WRITE_STRING", MODBUS_MAX_FUNCTION_NAME_LEN) == 0 &&
+                        xBenchmarkedWriteString) {
                     rc = prvCriticalSectionWrapper(req, req_length, rsp, &rsp_length);
                     configASSERT(rc != -1);
+                } else {
+                    /* discard MICROBENCHMARK_DISCARD runs to ensure quiescence */
+                    for (int i = 0; i < MICROBENCHMARK_DISCARD; ++i)
+                    {
+                        printf(". ");
+                        rc = prvCriticalSectionWrapper(req, req_length, rsp, &rsp_length);
+                        configASSERT(rc != -1);
 
-                    xMicrobenchmarkSample(pcModbusFunctionName, pdFALSE);
+                        xMicrobenchmarkSample(pcModbusFunctionName, pdFALSE);
+                    }
+
+                    /* perform MICROBENCHMARK_ITERATIONS runs of the critical section */
+                    for (int i = 0; i < MICROBENCHMARK_ITERATIONS; ++i)
+                    {
+                        printf(". ");
+                        rc = prvCriticalSectionWrapper(req, req_length, rsp, &rsp_length);
+                        configASSERT(rc != -1);
+
+                        xMicrobenchmarkSample(pcModbusFunctionName, pdTRUE);
+                    }
+                    printf("\n");
+
+                    /* mark modbus_write_string() as having been benchmarked */
+                    if(strncmp(pcModbusFunctionName, "MODBUS_FC_WRITE_STRING", MODBUS_MAX_FUNCTION_NAME_LEN) == 0) {
+                        xBenchmarkedWriteString = pdTRUE;
+                    }
                 }
-
-                /* perform MICROBENCHMARK_ITERATIONS runs of the critical section */
-                for (int i = 0; i < MICROBENCHMARK_ITERATIONS; ++i)
-                {
-                    printf(". ");
-                    rc = prvCriticalSectionWrapper(req, req_length, rsp, &rsp_length);
-                    configASSERT(rc != -1);
-
-                    xMicrobenchmarkSample(pcModbusFunctionName, pdTRUE);
-                }
-                printf("\n");
 #else
                 rc = prvCriticalSectionWrapper(req, req_length, rsp, &rsp_length);
                 configASSERT(rc != -1);
@@ -417,7 +419,7 @@ static void prvCriticalSectionTask(void *pvParameters)
 #endif
 
 #if defined(MACAROONS_LAYER)
-        rc = modbus_preprocess_request_macaroons(ctx, req);
+        rc = modbus_preprocess_request_macaroons(ctx, req, mb_mapping);
         configASSERT(rc != -1);
 #endif
 

@@ -81,6 +81,7 @@ def build(bld):
                   "freertos_bsp",
                   "freertos_tcpip",
               ],
+              defines=bld.env.DEFINES + ['CHERI_LAYER=1'],
               target="modbus_cheri")
 
     bld.stlib(features=['c'],
