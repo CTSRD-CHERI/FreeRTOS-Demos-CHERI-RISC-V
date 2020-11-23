@@ -327,6 +327,7 @@ class FreeRTOSLibCheri(FreeRTOSLib):
 
         FreeRTOSLib.__init__(self, ctx)
 
+
 class FreeRTOSLibDL(FreeRTOSLib):
 
     libdl_dir = '../../../FreeRTOS-Labs/Source/FreeRTOS-libdl/'
@@ -419,11 +420,16 @@ class FreeRTOSLibTCPIP(FreeRTOSLib):
 
         FreeRTOSLib.__init__(self, ctx)
 
-    def build(self, ctx):
+    def build_objects(self, ctx):
         ctx.objects(source=self.srcs,
                     includes=self.export_includes + ctx.env.INCLUDES,
                     export_includes=self.includes,
-                    target='freertos_tcpip')
+                    target='freertos_tcpip_objects')
+
+    def build_lib(self, ctx):
+        ctx.stlib(source=self.srcs,
+                  use=["freertos_tcpip_objects"],
+                  target='freertos_tcpip_lib')
 
 
 class FreeRTOSLibFAT(FreeRTOSLib):
@@ -597,6 +603,7 @@ def configure(ctx):
     ctx.env.MEMSTART = ctx.options.mem_start
     ctx.env.PROGRAM_PATH = ctx.options.program_path
     ctx.env.PROGRAM_ENTRY = ctx.env.PROG
+    ctx.env.COMPARTMENTALIZE = ctx.options.compartmentalize
 
     # Libs - Minimal libs required for any FreeRTOS Demo
     ctx.env.append_value('LIB', ['c'])
@@ -667,6 +674,19 @@ def configure(ctx):
                                                        '/wscript'):
         ctx.recurse(ctx.env.PROGRAM_PATH)
 
+    if ctx.env.COMPARTMENTALIZE:
+        ctx.env.append_value('DEFINES', [
+            'mainRAM_DISK_NAME                  = "/"',
+            '_STAT_H_                           = 1',
+            'ipconfigUSE_FAT_LIBDL              = 1',
+            'mainCONFIG_USE_DYNAMIC_LOADER      = 1',
+            'configEMBED_LIBS_FAT               = 1',
+            'configLIBDL_LIB_PATH               = "/lib/"',
+            'configLIBDL_CONF_PATH              = "/etc/"',
+            'configCOMPARTMENTS_NUM             = 0',
+            'configMAXLEN_COMPNAME              = 32'
+        ])
+
     # CFLAGS - Shared required CFLAGS
     ctx.env.append_value(
         'CFLAGS',
@@ -675,6 +695,86 @@ def configure(ctx):
     # PROG - For legacy compatibility
     if not any('configPROG_ENTRY' in define for define in ctx.env.DEFINES):
         ctx.env.append_value('DEFINES', ['configPROG_ENTRY=' + ctx.env.PROG])
+
+
+# Copied from https://nachtimwald.com/2019/10/09/python-binary-to-c-header/
+def bin2header(data, var_name='var'):
+    out = []
+    out.append('unsigned char {var_name}[] = {{'.format(var_name=var_name))
+    l = [data[i:i + 12] for i in range(0, len(data), 12)]
+    for i, x in enumerate(l):
+        line = ', '.join(['0x{val:02x}'.format(val=ord(c)) for c in x])
+        out.append('  {line}{end_comma}'.format(
+            line=line, end_comma=',' if i < len(l) - 1 else ''))
+    out.append('};')
+    out.append('unsigned int {var_name}_len = {data_len};'.format(
+        var_name=var_name, data_len=len(data)))
+    return '\n'.join(out)
+
+
+# Generate a header that containts hex content of the libdl libs to be embedded
+# in the file system
+def gen_header_libs(bld):
+    # Add the main app to be embedded
+    bld.env.LIB_DEPS_EMBED_FAT += [bld.env.PROG]
+    LIBS_TO_EMBED = ["lib" + lib + ".a" for lib in bld.env.LIB_DEPS_EMBED_FAT]
+
+    # Make sure all libraries are built and ready
+    for lib in bld.env.LIB_DEPS_EMBED_FAT:
+        tg = bld.get_tgen_by_name(lib)
+        tg.post()
+        for task in tg.tasks:
+            for obj_file in task.outputs:
+                if bld.env.PROG in str(obj_file):
+                    print(str(obj_file).split('/')[-1])
+                    bld.env.append_value(
+                        'DEFINES',
+                        'mainCONFIG_USE_DYNAMIC_LOADER_START_OBJ = ' +
+                        str(obj_file).split('/')[-1])
+            print(task.outputs)
+        for task in tg.tasks:
+            task.run()
+
+    # Create a libdl.conf file that contains the list of libraries
+    libdl_config = '\n'.join(['/lib/' + lib for lib in LIBS_TO_EMBED])
+
+    # Defines vars and types used by CreateAndVerifyExampleFiles.c
+    header_content = """
+typedef struct LIBFILE_TO_COPY {
+  const char *pcFileName;
+  size_t xFileSize;
+  const uint8_t *pucFileData;
+} xLibFileToCopy_t;
+                      """
+    # Convert files to hex arrays
+    for lib in LIBS_TO_EMBED:
+        lib_path = str(bld.path.get_bld().ant_glob('**/' + lib, quiet=True)[0])
+        lib = lib.replace('.', '_')
+        with open(lib_path, 'r') as f:
+            data = f.read()
+            header_content += (bin2header(data, lib)) + '\n'
+
+    # Write the libdl.conf hex
+    header_content += bin2header(libdl_config, 'libdl_conf') + '\n'
+
+    header_content += """
+const xLibFileToCopy_t xLibFilesToCopy[] = {
+    """
+
+    for lib in LIBS_TO_EMBED:
+        header_content += '{ "/lib/' + lib + '", sizeof(' + lib.replace(
+            '.', '_') + '), ' + lib.replace('.', '_') + ' },\n'
+
+    header_content += '{ "/etc/libdl.conf", sizeof(libdl_conf), libdl_conf} '
+    header_content += '};'
+
+    # Write the final content to the header file
+    with open(str(bld.path.get_bld()) + "/libs_fat_embedded.h", 'w') as f:
+        f.write(header_content)
+
+    for embed_lib in bld.env.LIB_DEPS_EMBED_FAT:
+        if embed_lib in bld.env.LIB_DEPS:
+            bld.env.LIB_DEPS.remove(embed_lib)
 
 
 def build(bld):
@@ -707,20 +807,38 @@ def build(bld):
         bld.stlib(source=['./demo/' + bld.env.PROG + '.c'],
                   target=bld.env.PROG)
 
-    # Remove freertos_tcpip from the libs as it is a collection of objects
-    if "freertos_tcpip" in bld.env.LIB_DEPS:
-      bld.env.LIB_DEPS.remove("freertos_tcpip")
+    main_sources = ['main.c']
+    main_libs = bld.env.LIB_DEPS + [bld.env.PROG]
 
-    # DEMO - Build the final statically linked ELF demo
+    if bld.env.COMPARTMENTALIZE:
+
+        # Generate the libs_fat_embedded.h header with libs
+        gen_header_libs(bld)
+        # Build the C files that embeds the libs into the FAT filesystem
+        main_sources += ['libs_fat_embedded.c']
+
+        # Need to include all unused functions because a future dynamically loaded
+        # object might want to link against it
+        bld.env.append_value('CFLAGS', ['-Wl,--whole-archive'])
+
+        main_libs = []
+
+        # Compartmentalization needs libdl + fat
+        if 'freertos_fat' not in bld.env.LIB_DEPS:
+            main_libs += ['freertos_fat', 'freertos_fat_headhers']
+            main_libs += ['freertos_fat']
+        if 'freertos_libdl' not in bld.env.LIB_DEPS:
+            main_libs += ['freertos_libdl', 'freertos_libdl_headers']
+
     bld.program(
-        source='main.c',
+        source=main_sources,
         target=PROG_NAME,
         features="c",
         includes=['.'],
-        use=bld.env.LIB_DEPS + [bld.env.PROG],
-        ldflags=bld.env.CFLAGS + bld.env.LDFLAGS + ['-Wl,--start-group'] +
-        ['-l' + lib for lib in bld.env.LIB_DEPS] + ['-l' + bld.env.PROG] +
-        ['-Wl,--end-group'] + [
+        libpath=['.', bld.env.PROGRAM_PATH],
+        use=main_libs,
+        ldflags=bld.env.CFLAGS + ['-Wl,--start-group'] +
+        ['-l' + lib for lib in bld.env.LIB_DEPS] + ['-Wl,--end-group'] + [
             '-T',
             bld.path.abspath() + '/link.ld.generated', '-nostartfiles',
             '-nostdlib', '-Wl,--defsym=MEM_START=' + str(bld.env.MEMSTART),

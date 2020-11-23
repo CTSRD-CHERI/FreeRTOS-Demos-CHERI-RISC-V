@@ -58,6 +58,15 @@ def configure(ctx):
         'configMAXLEN_COMPNAME              = 32'
     ])
 
+    if ctx.env.COMPARTMENTALIZE:
+         ctx.env.append_value(
+            'LIB_DEPS_EMBED_FAT',
+            ['freertos_tcpip', 'freertos_cli', 'virtio'])
+
+    ctx.env.append_value('EXPORT_DEFINES', [
+        'ipconfigUSE_FAT_LIBDL              = 1'
+    ])
+
     ctx.env.append_value(
         'LIB_DEPS',
         ['freertos_tcpip', 'freertos_cli', 'freertos_libdl', 'freertos_fat', 'virtio'])

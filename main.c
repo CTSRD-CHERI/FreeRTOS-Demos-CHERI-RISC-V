@@ -36,6 +36,18 @@
 #include <FreeRTOS.h>
 #include <task.h>
 
+#ifdef mainCONFIG_USE_DYNAMIC_LOADER
+/* FreeRTOS-libdl includes to dynamically load and link objects */
+#include <dlfcn.h>
+#include <rtl/rtl-trace.h>
+#include <rtl/rtl-archive.h>
+
+/* FreeRTOS+FAT includes. */
+#include "ff_headers.h"
+#include "ff_stdio.h"
+#include "ff_ramdisk.h"
+#endif
+
 /* Bsp includes. */
 #include "bsp.h"
 
@@ -130,6 +142,71 @@ uint32_t port_get_current_mtime(void)
 }
 /*-----------------------------------------------------------*/
 
+#if mainCONFIG_USE_DYNAMIC_LOADER
+
+#ifndef configPROG_ENTRY
+#error "configPROG_ENTRY must be defined as the entry function for the application \
+       "to which the dynamic loader jumps to"
+#endif
+
+/* The number and size of sectors that will make up the RAM disk.  The RAM disk
+is huge to allow some verbose FTP tests. */
+#define mainRAM_DISK_SECTOR_SIZE    512UL /* Currently fixed! */
+#define mainRAM_DISK_SECTORS        ( ( 5UL * 1024UL * 1024UL ) / mainRAM_DISK_SECTOR_SIZE ) /* 5M bytes. */
+#define mainIO_MANAGER_CACHE_SIZE   ( 15UL * mainRAM_DISK_SECTOR_SIZE )
+
+void vFatEmbedLibFiles( void );
+
+static void prvLoader(void) {
+
+typedef void (*prog_entry_t)( void );
+static uint8_t ucRAMDisk[ mainRAM_DISK_SECTORS * mainRAM_DISK_SECTOR_SIZE ];
+FF_Disk_t *pxDisk;
+prog_entry_t entry = NULL;
+
+    /* Create the RAM disk. */
+    pxDisk = FF_RAMDiskInit( mainRAM_DISK_NAME, ucRAMDisk, mainRAM_DISK_SECTORS, mainIO_MANAGER_CACHE_SIZE );
+    configASSERT( pxDisk );
+
+    /* Print out information on the disk. */
+    FF_RAMDiskShowPartition( pxDisk );
+
+    /* Embed the libs in the file systems*/
+    vFatEmbedLibFiles();
+
+    rtems_rtl_trace_set_mask ( RTEMS_RTL_TRACE_UNRESOLVED);
+
+    // TODO: Make this generic to load the main object of any program
+    void *obj = dlopen("/lib/libmain_servers.a:main_servers.c.1.o", RTLD_GLOBAL | RTLD_NOW);
+
+    if (obj == NULL) {
+      printf("Failed to dynamically load the app and/or libs\n");
+      _exit(-1);
+    }
+
+     #define str(s) #s
+     #define xstr(s) str(s)
+
+    printf("Searching loaded objects for %s\n", xstr(configPROG_ENTRY));
+    entry = (prog_entry_t) dlsym(obj, xstr(configPROG_ENTRY));
+
+    if (entry == NULL) {
+      printf("Failed to to find the specified prog entry: %s\n", xstr(configPROG_ENTRY));
+      _exit(-1);
+    } else {
+      printf("Found entry %s @ %p\n", xstr(configPROG_ENTRY), entry);
+    }
+
+    printf("Jumping to the app entry: %s\n", xstr(configPROG_ENTRY));
+
+    vTaskSuspendAll();
+    entry();
+    xTaskResumeAll();
+    while(1);
+}
+#endif
+/*-----------------------------------------------------------*/
+
 int demo_main(void) {
 
   prvSetupHardware();
@@ -163,9 +240,17 @@ int demo_main(void) {
   }
 #else
 #ifdef configPROG_ENTRY
-  {
-    configPROG_ENTRY();
-  }
+#ifdef mainCONFIG_USE_DYNAMIC_LOADER
+  /* Create a task that dynamically loads libs and apps from the file system */
+  xTaskCreate(prvLoader,
+              "loader",
+              configMINIMAL_STACK_SIZE * 2U,
+              NULL,
+              tskIDLE_PRIORITY,
+              NULL);
+#else
+  configPROG_ENTRY();
+#endif
 #else
 #error "Unsupported Demo"
 #endif

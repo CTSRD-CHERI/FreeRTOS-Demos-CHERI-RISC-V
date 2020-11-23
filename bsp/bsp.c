@@ -22,6 +22,7 @@ void prvSetupHardware(void) {
 #endif
 }
 
+#ifndef PLATFORM_QEMU_VIRT
 __attribute__((weak)) BaseType_t xNetworkInterfaceInitialise( void ) {
   printf("xNetworkInterfaceInitialise is not implemented, No NIC backend driver\n");
   return pdPASS;
@@ -32,6 +33,7 @@ xNetworkInterfaceOutput( void * const pxNetworkBuffer, BaseType_t xReleaseAfterS
   printf("xNetworkInterfaceOutput is not implemented, No NIC backend driver\n");
   return pdPASS;
 }
+#endif
 
 /**
  * Define an external interrupt handler
