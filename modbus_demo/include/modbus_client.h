@@ -38,8 +38,5 @@ void vClientTask(void *pvParameters);
  * Called by main_modbus() to initialise the client before
  * creating tasks and starting the scheduler
  */
-void vClientInitialization(char *ip, int port,
-                             QueueHandle_t xQueueRequest,
-                             QueueHandle_t xQueueResponse);
-
+void vClientInitialization(char *ip, int port);
 #endif /* _MODBUS_CLIENT_H_ */
