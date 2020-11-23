@@ -808,6 +808,7 @@ struct tm *gmtime_r( const time_t *pxTime, struct tm *tmStruct )
 }
 /*-----------------------------------------------------------*/
 
+#if 0
 time_t FreeRTOS_time( time_t *pxTime )
 {
 time_t xReturn;
@@ -821,6 +822,8 @@ time_t xReturn;
 
 	return xReturn;
 }
+#endif
+
 /*-----------------------------------------------------------*/
 
 /*
