@@ -683,7 +683,7 @@ def configure(ctx):
             'configEMBED_LIBS_FAT               = 1',
             'configLIBDL_LIB_PATH               = "/lib/"',
             'configLIBDL_CONF_PATH              = "/etc/"',
-            'configCOMPARTMENTS_NUM             = 0',
+            'configCOMPARTMENTS_NUM             = 1024',
             'configMAXLEN_COMPNAME              = 32'
         ])
 
