@@ -825,8 +825,7 @@ def build(bld):
 
         # Compartmentalization needs libdl + fat
         if 'freertos_fat' not in bld.env.LIB_DEPS:
-            main_libs += ['freertos_fat', 'freertos_fat_headhers']
-            main_libs += ['freertos_fat']
+            main_libs += ['freertos_fat', 'freertos_fat_headers']
         if 'freertos_libdl' not in bld.env.LIB_DEPS:
             main_libs += ['freertos_libdl', 'freertos_libdl_headers']
 
