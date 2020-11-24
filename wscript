@@ -669,6 +669,7 @@ def configure(ctx):
 
     if ctx.env.PURECAP:
         ctx.env.append_value('LIB_DEPS', ["cheri"])
+        ctx.env.append_value('CFLAGS', ['-Werror=cheri-prototypes'])
 
     if ctx.env.PROGRAM_PATH and ctx.path.find_resource(ctx.env.PROGRAM_PATH +
                                                        '/wscript'):
