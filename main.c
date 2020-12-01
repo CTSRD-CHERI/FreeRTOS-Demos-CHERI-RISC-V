@@ -53,6 +53,7 @@
 
 #ifdef CONFIG_ENABLE_CHERI
 #include <cheri_init_globals.h>
+#include <cheri/cheri-utility.h>
 
 void
 _start_purecap(void) {
@@ -199,10 +200,18 @@ prog_entry_t entry = NULL;
 
     printf("Jumping to the app entry: %s\n", xstr(configPROG_ENTRY));
 
-    vTaskSuspendAll();
-    entry();
-    xTaskResumeAll();
-    while(1);
+#ifdef __CHERI_PURE_CAPABILITY__
+  void* data_cap = NULL;
+  int ret = dlinfo(obj, RTLD_DI_CHERI_CAPTABLE, &data_cap);
+  printf("CCalling code -> "); cheri_print_cap(entry);
+  printf("CCalling captable -> "); cheri_print_cap(data_cap);
+  asm volatile(".balign 4\nccall %0, %1":: "C"(entry), "C"(data_cap):);
+#else
+  vTaskSuspendAll();
+  entry();
+#endif
+  xTaskResumeAll();
+  while(1);
 }
 #endif
 /*-----------------------------------------------------------*/
