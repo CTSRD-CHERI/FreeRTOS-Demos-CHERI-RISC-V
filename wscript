@@ -677,6 +677,7 @@ def configure(ctx):
 
     if ctx.env.COMPARTMENTALIZE:
         ctx.env.append_value('DEFINES', [
+            'configPORT_ALLOW_APP_EXCEPTION_HANDLERS=1',
             'mainRAM_DISK_NAME                  = "/"',
             '_STAT_H_                           = 1',
             'ipconfigUSE_FAT_LIBDL              = 1',
