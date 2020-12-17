@@ -330,6 +330,7 @@ static TaskHandle_t xServerWorkTaskHandle = NULL;
 
 /*-----------------------------------------------------------*/
 
+#if mainCONFIG_USE_DYNAMIC_LOADER == 0
 static UBaseType_t cheri_exception_handler(uintptr_t *exception_frame)
 {
 #ifdef __CHERI_PURE_CAPABILITY__
@@ -370,6 +371,7 @@ static UBaseType_t default_exception_handler(uintptr_t *exception_frame)
   printf("mepc = %llx\n", epc);
   while(1);
 }
+#endif
 
 /*
  * NOTE: Some versions of Visual Studio will generate erroneous compiler
@@ -794,7 +796,9 @@ uint32_t ulLoggingIPAddress;
 
        #ifdef __CHERI_PURE_CAPABILITY__
                /* Setup an exception handler for CHERI */
-               vPortSetExceptionHandler(0x1c, cheri_exception_handler);
+		#if mainCONFIG_USE_DYNAMIC_LOADER == 0
+			vPortSetExceptionHandler(0x1c, cheri_exception_handler);
+		#endif
        #endif
 }
 /*-----------------------------------------------------------*/
