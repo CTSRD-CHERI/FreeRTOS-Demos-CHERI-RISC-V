@@ -687,12 +687,13 @@ def configure(ctx):
             'mainRAM_DISK_NAME                  = "/"',
             '_STAT_H_                           = 1',
             'ipconfigUSE_FAT_LIBDL              = 1',
+            'ffconfigMAX_FILENAME               = 255',
             'mainCONFIG_USE_DYNAMIC_LOADER      = 1',
             'configEMBED_LIBS_FAT               = 1',
             'configLIBDL_LIB_PATH               = "/lib/"',
             'configLIBDL_CONF_PATH              = "/etc/"',
             'configCOMPARTMENTS_NUM             = 1024',
-            'configMAXLEN_COMPNAME              = 32'
+            'configMAXLEN_COMPNAME              = 255'
         ])
 
     # CFLAGS - Shared required CFLAGS

@@ -49,7 +49,7 @@ def configure(ctx):
         'ipconfigUSE_HTTP                   = 1',
         'ipconfigUSE_FTP                    = 1',
         'ipconfigUSE_FAT_LIBDL              = 1',
-        'ffconfigMAX_FILENAME               = 1',
+        'ffconfigMAX_FILENAME               = 255',
         'configHTTP_ROOT                    = "/ram/websrc/"',
         'configUSE_NET_VIRTIO               = 1',
 
@@ -61,7 +61,7 @@ def configure(ctx):
         'configLIBDL_LIB_PATH               = "/lib/"',
         'configLIBDL_CONF_PATH              = "/etc/"',
         'configCOMPARTMENTS_NUM             = 1024',
-        'configMAXLEN_COMPNAME              = 32'
+        'configMAXLEN_COMPNAME              = 255'
     ])
 
     if ctx.env.COMPARTMENTALIZE:
