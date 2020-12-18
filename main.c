@@ -200,16 +200,8 @@ prog_entry_t entry = NULL;
 
     printf("Jumping to the app entry: %s\n", xstr(configPROG_ENTRY));
 
-#ifdef __CHERI_PURE_CAPABILITY__
-  void* data_cap = NULL;
-  int ret = dlinfo(obj, RTLD_DI_CHERI_CAPTABLE, &data_cap);
-  printf("CCalling code -> "); cheri_print_cap(entry);
-  printf("CCalling captable -> "); cheri_print_cap(data_cap);
-  asm volatile(".balign 4\nccall %0, %1":: "C"(entry), "C"(data_cap):);
-#else
   vTaskSuspendAll();
   entry();
-#endif
   xTaskResumeAll();
   while(1);
 }
@@ -249,7 +241,7 @@ int demo_main(void) {
   }
 #else
 #ifdef configPROG_ENTRY
-#ifdef mainCONFIG_USE_DYNAMIC_LOADER
+#if mainCONFIG_USE_DYNAMIC_LOADER
   /* Create a task that dynamically loads libs and apps from the file system */
   xTaskCreate(prvLoader,
               "loader",
