@@ -231,12 +231,18 @@ class FreeRTOSLib:
     def __init__(self, bld):
         bld.env.append_value('INCLUDES', self.export_includes)
         bld.env.append_value('DEFINES', self.defines)
+        self.is_compartment = False
+        self.cflags = []
 
     def build(self, bld):
         bld(export_includes=self.export_includes, name=self.name + "_headers")
 
+        if self.is_compartment:
+          self.cflags += ['-cheri-cap-table-abi=gprel']
+
         bld.stlib(features=['c'],
                   asflags=bld.env.CFLAGS + bld.env.ASFLAGS,
+                  cflags = bld.env.CFLAGS + self.cflags,
                   includes=bld.env.INCLUDES + self.includes,
                   export_includes=self.export_includes,
                   source=self.srcs,
@@ -793,6 +799,8 @@ def build(bld):
 
     # LIBS - Build required libs
     for lib in bld.env.LIB_DEPS:
+        if lib in bld.env.LIB_DEPS_EMBED_FAT:
+          bld.env.libs[lib].is_compartment = True
         bld.env.libs[lib].build(bld)
 
     # PROG - FreeRTOS Program
