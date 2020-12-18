@@ -8,36 +8,46 @@
 plic_instance_t Plic;
 
 #ifdef __CHERI_PURE_CAPABILITY__
+#include <stdint.h>
+#include <rtl/rtl-freertos-compartments.h>
 #include <cheri/cheri-utility.h>
 #include "portmacro.h"
 
 #ifdef __CHERI_PURE_CAPABILITY__
-
-static void ccall_handler(uintptr_t *exception_frame, ptraddr_t mepc) {
-  uint32_t *ccall_instruction;
+static void inter_compartment_call(uintptr_t *exception_frame, ptraddr_t mepc) {
+  uint32_t *instruction;
   uint8_t  code_reg_num, data_reg_num;
   uint32_t *mepcc = (uint32_t *) *(exception_frame);
   mepcc -= 1; // portASM has already stepped into the next isntruction;
 
-  ccall_instruction = mepcc;
+  instruction = mepcc;
 
   // Decode the code/data pair passed to ccall
-  code_reg_num = (*ccall_instruction >> 15) & 0x1f;
-  data_reg_num = (*ccall_instruction >> 20) & 0x1f;
+  code_reg_num = (*instruction >> 15) & 0x1f;
+  data_reg_num = (*instruction >> 20) & 0x1f;
+
+  uint32_t cjalr_match =  ((0x7f << 25) | (0xc << 20) | (0x1 << 7) | 0x5b);
+
+  /* Only support handling cjalr with sealed caps (inter-compartment calls) */
+  if ((*instruction & cjalr_match) != cjalr_match) {
+    printf("Instruction does not match cjalr\n");
+    _exit(-1);
+  }
 
   // Get the callee CompID (its otype)
   size_t otype = __builtin_cheri_type_get(*(exception_frame + code_reg_num));
 
+  void **captable = rtl_cherifreertos_compartment_get_captable(otype);
+
   xCOMPARTMENT_RET ret = xTaskRunCompartment(cheri_unseal_cap(*(exception_frame + code_reg_num)),
-                    cheri_unseal_cap(*(exception_frame + data_reg_num)),
+                    captable,
                     exception_frame + 10,
                     otype);
 
   // Save the return registers in the context.
   // FIXME: Some checks might be done here to check of the compartment traps and
   // accordingly take some different action rather than just returning
-  *(exception_frame + 10) = ret.a0;
-  *(exception_frame + 11) = ret.a1;
+  *(exception_frame + 10) = ret.ca0;
 }
 
 #endif
@@ -62,7 +72,13 @@ static UBaseType_t cheri_exception_handler(uintptr_t *exception_frame)
 
   // ccall
   if (cheri_cause == 0x19) {
-    ccall_handler(exception_frame, epc);
+    inter_compartment_call(exception_frame, epc);
+    return 0;
+  }
+
+  // Sealed fault
+  if (cheri_cause == 0x3) {
+    inter_compartment_call(exception_frame, epc);
     return 0;
   }
 
