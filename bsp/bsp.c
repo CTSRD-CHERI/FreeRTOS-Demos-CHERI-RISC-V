@@ -58,16 +58,18 @@ static UBaseType_t cheri_exception_handler(uintptr_t *exception_frame)
   size_t cause = 0;
   size_t epc = 0;
   size_t cheri_cause;
+  void *mepcc;
 
   asm volatile ("csrr %0, mcause" : "=r"(cause)::);
   asm volatile ("csrr %0, mepc" : "=r"(epc)::);
+  asm volatile ("cspecialr %0, mepcc" : "=C"(mepcc)::);
 
   size_t ccsr = 0;
-  asm volatile ("csrr %0, mccsr" : "=r"(ccsr)::);
+  asm volatile ("csrr %0, mtval" : "=r"(ccsr)::);
 
-  uint8_t reg_num = (uint8_t) ((ccsr >> 10) & 0x1f);
-  int is_scr = ((ccsr >> 15) & 0x1);
-  cheri_cause = (unsigned) ((ccsr >> 5) & 0x1f);
+  uint8_t reg_num = (uint8_t) ((ccsr >> 5) & 0x1f);
+  int is_scr = ((ccsr >> 10) & 0x1);
+  cheri_cause = (unsigned) ((ccsr) & 0x1f);
 
 
   // ccall
@@ -87,6 +89,7 @@ static UBaseType_t cheri_exception_handler(uintptr_t *exception_frame)
   }
 
   printf("mepc = 0x%lx\n", epc);
+  printf("mepcc -> "); cheri_print_cap(mepcc);
   printf("TRAP: CCSR = 0x%lx (cause: %x reg: %u : scr: %u)\n",
                ccsr,
                cheri_cause,
