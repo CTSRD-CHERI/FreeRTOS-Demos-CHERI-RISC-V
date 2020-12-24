@@ -216,6 +216,33 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
             if ctx.env.RISCV_XLEN == "64" else str(0x8000000b)
         ]
 
+class FreeRTOSBspFett(FreeRTOSBsp):
+    def __init__(self, ctx):
+        self.platform = "fett"
+        self.bld_ctx = ctx,
+
+        ctx.env.MEMSTART = 0xC0000000
+
+        self.srcs = ['./bsp/uart16550.c', './bsp/sifive_test.c']
+
+        self.defines = [
+            'PLATFORM_FETT               =     1',
+            'configCLINT_BASE_ADDRESS    =     0x10000000',
+            'CLINT_CTRL_ADDR             =     0x10000000',
+            'configUART16550_BASE        =     0x62300000ULL',
+            'configUART16550_BAUD        =     115200LL',
+            'configUART16550_REGSHIFT    =     2',
+            'SIFIVE_TEST_BASE            =     0x50000000',
+            'configCPU_CLOCK_HZ          =     100000000',
+            'configPERIPH_CLOCK_HZ       =     250000000',
+            'PLIC_BASE_ADDR              =     0xC000000ULL',
+            'PLIC_NUM_SOURCES            =     16',
+            'PLIC_NUM_PRIORITIES         =     7',
+            'PLIC_SOURCE_UART0           =     0x1',
+            'PLIC_PRIORITY_UART0         =     0x1',
+            'MCAUSE_EXTERNAL_INTERRUPT   =' + str(0x800000000000000b)
+            if ctx.env.RISCV_XLEN == "64" else str(0x8000000b)
+        ]
 
 ########################### BSPS END ###############################
 
@@ -507,6 +534,7 @@ def freertos_bsps_init(bld_ctx):
     bld_ctx.env.freertos_bsps["qemu_virt"] = FreeRTOSBspQemuVirt(bld_ctx)
     bld_ctx.env.freertos_bsps["sail"] = FreeRTOSBspSail(bld_ctx)
     bld_ctx.env.freertos_bsps["gfe"] = FreeRTOSBspGfe(bld_ctx)
+    bld_ctx.env.freertos_bsps["fett"] = FreeRTOSBspFett(bld_ctx)
     bld_ctx.env.freertos_bsps["piccolo"] = FreeRTOSBspPiccolo(bld_ctx)
 
 

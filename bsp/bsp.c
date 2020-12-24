@@ -118,7 +118,7 @@ static UBaseType_t default_exception_handler(uintptr_t *exception_frame)
 void prvSetupHardware(void) {
   // Resets PLIC, threshold 0, nothing enabled
 
-#ifdef PLATFORM_QEMU_VIRT
+#if PLATFORM_QEMU_VIRT || PLATFORM_FETT
   PLIC_init(&Plic, PLIC_BASE_ADDR, PLIC_NUM_SOURCES, PLIC_NUM_PRIORITIES);
 #endif
 
@@ -133,6 +133,7 @@ void prvSetupHardware(void) {
 }
 
 #ifndef PLATFORM_QEMU_VIRT
+#ifndef PLATFORM_FETT
 __attribute__((weak)) BaseType_t xNetworkInterfaceInitialise( void ) {
   printf("xNetworkInterfaceInitialise is not implemented, No NIC backend driver\n");
   return pdPASS;
@@ -143,6 +144,7 @@ xNetworkInterfaceOutput( void * const pxNetworkBuffer, BaseType_t xReleaseAfterS
   printf("xNetworkInterfaceOutput is not implemented, No NIC backend driver\n");
   return pdPASS;
 }
+#endif
 #endif
 
 /**

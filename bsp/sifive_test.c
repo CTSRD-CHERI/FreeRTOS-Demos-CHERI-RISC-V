@@ -46,7 +46,10 @@
 extern void *pvAlmightyDataCap;
 #endif
 
+#ifndef SIFIVE_TEST_BASE
 #define SIFIVE_TEST_BASE  0x100000
+#endif
+
 #define TEST_PASS         0x5555
 #define TEST_FAIL         0x3333
 
