@@ -74,17 +74,10 @@ OUTPUT_ARCH( "riscv" )
 
 PHDRS
 {
-  headers PT_PHDR PHDRS FILEHDR;
-  /*interp PT_INTERP ;*/
-  text PT_LOAD PHDRS ;
-  data PT_LOAD ;
-  /*dynamic PT_DYNAMIC ;*/
+  text PT_LOAD FILEHDR PHDRS ;
   captable PT_LOAD ;
   symtab PT_LOAD ;
   strtab PT_LOAD ;
-  shdr_ndx PT_LOAD ;
-
-  comp1 PT_LOAD ;
 }
 
 /*
@@ -99,9 +92,9 @@ _HEAP_SIZE = 0x4000;
  * Define memory layout
  ****************************************************************************/
 MEMORY {
-    cmem : ORIGIN = MEM_START, LENGTH = 0x00800000
 	imem : ORIGIN = MEM_START, LENGTH = 0x10000000
-	dmem : ORIGIN = MEM_START + 0x10001000, LENGTH = 0x10000000
+	dmem : ORIGIN = MEM_START + 0x10000000, LENGTH = 0x10000000
+	uncached : ORIGIN = 0xc0000000, LENGTH = 0x0010000
 }
 
 /* Specify the default entry point to the program */
@@ -117,15 +110,15 @@ SECTIONS {
 	    *boot.o(.text);
 		*(.text);
 		*(.text.*);
-	} > cmem
+	} > imem
 
 	.init : {
 	   KEEP (*(.init))
-	} > cmem
+	} > imem
 
     .fini : {
        KEEP (*(.fini))
-    } > cmem
+    } > imem
 
     .rodata : {
        __rodata_start = .;
@@ -133,21 +126,21 @@ SECTIONS {
        *(.rodata.*)
        *(.gnu.linkonce.r.*)
        __rodata_end = .;
-	} > cmem
+	} > dmem
 
-	.sbss : {
+	.sbss (NOLOAD) : {
 	   __sbss_start = .;
 	   *(.sbss)
 	   *(.sbss.*)
 	   *(.gnu.linkonce.sb.*)
 	   __sbss_end = .;
-	} > cmem
+	} > dmem
 
     .sdata : {
         _gp = . + 0x800;
         *(.srodata.cst16) *(.srodata.cst8) *(.srodata.cst4) *(.srodata.cst2) *(.srodata*)
         *(.sdata .sdata.* .gnu.linkonce.s.*)
-     }	> cmem
+     }	> dmem
 
 	.data : {
 	   . = ALIGN(16);
@@ -156,50 +149,25 @@ SECTIONS {
 	   *(.data.*)
 	   *(.gnu.linkonce.d.*)
 	   __data_end = .;
-	} > cmem
+	} > dmem
 
-	.htif : {
+	.htif (NOLOAD) : {
 	   *(.htif)
-	} > cmem
+	} > dmem
 
 	.eh_frame : {
 	   *(.eh_frame)
-	} > cmem
+	} > dmem
 
     __cap_relocs : {
        . = ALIGN(16);
-    } > cmem
+    } > dmem
 
     .symtab : {
        __symtab_start = .;
         *(.symtab)
        __symtab_end = .;
     } > dmem :symtab
-
-    /*.shstrtab : {
-       . = ALIGN(16);
-       __shstrtab_start = .;
-        *(.shstrtab)
-       __shstrtab_end = .;
-     } > dmem
-    .symtab_shndx : {
-       . = ALIGN(16);
-       __symtab_shndx_start = .;
-        *(.symtab_shndx)
-       __symtab_shndx_end = .;
-    } > dmem :shdr_ndx
-    */
-
-    .dynsym : {
-       __dynsym_start = .;
-        *(.dynsym)
-       __dynsym_end = .;
-    } > dmem
-
-    .dynstr : {
-       . = ALIGN(16);
-        *(.dynstr)
-    } > dmem
 
     .strtab : {
        __strtab_start = .;
@@ -211,7 +179,7 @@ SECTIONS {
        . = ALIGN(16);
     } > dmem :captable
 
-    .bss : {
+    .bss (NOLOAD) : {
        . = ALIGN(16);
        __bss_start = .;
        *(.bss)
@@ -220,19 +188,18 @@ SECTIONS {
        *(COMMON)
        . = ALIGN(16);
        __bss_end = .;
-    } > cmem
+    } > dmem
 
     /* Generate Stack and Heap definitions */
-
-    .heap : {
+    .heap (NOLOAD) : {
        . = ALIGN(16);
        _heap = .;
        _heap_start = .;
        . += _HEAP_SIZE;
        _heap_end = .;
-    } > cmem
+    } > dmem
 
-    .stack : {
+    .stack (NOLOAD) : {
        . = ALIGN(16);
        _stack_end = .;
        . += _STACK_SIZE;
@@ -240,11 +207,11 @@ SECTIONS {
        _stack = .;
        __stack = _stack;
        __freertos_irq_stack_top = .;
-    } > cmem
+    } > dmem
 
-    "_comp1" : {
-       *(.comp1)
-    } > dmem :comp1
+    .uncached (NOLOAD) : {
+       *(.uncached)
+    } > uncached
 
     _end = .;
 }
