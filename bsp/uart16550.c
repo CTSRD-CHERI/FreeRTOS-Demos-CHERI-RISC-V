@@ -42,6 +42,8 @@ int uart16550_txbuffer(uint8_t *ptr, int len) {
 
   for (int i = 0; i < len; i++) {
     uart16550_putchar(ptr[i]);
+    if (ptr[i] == '\n')
+      uart16550_putchar('\r');
   }
 
   return len;
