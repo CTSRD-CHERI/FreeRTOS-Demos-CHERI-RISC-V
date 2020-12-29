@@ -4,6 +4,7 @@
 #define PLIC_DRIVER_H
 
 #include "stdint.h"
+#include <FreeRTOS.h>
 
 // 32 bits per source
 #define PLIC_PRIORITY_OFFSET 0x0000UL
@@ -35,7 +36,7 @@
  * This data type defines an interrupt handler for a device.
  * The argument points to the instance of the component
  */
-typedef void (*plic_interrupt_handler_t)(void *InstancePtr);
+typedef BaseType_t (*plic_interrupt_handler_t)(void *InstancePtr);
 
 /* The following data type defines each entry in an interrupt vector table.
  * The callback reference is the base address of the interrupting device
