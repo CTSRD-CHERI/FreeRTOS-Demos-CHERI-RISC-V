@@ -95,7 +95,12 @@
 /* FreeRTOS+FAT includes. */
 #include "ff_headers.h"
 #include "ff_stdio.h"
+
+#if configHAS_VIRTIO_BLK
+#include "ff_virtioblk_disk.h"
+#else
 #include "ff_ramdisk.h"
+#endif
 
 /* Demo application includes. */
 #include "SimpleUDPClientAndServer.h"
@@ -440,11 +445,19 @@ static uint8_t ucRAMDisk[ mainRAM_DISK_SECTORS * mainRAM_DISK_SECTOR_SIZE ];
 FF_Disk_t *pxDisk;
 
 	/* Create the RAM disk. */
+#if configHAS_VIRTIO_BLK
+	pxDisk = FF_VirtIODiskInit(mainRAM_DISK_NAME, mainIO_MANAGER_CACHE_SIZE);
+	configASSERT( pxDisk );
+
+	/* Print out information on the disk. */
+	FF_VirtIODiskShowPartition( pxDisk );
+#else
 	pxDisk = FF_RAMDiskInit( mainRAM_DISK_NAME, ucRAMDisk, mainRAM_DISK_SECTORS, mainIO_MANAGER_CACHE_SIZE );
 	configASSERT( pxDisk );
 
 	/* Print out information on the disk. */
 	FF_RAMDiskShowPartition( pxDisk );
+#endif
 
 	/* Create a few example files on the disk.  These are not deleted again. */
 	vCreateAndVerifyExampleFiles( mainRAM_DISK_NAME );
