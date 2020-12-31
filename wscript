@@ -138,6 +138,9 @@ class FreeRTOSBspQemuVirt(FreeRTOSBsp):
             'PLIC_NUM_PRIORITIES         =     7'
         ]
 
+        if ctx.env.VIRTIO_BLK:
+            self.defines += ['configHAS_VIRTIO_BLK     =     1']
+
 
 class FreeRTOSBspSpike(FreeRTOSBsp):
     def __init__(self, ctx):
@@ -253,6 +256,9 @@ class FreeRTOSBspFett(FreeRTOSBsp):
             'MCAUSE_EXTERNAL_INTERRUPT   =' + str(0x800000000000000b)
             if ctx.env.RISCV_XLEN == "64" else str(0x8000000b)
         ]
+
+        if ctx.env.VIRTIO_BLK:
+            self.defines += ['configHAS_VIRTIO_BLK     =     1']
 
 ########################### BSPS END ###############################
 
@@ -420,6 +426,9 @@ class FreeRTOSLibVirtIO(FreeRTOSLib):
             self.libvirtio_dir + 'helpers.c'
         ]
 
+        if ctx.env.VIRTIO_BLK:
+            self.srcs += [ self.libvirtio_dir + 'virtio-blk.c']
+
         self.includes = [self.libvirtio_dir]
         self.export_includes = [self.libvirtio_dir]
 
@@ -481,22 +490,29 @@ class FreeRTOSLibFAT(FreeRTOSLib):
 
     def __init__(self, ctx):
         self.name = "freertos_fat"
-        self.srcs = [
+
+        if ctx.env.VIRTIO_BLK:
+            self.srcs = [self.libfat_dir + 'portable/virtio-blk/ff_virtioblk_disk.c']
+            self.includes = [self.libfat_dir + 'portable/virtio-blk']
+            self.export_includes = [self.libfat_dir + 'portable/virtio-blk']
+        else:
+            self.srcs = [self.libfat_dir + 'portable/common/ff_ramdisk.c']
+
+        self.srcs += [
             self.libfat_dir + 'ff_crc.c', self.libfat_dir + 'ff_dir.c',
             self.libfat_dir + 'ff_error.c', self.libfat_dir + 'ff_fat.c',
             self.libfat_dir + 'ff_file.c', self.libfat_dir + 'ff_format.c',
             self.libfat_dir + 'ff_ioman.c', self.libfat_dir + 'ff_locking.c',
             self.libfat_dir + 'ff_memory.c', self.libfat_dir + 'ff_string.c',
             self.libfat_dir + 'ff_sys.c', self.libfat_dir + 'ff_time.c',
-            self.libfat_dir + 'ff_stdio.c',
-            self.libfat_dir + 'portable/common/ff_ramdisk.c'
+            self.libfat_dir + 'ff_stdio.c'
         ]
 
-        self.includes = [
+        self.includes += [
             self.libfat_dir + '/include', self.libfat_dir + 'portable/common'
         ]
 
-        self.export_includes = [
+        self.export_includes += [
             self.libfat_dir + '/include', self.libfat_dir + 'portable/common'
         ]
 
@@ -614,6 +630,11 @@ def options(ctx):
                    default=0x80000000,
                    help='BSP platform RAM start')
 
+    ctx.add_option('--use-virtio-blk',
+                   action='store_true',
+                   default=False,
+                   help='Use VirtIO Block Device for the file system')
+
     # Features options
     ctx.add_option('--compartmentalize',
                    action='store_true',
@@ -645,6 +666,7 @@ def configure(ctx):
     ctx.env.TARGET = ctx.env.ARCH + '-unknown-elf'
     ctx.env.SYSROOT = ctx.options.sysroot
     ctx.env.MEMSTART = ctx.options.mem_start
+    ctx.env.VIRTIO_BLK = ctx.options.use_virtio_blk
     ctx.env.PROGRAM_PATH = ctx.options.program_path
     ctx.env.PROGRAM_ENTRY = ctx.env.PROG
     ctx.env.COMPARTMENTALIZE = ctx.options.compartmentalize
