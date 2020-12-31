@@ -578,6 +578,15 @@ def freertos_init(bld):
 
 ########################### INIT END #############################
 
+########################### UTILS START #############################
+
+# Size in MiB
+def create_disk_image(ctx, size = 5):
+    with open(ctx.env.PREFIX + '/bin/freertos.img', 'wb') as f:
+        f.seek(1024 * 1024 * size)
+        f.write('0')
+
+########################### UTILS END   #############################
 
 def options(ctx):
     # Tools
@@ -922,6 +931,10 @@ def build(bld):
 def post_build(ctx):
 
     print('After the build is complete')
+
+    if ctx.cmd == 'install':
+        if ctx.env.VIRTIO_BLK:
+            create_disk_image(ctx, 5)
 
     # TODO
     if ctx.options.run:
