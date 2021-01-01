@@ -133,6 +133,7 @@ class FreeRTOSBspQemuVirt(FreeRTOSBsp):
             'VIRTIO_NET_PLIC_INTERRUPT_ID   = 0x8',
             'VIRTIO_NET_PLIC_INTERRUPT_PRIO = 0x1',
             'VIRTIO_BLK_MMIO_ADDRESS     =     0x10007000',
+            'VIRTIO_BLK_MMIO_SIZE        =     0x1000',
             'PLIC_BASE_ADDR              =     0xC000000ULL',
             'PLIC_NUM_SOURCES            =     127',
             'PLIC_NUM_PRIORITIES         =     7'
@@ -249,8 +250,9 @@ class FreeRTOSBspFett(FreeRTOSBsp):
             'configHAS_VIRTIO            =     1',
             'configHAS_VIRTIO_NET        =     1',
             'VIRTIO_NET_MMIO_ADDRESS     =     0x40000000',
-            'VIRTIO_BLK_MMIO_ADDRESS     =     0x40002000',
             'VIRTIO_NET_MMIO_SIZE        =     0x1000',
+            'VIRTIO_BLK_MMIO_ADDRESS     =     0x40002000',
+            'VIRTIO_BLK_MMIO_SIZE        =     0x1000',
             'VIRTIO_NET_PLIC_INTERRUPT_ID   = 0x2',
             'VIRTIO_NET_PLIC_INTERRUPT_PRIO = 0x1',
             'MCAUSE_EXTERNAL_INTERRUPT   =' + str(0x800000000000000b)
