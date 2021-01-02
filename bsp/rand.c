@@ -10,3 +10,18 @@ UBaseType_t uxRand(void) {
   ulNextRand = (ulMultiplier * ulNextRand) + ulIncrement;
   return ((int)(ulNextRand >> 16UL) & 0x7fffUL);
 }
+
+/*
+ * Set *pulNumber to a random number, and return pdTRUE. When the random number
+ * generator is broken, it shall return pdFALSE.
+ * The macros ipconfigRAND32() and configRAND32() are not in use
+ * anymore in FreeRTOS+TCP.
+ *
+ * THIS IS ONLY A DUMMY IMPLEMENTATION THAT RETURNS A PSEUDO RANDOM NUMBER SO IS
+ * NOT INTENDED FOR USE IN PRODUCTION SYSTEMS.
+ */
+BaseType_t xApplicationGetRandomNumber( uint32_t * pulNumber )
+{
+    *pulNumber = uxRand();
+    return pdTRUE;
+}
