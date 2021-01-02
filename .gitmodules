@@ -1,0 +1,16 @@
+[submodule "modbus_demo/libmodbus"]
+	path = modbus_demo/libmodbus
+	url = https://github.com/dodsonmg/libmodbus.git
+	branch = freertos
+[submodule "modbus_demo/libmacaroons"]
+	path = modbus_demo/libmacaroons
+	url = https://github.com/dodsonmg/libmacaroons.git
+	branch = freertos
+[submodule "modbus_demo/libmodbus_macaroons"]
+	path = modbus_demo/libmodbus_macaroons
+	url = https://github.com/dodsonmg/libmodbus_macaroons.git
+	branch = freertos
+[submodule "modbus_demo/libmodbus_cheri"]
+	path = modbus_demo/libmodbus_cheri
+	url = https://github.com/dodsonmg/libmodbus_cheri.git
+	branch = freertos
