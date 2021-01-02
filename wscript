@@ -368,7 +368,7 @@ class FreeRTOSLibBsp(FreeRTOSLib):
 
 class FreeRTOSLibCheri(FreeRTOSLib):
 
-    libcheri_dir = '../../../FreeRTOS-Labs/Source/FreeRTOS-libcheri'
+    libcheri_dir = '../../../FreeRTOS-Labs/FreeRTOS-Labs/Source/FreeRTOS-libcheri'
 
     def __init__(self, ctx):
         self.name = "cheri"
@@ -381,7 +381,7 @@ class FreeRTOSLibCheri(FreeRTOSLib):
 
 class FreeRTOSLibDL(FreeRTOSLib):
 
-    libdl_dir = '../../../FreeRTOS-Labs/Source/FreeRTOS-libdl/'
+    libdl_dir = '../../../FreeRTOS-Labs/FreeRTOS-Labs/Source/FreeRTOS-libdl/'
 
     def __init__(self, ctx):
         self.name = "freertos_libdl"
@@ -417,7 +417,7 @@ class FreeRTOSLibDL(FreeRTOSLib):
 
 class FreeRTOSLibVirtIO(FreeRTOSLib):
 
-    libvirtio_dir = '../../../FreeRTOS-Labs/Source/FreeRTOS-libvirtio/'
+    libvirtio_dir = '../../../FreeRTOS-Labs/FreeRTOS-Labs/Source/FreeRTOS-libvirtio/'
 
     def __init__(self, ctx):
         self.name = "virtio"
@@ -488,7 +488,7 @@ class FreeRTOSLibTCPIP(FreeRTOSLib):
 
 class FreeRTOSLibFAT(FreeRTOSLib):
 
-    libfat_dir = '../../../FreeRTOS-Labs/Source/FreeRTOS-Plus-FAT/'
+    libfat_dir = '../../../FreeRTOS-Labs/FreeRTOS-Labs/Source/FreeRTOS-Plus-FAT/'
 
     def __init__(self, ctx):
         self.name = "freertos_fat"
