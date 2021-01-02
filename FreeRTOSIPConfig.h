@@ -277,7 +277,36 @@
  * 32-bit memory instructions, all packets will be stored 32-bit-aligned, plus 16-bits.
  * This has to do with the contents of the IP-packets: all 32-bit fields are
  * 32-bit-aligned, plus 16-bit(!) */
-#define ipconfigPACKET_FILLER_SIZE      2
+#define ipconfigPACKET_FILLER_SIZE    2
+
+/* Space left at the beginning of a network buffer storage area to store a
+ * pointer back to the network buffer.  Should be a multiple of uintptr_t to ensure uintptr_t byte
+ * alignment is maintained on architectures that require it.
+ *
+ * In order to get a 32-bit alignment of network packets, an offset of 2 bytes
+ * would be desirable, as defined by ipconfigPACKET_FILLER_SIZE.  So the malloc'd
+ * buffer will have the following contents:
+ *  uintptr_t pointer;   // uintptr_t-aligned
+ *  uchar_8 filler[6];
+ *  << ETH-header >>    // half-word-aligned
+ *  uchar_8 dest[6];    // start of pucEthernetBuffer
+ *  uchar_8 dest[6];
+ *  uchar16_t type;
+ *  << IP-header >>     // word-aligned
+ *  uint8_t ucVersionHeaderLength;
+ *  etc
+ */
+#ifdef __CHERI_PURE_CAPABILITY__
+    #if __riscv_xlen == 32
+        #define ipconfigBUFFER_PADDING    14
+    #else
+        #define ipconfigBUFFER_PADDING    22
+    #endif
+#else
+    #if __riscv_xlen == 64
+        #define ipconfigBUFFER_PADDING    14
+    #endif
+#endif
 
 /* Define the size of the pool of TCP window descriptors.  On the average, each
  * TCP socket will use up to 2 x 6 descriptors, meaning that it can have 2 x 6
