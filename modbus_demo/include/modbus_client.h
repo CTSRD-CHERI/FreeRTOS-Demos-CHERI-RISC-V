@@ -32,11 +32,12 @@
  * Constructs modbus requests and sends them to the server
  * Receives modbus responses from the server
  */
-void vClientTask(void *pvParameters);
+void vClientTask( void * pvParameters );
 
 /*
  * Called by main_modbus() to initialise the client before
  * creating tasks and starting the scheduler
  */
-void vClientInitialization(char *ip, int port);
+void vClientInitialization( char * ip,
+                            int port );
 #endif /* _MODBUS_CLIENT_H_ */

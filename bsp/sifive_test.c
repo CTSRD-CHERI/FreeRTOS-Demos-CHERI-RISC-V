@@ -38,40 +38,40 @@
 #include <stddef.h>
 
 #ifndef __waf__
-#include <bsp/qemu_virt.h>
+    #include <bsp/qemu_virt.h>
 #endif
 
 #ifdef __CHERI_PURE_CAPABILITY__
-#include <cheric.h>
-extern void *pvAlmightyDataCap;
+    #include <cheric.h>
+    extern void * pvAlmightyDataCap;
 #endif
 
 #ifndef SIFIVE_TEST_BASE
-#define SIFIVE_TEST_BASE  0x100000
+    #define SIFIVE_TEST_BASE    0x100000
 #endif
 
-#define TEST_PASS         0x5555
-#define TEST_FAIL         0x3333
+#define TEST_PASS               0x5555
+#define TEST_FAIL               0x3333
 
 void vTerminate( int32_t lExitCode )
 {
-volatile uint32_t *sifive_test = ( uint32_t * ) SIFIVE_TEST_BASE;
-uint32_t test_command = TEST_PASS;
+    volatile uint32_t * sifive_test = ( uint32_t * ) SIFIVE_TEST_BASE;
+    uint32_t test_command = TEST_PASS;
 
-	#ifdef __CHERI_PURE_CAPABILITY__
-		sifive_test = cheri_setoffset( pvAlmightyDataCap, ( ptraddr_t ) sifive_test );
-		sifive_test = cheri_csetbounds( ( void * ) sifive_test, sizeof( uint32_t ) );
-	#endif
+    #ifdef __CHERI_PURE_CAPABILITY__
+        sifive_test = cheri_setoffset( pvAlmightyDataCap, ( ptraddr_t ) sifive_test );
+        sifive_test = cheri_csetbounds( ( void * ) sifive_test, sizeof( uint32_t ) );
+    #endif
 
-	if( lExitCode != 0 )
-	{
-		test_command = ( lExitCode << 16 ) | TEST_FAIL;
-	}
+    if( lExitCode != 0 )
+    {
+        test_command = ( lExitCode << 16 ) | TEST_FAIL;
+    }
 
-	while( sifive_test != NULL )
-	{
-		*sifive_test =  test_command;
-	}
+    while( sifive_test != NULL )
+    {
+        *sifive_test = test_command;
+    }
 }
 
 #endif /* _RISCV_SIFIVE_TEST_H */

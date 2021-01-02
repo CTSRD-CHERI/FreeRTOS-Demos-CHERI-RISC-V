@@ -59,7 +59,7 @@
  * vTracePrintF may use multiple records depending on the number of data args.
  ******************************************************************************/
 
-#define EVENT_BUFFER_SIZE 100000 /* Adjust wrt. to available RAM */
+#define EVENT_BUFFER_SIZE    100000 /* Adjust wrt. to available RAM */
 
 
 /*******************************************************************************
@@ -81,7 +81,7 @@
  * Note that this only applies if using static allocation, see below.
  ******************************************************************************/
 
-#define USE_LINKER_PRAGMA 0
+#define USE_LINKER_PRAGMA    0
 
 
 /*******************************************************************************
@@ -95,7 +95,7 @@
  * Object Table. Thus, if you don't use User Events or delete any kernel
  * objects you set this to zero (0) to minimize RAM usage.
  ******************************************************************************/
-#define SYMBOL_TABLE_SIZE 5000
+#define SYMBOL_TABLE_SIZE                 5000
 
 /*******************************************************************************
  * USE_SEPARATE_USER_EVENT_BUFFER
@@ -109,7 +109,7 @@
  * task instance named "Unknown actor". This is added as a placeholder when the
  * user event history is longer than the task scheduling history.
  ******************************************************************************/
-#define USE_SEPARATE_USER_EVENT_BUFFER 0
+#define USE_SEPARATE_USER_EVENT_BUFFER    0
 
 /*******************************************************************************
  * USER_EVENT_BUFFER_SIZE
@@ -121,7 +121,7 @@
  *
  * Only in use if USE_SEPARATE_USER_EVENT_BUFFER is set to 1.
  ******************************************************************************/
-#define USER_EVENT_BUFFER_SIZE 500
+#define USER_EVENT_BUFFER_SIZE            500
 
 /*******************************************************************************
  * USER_EVENT_CHANNELS
@@ -132,7 +132,7 @@
  *
  * Only in use if USE_SEPARATE_USER_EVENT_BUFFER is set to 1.
  ******************************************************************************/
-#define CHANNEL_FORMAT_PAIRS 32
+#define CHANNEL_FORMAT_PAIRS              32
 
 /*******************************************************************************
  * NTask, NISR, NQueue, NSemaphore, NMutex
@@ -167,18 +167,18 @@
  * NTask should thus be at least 2-3 slots larger than your application task count.
  *
  ******************************************************************************/
-#define NTask             100
-#define NISR              60
-#define NQueue            60
-#define NSemaphore        60
-#define NMutex            60
+#define NTask                             100
+#define NISR                              60
+#define NQueue                            60
+#define NSemaphore                        60
+#define NMutex                            60
 
 /* Maximum object name length for each class (includes zero termination) */
-#define NameLenTask       15
-#define NameLenISR        15
-#define NameLenQueue      15
-#define NameLenSemaphore  15
-#define NameLenMutex      15
+#define NameLenTask                       15
+#define NameLenISR                        15
+#define NameLenQueue                      15
+#define NameLenSemaphore                  15
+#define NameLenMutex                      15
 
 /******************************************************************************
  * TRACE_DESCRIPTION
@@ -190,7 +190,7 @@
  * internal error messages from the recorder, which if occurs overwrites the
  * value defined here. This may be maximum 256 chars.
  *****************************************************************************/
-#define TRACE_DESCRIPTION "Tracealyzer Recorder Test Program"
+#define TRACE_DESCRIPTION                 "Tracealyzer Recorder Test Program"
 
 /******************************************************************************
  * TRACE_DESCRIPTION_MAX_LENGTH
@@ -201,7 +201,7 @@
  * Default is 80.
  * Maximum allowed length is 256 - the trace will fail to load if longer.
  *****************************************************************************/
-#define TRACE_DESCRIPTION_MAX_LENGTH 80
+#define TRACE_DESCRIPTION_MAX_LENGTH      80
 
 
 /******************************************************************************
@@ -221,7 +221,7 @@
  * Using dynamic allocation may give more flexibility in some cases.
  *****************************************************************************/
 
-#define TRACE_DATA_ALLOCATION TRACE_DATA_ALLOCATION_STATIC
+#define TRACE_DATA_ALLOCATION    TRACE_DATA_ALLOCATION_STATIC
 
 
 /******************************************************************************
@@ -237,7 +237,7 @@
  * If this is one (1), the TRACE_ASSERT macro will verify that a condition is
  * true. If the condition is false, vTraceError() will be called.
  *****************************************************************************/
-#define USE_TRACE_ASSERT 1
+#define USE_TRACE_ASSERT           1
 
 /******************************************************************************
  * INCLUDE_FLOAT_SUPPORT
@@ -253,7 +253,7 @@
  * Note: vTracePrintF can still be used with integer and string arguments in
  * either case.
  *****************************************************************************/
-#define INCLUDE_FLOAT_SUPPORT 0
+#define INCLUDE_FLOAT_SUPPORT      0
 
 /******************************************************************************
  * INCLUDE_USER_EVENTS
@@ -270,45 +270,45 @@
  * Note that Tracealyzer Standard Edition or Professional Edition is required
  * for User Events, they are not displayed in Tracealyzer Free Edition.
  *****************************************************************************/
-#define INCLUDE_USER_EVENTS 1
+#define INCLUDE_USER_EVENTS        1
 
 /*****************************************************************************
- * INCLUDE_READY_EVENTS
- *
- * Macro which should be defined as either zero (0) or one (1).
- * Default is 1.
- *
- * If this is zero (0), the code for recording Ready events is
- * excluded. Note, this will make it impossible to calculate the correct
- * response times.
- *****************************************************************************/
-#define INCLUDE_READY_EVENTS 1
+* INCLUDE_READY_EVENTS
+*
+* Macro which should be defined as either zero (0) or one (1).
+* Default is 1.
+*
+* If this is zero (0), the code for recording Ready events is
+* excluded. Note, this will make it impossible to calculate the correct
+* response times.
+*****************************************************************************/
+#define INCLUDE_READY_EVENTS       1
 
 /*****************************************************************************
- * INCLUDE_NEW_TIME_EVENTS
- *
- * Macro which should be defined as either zero (0) or one (1).
- * Default is 0.
- *
- * If this is zero (1), events will be generated whenever the os clock is
- * increased.
- *****************************************************************************/
-#define INCLUDE_NEW_TIME_EVENTS 0
+* INCLUDE_NEW_TIME_EVENTS
+*
+* Macro which should be defined as either zero (0) or one (1).
+* Default is 0.
+*
+* If this is zero (1), events will be generated whenever the os clock is
+* increased.
+*****************************************************************************/
+#define INCLUDE_NEW_TIME_EVENTS    0
 
 /*****************************************************************************
- * INCLUDE_ISR_TRACING
- *
- * Macro which should be defined as either zero (0) or one (1).
- * Default is 1.
- *
- * If this is zero (0), the code for recording Interrupt Service Routines is
- * excluded to reduce code size.
- *
- * Note, if the kernel has no central interrupt dispatcher, recording ISRs
- * require that you insert calls to vTraceStoreISRBegin and vTraceStoreISREnd
- * in your interrupt handlers.
- *****************************************************************************/
-#define INCLUDE_ISR_TRACING 1
+* INCLUDE_ISR_TRACING
+*
+* Macro which should be defined as either zero (0) or one (1).
+* Default is 1.
+*
+* If this is zero (0), the code for recording Interrupt Service Routines is
+* excluded to reduce code size.
+*
+* Note, if the kernel has no central interrupt dispatcher, recording ISRs
+* require that you insert calls to vTraceStoreISRBegin and vTraceStoreISREnd
+* in your interrupt handlers.
+*****************************************************************************/
+#define INCLUDE_ISR_TRACING        1
 
 /******************************************************************************
  * INCLUDE_OBJECT_DELETE
@@ -320,7 +320,7 @@
  * traced kernel objects are deleted at runtime. If no deletes are made, this
  * can be set to 0 in order to exclude the delete-handling code.
  *****************************************************************************/
-#define INCLUDE_OBJECT_DELETE 0
+#define INCLUDE_OBJECT_DELETE      0
 
 /******************************************************************************
  * CONFIGURATION RELATED TO BEHAVIOR
@@ -361,7 +361,7 @@
  * system since the scheduler is blocked during the processing of vTracePortEnd.
  *****************************************************************************/
 
-#define TRACE_RECORDER_STORE_MODE TRACE_STORE_MODE_RING_BUFFER
+#define TRACE_RECORDER_STORE_MODE    TRACE_STORE_MODE_RING_BUFFER
 
 /******************************************************************************
  * STOP_AFTER_N_EVENTS
@@ -376,7 +376,7 @@
  * in ring buffer mode . A negative value (or no definition of this macro)
  * disables this feature.
  *****************************************************************************/
-#define STOP_AFTER_N_EVENTS -1
+#define STOP_AFTER_N_EVENTS          -1
 
 /******************************************************************************
  * USE_IMPLICIT_IFE_RULES
@@ -426,21 +426,21 @@
  * covering all execution fragments, unless you define an explicit IFE in each
  * task by calling vTraceTaskInstanceIsFinished before the blocking call.
  *****************************************************************************/
-#define USE_IMPLICIT_IFE_RULES 1
+#define USE_IMPLICIT_IFE_RULES       1
 
 /******************************************************************************
- * INCLUDE_SAVE_TO_FILE
- *
- * Macro which should be defined as either zero (0) or one (1).
- * Default is 0.
- *
- * If enabled (1), the recorder will include code for saving the trace
- * to a local file system.
- ******************************************************************************/
+* INCLUDE_SAVE_TO_FILE
+*
+* Macro which should be defined as either zero (0) or one (1).
+* Default is 0.
+*
+* If enabled (1), the recorder will include code for saving the trace
+* to a local file system.
+******************************************************************************/
 #ifdef WIN32
-    #define INCLUDE_SAVE_TO_FILE 1
+    #define INCLUDE_SAVE_TO_FILE    1
 #else
-    #define INCLUDE_SAVE_TO_FILE 0
+    #define INCLUDE_SAVE_TO_FILE    0
 #endif
 
 /******************************************************************************
@@ -459,7 +459,7 @@
  *
  * See vTraceMonitorTask in trcUser.c
  *****************************************************************************/
-#define TRACE_PROGRESS_MONITOR_TASK_PRIORITY (tskIDLE_PRIORITY + 1)
+#define TRACE_PROGRESS_MONITOR_TASK_PRIORITY     ( tskIDLE_PRIORITY + 1 )
 
 /******************************************************************************
  * TRACE_PROGRESS_MONITOR_TASK_STACKSIZE
@@ -473,7 +473,7 @@
  *
  * See vTraceMonitorTask in trcUser.c
  *****************************************************************************/
-#define TRACE_PROGRESS_MONITOR_TASK_STACKSIZE 500
+#define TRACE_PROGRESS_MONITOR_TASK_STACKSIZE    500
 
 /******************************************************************************
  * TRACE_PROGRESS_MONITOR_TASK_PERIOD
@@ -492,9 +492,9 @@
  * See vTraceMonitorTask in trcUser.c
  *****************************************************************************/
 #ifdef WIN32
-    #define TRACE_PROGRESS_MONITOR_TASK_PERIOD 100
+    #define TRACE_PROGRESS_MONITOR_TASK_PERIOD    100
 #else
-    #define TRACE_PROGRESS_MONITOR_TASK_PERIOD 1000
+    #define TRACE_PROGRESS_MONITOR_TASK_PERIOD    1000
 #endif
 
 /******************************************************************************
@@ -504,7 +504,6 @@
  * If no team license is available, this should be an empty string "".
  * This should be maximum 32 chars, including zero-termination.
  *****************************************************************************/
-#define TEAM_LICENSE_CODE ""
+#define TEAM_LICENSE_CODE    ""
 
-#endif
-
+#endif /* ifndef TRCCONFIG_H */

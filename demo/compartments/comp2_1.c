@@ -37,9 +37,10 @@
 #include "task.h"
 #include "queue.h"
 
-void vComp2_1(void);
+void vComp2_1( void );
 
-void vComp2_1(void) {
-  printf("Hello World from Comp2_1\n");
+void vComp2_1( void )
+{
+    printf( "Hello World from Comp2_1\n" );
 }
 /*-----------------------------------------------------------*/

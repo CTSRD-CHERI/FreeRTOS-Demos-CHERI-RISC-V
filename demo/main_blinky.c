@@ -74,20 +74,20 @@
 #include "queue.h"
 
 /* Priorities used by the tasks. */
-#define mainQUEUE_RECEIVE_TASK_PRIORITY (tskIDLE_PRIORITY + 2)
-#define mainQUEUE_SEND_TASK_PRIORITY (tskIDLE_PRIORITY + 1)
+#define mainQUEUE_RECEIVE_TASK_PRIORITY    ( tskIDLE_PRIORITY + 2 )
+#define mainQUEUE_SEND_TASK_PRIORITY       ( tskIDLE_PRIORITY + 1 )
 
 /* The rate at which data is sent to the queue.  The 200ms value is converted
-to ticks using the pdMS_TO_TICKS() macro. */
-#define mainQUEUE_SEND_FREQUENCY_MS pdMS_TO_TICKS(200)
+ * to ticks using the pdMS_TO_TICKS() macro. */
+#define mainQUEUE_SEND_FREQUENCY_MS        pdMS_TO_TICKS( 200 )
 
 /* The maximum number items the queue can hold.  The priority of the receiving
-task is above the priority of the sending task, so the receiving task will
-preempt the sending task and remove the queue items each time the sending task
-writes to the queue.  Therefore the queue will never have more than one item in
-it at any time, and even with a queue length of 1, the sending task will never
-find the queue full. */
-#define mainQUEUE_LENGTH (1)
+ * task is above the priority of the sending task, so the receiving task will
+ * preempt the sending task and remove the queue items each time the sending task
+ * writes to the queue.  Therefore the queue will never have more than one item in
+ * it at any time, and even with a queue length of 1, the sending task will never
+ * find the queue full. */
+#define mainQUEUE_LENGTH                   ( 1 )
 
 /*-----------------------------------------------------------*/
 
@@ -95,13 +95,13 @@ find the queue full. */
  * Called by main when mainCREATE_SIMPLE_BLINKY_DEMO_ONLY is set to 1 in
  * main.c.
  */
-void main_blinky(void);
+void main_blinky( void );
 
 /*
  * The tasks as described in the comments at the top of this file.
  */
-static void prvQueueReceiveTask(void *pvParameters);
-static void prvQueueSendTask(void *pvParameters);
+static void prvQueueReceiveTask( void * pvParameters );
+static void prvQueueSendTask( void * pvParameters );
 
 /*-----------------------------------------------------------*/
 
@@ -110,106 +110,116 @@ static QueueHandle_t xQueue = NULL;
 
 /*-----------------------------------------------------------*/
 
-void main_blinky(void) {
-  /* Create the queue. */
-  xQueue = xQueueCreate(mainQUEUE_LENGTH, sizeof(unsigned long));
+void main_blinky( void )
+{
+    /* Create the queue. */
+    xQueue = xQueueCreate( mainQUEUE_LENGTH, sizeof( unsigned long ) );
 
-  if (xQueue != NULL) {
-    /* Start the two tasks as described in the comments at the top of this
-    file. */
-    xTaskCreate(prvQueueReceiveTask,			 /* The function that implements the task. */
-                "Rx",							 /* The text name assigned to the task - for debug only as it is not used by the kernel. */
-                configMINIMAL_STACK_SIZE * 2U,   /* The size of the stack to allocate to the task. */
-                NULL,							 /* The parameter passed to the task - not used in this case. */
-                mainQUEUE_RECEIVE_TASK_PRIORITY, /* The priority assigned to the task. */
-                NULL);							 /* The task handle is not required, so NULL is passed. */
+    if( xQueue != NULL )
+    {
+        /* Start the two tasks as described in the comments at the top of this
+         * file. */
+        xTaskCreate( prvQueueReceiveTask,             /* The function that implements the task. */
+                     "Rx",                            /* The text name assigned to the task - for debug only as it is not used by the kernel. */
+                     configMINIMAL_STACK_SIZE * 2U,   /* The size of the stack to allocate to the task. */
+                     NULL,                            /* The parameter passed to the task - not used in this case. */
+                     mainQUEUE_RECEIVE_TASK_PRIORITY, /* The priority assigned to the task. */
+                     NULL );                          /* The task handle is not required, so NULL is passed. */
 
-    xTaskCreate(prvQueueSendTask, "TX", configMINIMAL_STACK_SIZE * 2U, NULL, mainQUEUE_SEND_TASK_PRIORITY, NULL);
+        xTaskCreate( prvQueueSendTask, "TX", configMINIMAL_STACK_SIZE * 2U, NULL, mainQUEUE_SEND_TASK_PRIORITY, NULL );
 
-    /* vTaskStartScheduler is called by main.c after we return */
-    //vTaskStartScheduler();
-  }
+        /* vTaskStartScheduler is called by main.c after we return */
+        /*vTaskStartScheduler(); */
+    }
 
-  /* There are two cases main_blinky can execute in:
-   * 1) When called from main.c, in which case we're expected to return so that
-   * main.c calls vTaskStartScheduler.
-   * 2) When it gets dynamically loaded in which case the scheduler has already
-   * been started.
-   * In both cases, we need to return (to main.c or to whoever loaded us). */
+    /* There are two cases main_blinky can execute in:
+     * 1) When called from main.c, in which case we're expected to return so that
+     * main.c calls vTaskStartScheduler.
+     * 2) When it gets dynamically loaded in which case the scheduler has already
+     * been started.
+     * In both cases, we need to return (to main.c or to whoever loaded us). */
 }
 /*-----------------------------------------------------------*/
 
-static void prvQueueSendTask(void *pvParameters) {
-  TickType_t xNextWakeTime;
-  const unsigned long ulValueToSend = 100UL;
-  BaseType_t xReturned;
+static void prvQueueSendTask( void * pvParameters )
+{
+    TickType_t xNextWakeTime;
+    const unsigned long ulValueToSend = 100UL;
+    BaseType_t xReturned;
 
-  unsigned int cnt = 0;
+    unsigned int cnt = 0;
 
-  /* Remove compiler warning about unused parameter. */
-  (void)pvParameters;
+    /* Remove compiler warning about unused parameter. */
+    ( void ) pvParameters;
 
-  /* Initialise xNextWakeTime - this only needs to be done once. */
-  xNextWakeTime = xTaskGetTickCount();
+    /* Initialise xNextWakeTime - this only needs to be done once. */
+    xNextWakeTime = xTaskGetTickCount();
 
-  for (;;) {
-    printf("[%u]: Hello from TX\r\n", cnt);
-    cnt++;
+    for( ; ; )
+    {
+        printf( "[%u]: Hello from TX\r\n", cnt );
+        cnt++;
 
-    /* Place this task in the blocked state until it is time to run again. */
-    vTaskDelayUntil(&xNextWakeTime, mainQUEUE_SEND_FREQUENCY_MS);
+        /* Place this task in the blocked state until it is time to run again. */
+        vTaskDelayUntil( &xNextWakeTime, mainQUEUE_SEND_FREQUENCY_MS );
 
-    printf("[%u] TX: awoken\r\n", cnt);
+        printf( "[%u] TX: awoken\r\n", cnt );
 
-    /* Send to the queue - causing the queue receive task to unblock and
-    toggle the LED.  0 is used as the block time so the sending operation
-    will not block - it shouldn't need to block as the queue should always
-    be empty at this point in the code. */
-    xReturned = xQueueSend(xQueue, &ulValueToSend, 0U);
-    configASSERT(xReturned == pdPASS);
-    printf("[%u] TX: sent\r\n", cnt);
-  }
+        /* Send to the queue - causing the queue receive task to unblock and
+         * toggle the LED.  0 is used as the block time so the sending operation
+         * will not block - it shouldn't need to block as the queue should always
+         * be empty at this point in the code. */
+        xReturned = xQueueSend( xQueue, &ulValueToSend, 0U );
+        configASSERT( xReturned == pdPASS );
+        printf( "[%u] TX: sent\r\n", cnt );
+    }
 }
 /*-----------------------------------------------------------*/
 
-static void prvQueueReceiveTask(void *pvParameters) {
-  unsigned long ulReceivedValue;
-  const unsigned long ulExpectedValue = 100UL;
-  extern void vToggleLED(void);
+static void prvQueueReceiveTask( void * pvParameters )
+{
+    unsigned long ulReceivedValue;
+    const unsigned long ulExpectedValue = 100UL;
+    extern void vToggleLED( void );
 
-  unsigned int cnt = 0;
+    unsigned int cnt = 0;
 
-  /* Remove compiler warning about unused parameter. */
-  (void)pvParameters;
+    /* Remove compiler warning about unused parameter. */
+    ( void ) pvParameters;
 
-  for (;;) {
-    printf("[%u]: Hello from RX\r\n", cnt);
-    cnt++;
+    for( ; ; )
+    {
+        printf( "[%u]: Hello from RX\r\n", cnt );
+        cnt++;
 
-    /* Wait until something arrives in the queue - this task will block
-    indefinitely provided INCLUDE_vTaskSuspend is set to 1 in
-    FreeRTOSConfig.h. */
-    xQueueReceive(xQueue, &ulReceivedValue, portMAX_DELAY);
+        /* Wait until something arrives in the queue - this task will block
+         * indefinitely provided INCLUDE_vTaskSuspend is set to 1 in
+         * FreeRTOSConfig.h. */
+        xQueueReceive( xQueue, &ulReceivedValue, portMAX_DELAY );
 
-    printf("[%u] RX: received value\r\n", cnt);
+        printf( "[%u] RX: received value\r\n", cnt );
 
-    /*  To get here something must have been received from the queue, but
-    is it the expected value?  If it is, toggle the LED. */
-    if (ulReceivedValue == ulExpectedValue) {
-      printf("Blink !!!\r\n");
-      // TODO: blink a real LED at some point
-      vToggleLED();
-      ulReceivedValue = 0U;
-    } else {
-      printf("Unexpected value received\r\n");
-      _exit(-1);
+        /*  To get here something must have been received from the queue, but
+         * is it the expected value?  If it is, toggle the LED. */
+        if( ulReceivedValue == ulExpectedValue )
+        {
+            printf( "Blink !!!\r\n" );
+            /* TODO: blink a real LED at some point */
+            vToggleLED();
+            ulReceivedValue = 0U;
+        }
+        else
+        {
+            printf( "Unexpected value received\r\n" );
+            _exit( -1 );
+        }
+
+        if( cnt == 5 )
+        {
+            /* Successully blinked for 5 time, enough for testing. Shutdown the
+             * supported platforms and signal a success. */
+            _exit( 0 );
+        }
     }
-
-    if ( cnt == 5 ) {
-        /* Successully blinked for 5 time, enough for testing. Shutdown the
-           supported platforms and signal a success. */
-        _exit(0);
-    }
-  }
 }
 /*-----------------------------------------------------------*/

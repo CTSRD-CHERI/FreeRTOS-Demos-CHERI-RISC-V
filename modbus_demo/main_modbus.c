@@ -77,32 +77,32 @@
 #include "modbus_server.h"
 #include "modbus_client.h"
 
-#if defined(CHERI_LAYER)
+#if defined( CHERI_LAYER )
 /* Modbus CHERI includes */
-#include "modbus_cheri.h"
+    #include "modbus_cheri.h"
 #endif
 
-#if defined(MACAROONS_LAYER)
+#if defined( MACAROONS_LAYER )
 /* Macaroons includes */
-#include "modbus_macaroons.h"
+    #include "modbus_macaroons.h"
 #endif
 
 /*-----------------------------------------------------------*/
 
 /* The default IP and MAC address used by the demo.  The address configuration
-defined here will be used if ipconfigUSE_DHCP is 0, or if ipconfigUSE_DHCP is
-1 but a DHCP server could not be contacted.  See the online documentation for
-more information. */
+ * defined here will be used if ipconfigUSE_DHCP is 0, or if ipconfigUSE_DHCP is
+ * 1 but a DHCP server could not be contacted.  See the online documentation for
+ * more information. */
 static const uint8_t ucIPAddress[ 4 ] = { configIP_ADDR0, configIP_ADDR1, configIP_ADDR2, configIP_ADDR3 };
 static const uint8_t ucNetMask[ 4 ] = { configNET_MASK0, configNET_MASK1, configNET_MASK2, configNET_MASK3 };
 static const uint8_t ucGatewayAddress[ 4 ] = { configGATEWAY_ADDR0, configGATEWAY_ADDR1, configGATEWAY_ADDR2, configGATEWAY_ADDR3 };
 static const uint8_t ucDNSServerAddress[ 4 ] = { configDNS_SERVER_ADDR0, configDNS_SERVER_ADDR1, configDNS_SERVER_ADDR2, configDNS_SERVER_ADDR3 };
 
 /* Default MAC address configuration.  The demo creates a virtual network
-connection that uses this MAC address by accessing the raw Ethernet data
-to and from a real network connection on the host PC.  See the
-configNETWORK_INTERFACE_TO_USE definition for information on how to configure
-the real network connection to use. */
+ * connection that uses this MAC address by accessing the raw Ethernet data
+ * to and from a real network connection on the host PC.  See the
+ * configNETWORK_INTERFACE_TO_USE definition for information on how to configure
+ * the real network connection to use. */
 static const uint8_t ucMACAddress[ 6 ] = { configMAC_ADDR0, configMAC_ADDR1, configMAC_ADDR2, configMAC_ADDR3, configMAC_ADDR4, configMAC_ADDR5 };
 
 /* The default modbus server port is 502; however, the client and server
@@ -113,11 +113,11 @@ static const uint8_t ucMACAddress[ 6 ] = { configMAC_ADDR0, configMAC_ADDR1, con
  * be listening on localhost:502 */
 const int modbus_port = 502;
 const int modbus_port_mapped = 1502;
-const char *localhost_ip = "127.0.0.1";
+const char * localhost_ip = "127.0.0.1";
 
 /*-----------------------------------------------------------*/
 
-void main_modbus(void)
+void main_modbus( void )
 {
     /* Initialise the network interface.
      * ***NOTE*** Tasks that use the network are created in the network event hook
@@ -132,97 +132,99 @@ void main_modbus(void)
 /*-----------------------------------------------------------*/
 
 /* Called by FreeRTOS+TCP when the network connects or disconnects.  Disconnect
-events are only received if implemented in the MAC driver. */
+ * events are only received if implemented in the MAC driver. */
 void vApplicationIPNetworkEventHook( eIPCallbackEvent_t eNetworkEvent )
 {
     uint32_t ulIPAddress, ulNetMask, ulGatewayAddress, ulDNSServerAddress;
     char cBuffer[ 16 ];
     static BaseType_t xTasksAlreadyCreated = pdFALSE;
 
-	/* If the network has just come up...*/
-	if( eNetworkEvent == eNetworkUp )
-	{
-		/* Create the tasks that use the IP stack if they have not already been
-		created. */
-		if( xTasksAlreadyCreated == pdFALSE )
-		{
+    /* If the network has just come up...*/
+    if( eNetworkEvent == eNetworkUp )
+    {
+        /* Create the tasks that use the IP stack if they have not already been
+         * created. */
+        if( xTasksAlreadyCreated == pdFALSE )
+        {
             /* Initialise the server and client */
             FreeRTOS_debug_printf( ( "vServerInitialization\n" ) );
-            vServerInitialization(localhost_ip, modbus_port);
+            vServerInitialization( localhost_ip, modbus_port );
             FreeRTOS_debug_printf( ( "vClientInitialization\n" ) );
-            vClientInitialization(localhost_ip, modbus_port_mapped);
+            vClientInitialization( localhost_ip, modbus_port_mapped );
 
             /*
-            * Start the client and server tasks as described in the comments at the top of this
-            * file.
-            */
-            xTaskCreate(vClientTask,                 /* The function that implements the task. */
-                      "Client",                      /* The text name assigned to the task - for debug only as it is not used by the kernel. */
-                      configMINIMAL_STACK_SIZE * 2U, /* The size of the stack to allocate to the task. */
-                      NULL,                          /* The parameter passed to the task - not used in this case. */
-                      modbusCLIENT_TASK_PRIORITY,      /* The priority assigned to the task. */
-                      NULL);                         /* The task handle is not required, so NULL is passed. */
+             * Start the client and server tasks as described in the comments at the top of this
+             * file.
+             */
+            xTaskCreate( vClientTask,                   /* The function that implements the task. */
+                         "Client",                      /* The text name assigned to the task - for debug only as it is not used by the kernel. */
+                         configMINIMAL_STACK_SIZE * 2U, /* The size of the stack to allocate to the task. */
+                         NULL,                          /* The parameter passed to the task - not used in this case. */
+                         modbusCLIENT_TASK_PRIORITY,    /* The priority assigned to the task. */
+                         NULL );                        /* The task handle is not required, so NULL is passed. */
 
-            xTaskCreate(vServerTask,                 /* The function that implements the task. */
-                      "Server",                      /* The text name assigned to the task - for debug only as it is not used by the kernel. */
-                      configMINIMAL_STACK_SIZE * 2U, /* The size of the stack to allocate to the task. */
-                      NULL,                          /* The parameter passed to the task - not used in this case. */
-                      modbusSERVER_TASK_PRIORITY,      /* The priority assigned to the task. */
-                      NULL);                         /* The task handle is not required, so NULL is passed. */
+            xTaskCreate( vServerTask,                   /* The function that implements the task. */
+                         "Server",                      /* The text name assigned to the task - for debug only as it is not used by the kernel. */
+                         configMINIMAL_STACK_SIZE * 2U, /* The size of the stack to allocate to the task. */
+                         NULL,                          /* The parameter passed to the task - not used in this case. */
+                         modbusSERVER_TASK_PRIORITY,    /* The priority assigned to the task. */
+                         NULL );                        /* The task handle is not required, so NULL is passed. */
 
             xTasksAlreadyCreated = pdTRUE;
         }
 
-		/* Print out the network configuration, which may have come from a DHCP
-		server. */
-		FreeRTOS_GetAddressConfiguration( &ulIPAddress, &ulNetMask, &ulGatewayAddress, &ulDNSServerAddress );
-		FreeRTOS_inet_ntoa( ulIPAddress, cBuffer );
-		FreeRTOS_printf( ( "\r\n\r\nIP Address: %s\r\n", cBuffer ) );
+        /* Print out the network configuration, which may have come from a DHCP
+         * server. */
+        FreeRTOS_GetAddressConfiguration( &ulIPAddress, &ulNetMask, &ulGatewayAddress, &ulDNSServerAddress );
+        FreeRTOS_inet_ntoa( ulIPAddress, cBuffer );
+        FreeRTOS_printf( ( "\r\n\r\nIP Address: %s\r\n", cBuffer ) );
 
-		FreeRTOS_inet_ntoa( ulNetMask, cBuffer );
-		FreeRTOS_printf( ( "Subnet Mask: %s\r\n", cBuffer ) );
+        FreeRTOS_inet_ntoa( ulNetMask, cBuffer );
+        FreeRTOS_printf( ( "Subnet Mask: %s\r\n", cBuffer ) );
 
-		FreeRTOS_inet_ntoa( ulGatewayAddress, cBuffer );
-		FreeRTOS_printf( ( "Gateway Address: %s\r\n", cBuffer ) );
+        FreeRTOS_inet_ntoa( ulGatewayAddress, cBuffer );
+        FreeRTOS_printf( ( "Gateway Address: %s\r\n", cBuffer ) );
 
-		FreeRTOS_inet_ntoa( ulDNSServerAddress, cBuffer );
-		FreeRTOS_printf( ( "DNS Server Address: %s\r\n\r\n\r\n", cBuffer ) );
-	}
+        FreeRTOS_inet_ntoa( ulDNSServerAddress, cBuffer );
+        FreeRTOS_printf( ( "DNS Server Address: %s\r\n\r\n\r\n", cBuffer ) );
+    }
 }
 
 /*-----------------------------------------------------------*/
 
 /* Called automatically when a reply to an outgoing ping is received. */
-void vApplicationPingReplyHook( ePingReplyStatus_t eStatus, uint16_t usIdentifier )
+void vApplicationPingReplyHook( ePingReplyStatus_t eStatus,
+                                uint16_t usIdentifier )
 {
-static const char *pcSuccess = "Ping reply received - ";
-static const char *pcInvalidChecksum = "Ping reply received with invalid checksum - ";
-static const char *pcInvalidData = "Ping reply received with invalid data - ";
+    static const char * pcSuccess = "Ping reply received - ";
+    static const char * pcInvalidChecksum = "Ping reply received with invalid checksum - ";
+    static const char * pcInvalidData = "Ping reply received with invalid data - ";
 
-	switch( eStatus )
-	{
-		case eSuccess	:
-			FreeRTOS_printf( ( pcSuccess ) );
-			break;
+    switch( eStatus )
+    {
+        case eSuccess:
+            FreeRTOS_printf( ( pcSuccess ) );
+            break;
 
-		case eInvalidChecksum :
-			FreeRTOS_printf( ( pcInvalidChecksum ) );
-			break;
+        case eInvalidChecksum:
+            FreeRTOS_printf( ( pcInvalidChecksum ) );
+            break;
 
-		case eInvalidData :
-			FreeRTOS_printf( ( pcInvalidData ) );
-			break;
+        case eInvalidData:
+            FreeRTOS_printf( ( pcInvalidData ) );
+            break;
 
-		default :
-			/* It is not possible to get here as all enums have their own
-			case. */
-			break;
-	}
+        default:
 
-	FreeRTOS_printf( ( "identifier %d\r\n", ( int ) usIdentifier ) );
+            /* It is not possible to get here as all enums have their own
+             * case. */
+            break;
+    }
 
-	/* Prevent compiler warnings in case FreeRTOS_debug_printf() is not defined. */
-	( void ) usIdentifier;
+    FreeRTOS_printf( ( "identifier %d\r\n", ( int ) usIdentifier ) );
+
+    /* Prevent compiler warnings in case FreeRTOS_debug_printf() is not defined. */
+    ( void ) usIdentifier;
 }
 
 /*-----------------------------------------------------------*/
@@ -233,39 +235,45 @@ static const char *pcInvalidData = "Ping reply received with invalid data - ";
  * THAT RETURNS A PSEUDO RANDOM NUMBER SO IS NOT INTENDED FOR USE IN PRODUCTION
  * SYSTEMS.
  */
-extern uint32_t ulApplicationGetNextSequenceNumber(uint32_t ulSourceAddress,
-	uint16_t usSourcePort,
-	uint32_t ulDestinationAddress,
-	uint16_t usDestinationPort)
+extern uint32_t ulApplicationGetNextSequenceNumber( uint32_t ulSourceAddress,
+                                                    uint16_t usSourcePort,
+                                                    uint32_t ulDestinationAddress,
+                                                    uint16_t usDestinationPort )
 {
-	(void)ulSourceAddress;
-	(void)usSourcePort;
-	(void)ulDestinationAddress;
-	(void)usDestinationPort;
+    ( void ) ulSourceAddress;
+    ( void ) usSourcePort;
+    ( void ) ulDestinationAddress;
+    ( void ) usDestinationPort;
 
-	return uxRand();
+    return uxRand();
 }
 
 /*-----------------------------------------------------------*/
 
-void vPrintTx(uint8_t *msg, int msg_length)
+void vPrintTx( uint8_t * msg,
+               int msg_length )
 {
-  printf("TX:\t");
-  for (int i = 0; i < msg_length; ++i)
-  {
-    printf("[%.2X]", msg[i]);
-  }
-  printf("\n\n");
+    printf( "TX:\t" );
+
+    for( int i = 0; i < msg_length; ++i )
+    {
+        printf( "[%.2X]", msg[ i ] );
+    }
+
+    printf( "\n\n" );
 }
 
 /*-----------------------------------------------------------*/
 
-void vPrintRx(uint8_t *msg, int msg_length)
+void vPrintRx( uint8_t * msg,
+               int msg_length )
 {
-  printf("RX:\t");
-  for (int i = 0; i < msg_length; ++i)
-  {
-    printf("<%.2X>", msg[i]);
-  }
-  printf("\n\n");
+    printf( "RX:\t" );
+
+    for( int i = 0; i < msg_length; ++i )
+    {
+        printf( "<%.2X>", msg[ i ] );
+    }
+
+    printf( "\n\n" );
 }

@@ -40,78 +40,85 @@
 #include <cheric.h>
 
 #if __riscv_xlen == 32
-#define PRINT_REG "0x%08" PRIx32
+    #define PRINT_REG    "0x%08" PRIx32
 #elif __riscv_xlen == 64
-#define PRINT_REG "0x%016" PRIx64
+    #define PRINT_REG    "0x%016" PRIx64
 #endif
 
-static void prvpvMallocTest(void *pvParameters);
+static void prvpvMallocTest( void * pvParameters );
 static UBaseType_t cheri_exception_handler();
 
 /*-----------------------------------------------------------*/
 
-void main_tests(void) {
-
-    xTaskCreate(prvpvMallocTest,			 /* The function that implements the task. */
-                "Test pvPortMalloc",					 /* The text name assigned to the task - for debug only as it is not used by the kernel. */
-                configMINIMAL_STACK_SIZE * 2U,   /* The size of the stack to allocate to the task. */
-                NULL,							 /* The parameter passed to the task - not used in this case. */
-                1, /* The priority assigned to the task. */
-                NULL);							 /* The task handle is not required, so NULL is passed. */
+void main_tests( void )
+{
+    xTaskCreate( prvpvMallocTest,               /* The function that implements the task. */
+                 "Test pvPortMalloc",           /* The text name assigned to the task - for debug only as it is not used by the kernel. */
+                 configMINIMAL_STACK_SIZE * 2U, /* The size of the stack to allocate to the task. */
+                 NULL,                          /* The parameter passed to the task - not used in this case. */
+                 1,                             /* The priority assigned to the task. */
+                 NULL );                        /* The task handle is not required, so NULL is passed. */
 
     /* Setup an exception handler for CHERI */
-    vPortSetExceptionHandler(0x1c, cheri_exception_handler);
+    vPortSetExceptionHandler( 0x1c, cheri_exception_handler );
 
     /* Start the tasks and timer running. */
     vTaskStartScheduler();
 
-  /* If all is well, the scheduler will now be running, and the following
-  line will never be reached.  If the following line does execute, then
-  there was insufficient FreeRTOS heap memory available for the Idle and/or
-  timer tasks to be created.  See the memory management section on the
-  FreeRTOS web site for more details on the FreeRTOS heap
-  http://www.freertos.org/a00111.html. */
-  for (;;)
-    ;
+    /* If all is well, the scheduler will now be running, and the following
+     * line will never be reached.  If the following line does execute, then
+     * there was insufficient FreeRTOS heap memory available for the Idle and/or
+     * timer tasks to be created.  See the memory management section on the
+     * FreeRTOS web site for more details on the FreeRTOS heap
+     * http://www.freertos.org/a00111.html. */
+    for( ; ; )
+    {
+    }
 }
 
 /*-----------------------------------------------------------*/
 
-static void prvpvMallocTest(void *pvParameters) {
-
-  printf("Testing pvPortMalloc\n");
-  uint64_t *buff = (uint64_t *) pvPortMalloc(32*8);
-  printf("Test overflowing a pvPortMalloc's allocated buffer\n");
-  buff[32] = 0;
-  /* Shouldn't reach here */
-  printf("Testing done - Shouldn't reach here\n");
-  _exit(0);
-  while(1);
-}
-/*-----------------------------------------------------------*/
-
-/*-----------------------------------------------------------*/
-
-static void cheri_print_cap(void *cap) {
-  printf("cap: [v: %" PRIu8 " | f: %" PRIu8 " | sealed: %" PRIu8 " | addr: "
-  PRINT_REG \
-  " | base: " PRINT_REG " | length: " PRINT_REG " | offset: " PRINT_REG \
-  " | perms: " PRINT_REG "] \n",
-  (uint8_t) __builtin_cheri_tag_get(cap),
-  (uint8_t) __builtin_cheri_flags_get(cap),
-  (uint8_t) __builtin_cheri_sealed_get(cap),
-  __builtin_cheri_address_get(cap),
-  __builtin_cheri_base_get(cap),
-  __builtin_cheri_length_get(cap),
-  __builtin_cheri_offset_get(cap),
-  __builtin_cheri_perms_get(cap)
-  );
-}
-
-static UBaseType_t cheri_exception_handler(uintptr_t *exception_frame)
+static void prvpvMallocTest( void * pvParameters )
 {
+    printf( "Testing pvPortMalloc\n" );
+    uint64_t * buff = ( uint64_t * ) pvPortMalloc( 32 * 8 );
+    printf( "Test overflowing a pvPortMalloc's allocated buffer\n" );
+    buff[ 32 ] = 0;
+    /* Shouldn't reach here */
+    printf( "Testing done - Shouldn't reach here\n" );
+    _exit( 0 );
 
-  cheri_print_cap(*(++exception_frame));
-  while(1);
+    while( 1 )
+    {
+    }
+}
+/*-----------------------------------------------------------*/
+
+/*-----------------------------------------------------------*/
+
+static void cheri_print_cap( void * cap )
+{
+    printf( "cap: [v: %" PRIu8 " | f: %" PRIu8 " | sealed: %" PRIu8 " | addr: "
+            PRINT_REG                                                             \
+            " | base: " PRINT_REG " | length: " PRINT_REG " | offset: " PRINT_REG \
+            " | perms: " PRINT_REG "] \n",
+            ( uint8_t ) __builtin_cheri_tag_get( cap ),
+            ( uint8_t ) __builtin_cheri_flags_get( cap ),
+            ( uint8_t ) __builtin_cheri_sealed_get( cap ),
+            __builtin_cheri_address_get( cap ),
+            __builtin_cheri_base_get( cap ),
+            __builtin_cheri_length_get( cap ),
+            __builtin_cheri_offset_get( cap ),
+            __builtin_cheri_perms_get( cap )
+            );
+}
+
+static UBaseType_t cheri_exception_handler( uintptr_t * exception_frame )
+{
+    cheri_print_cap( *( ++exception_frame ) );
+
+    while( 1 )
+    {
+    }
 }
 /*-----------------------------------------------------------*/

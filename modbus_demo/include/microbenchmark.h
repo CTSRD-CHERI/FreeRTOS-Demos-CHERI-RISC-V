@@ -31,19 +31,20 @@
 /*-----------------------------------------------------------*/
 
 /* bound the number of functions that will be benchmarked */
-#define MAX_FUNCTIONS 20
+#define MAX_FUNCTIONS                20
 
 /* number of iterations of each function to be sampled and recorded */
-#define MICROBENCHMARK_ITERATIONS 10
+#define MICROBENCHMARK_ITERATIONS    10
 
 /* number of iterations to discard to ensure quiescense */
-#define MICROBENCHMARK_DISCARD 10
+#define MICROBENCHMARK_DISCARD       10
 
 /*-----------------------------------------------------------*/
 
-void xMicrobenchmarkSample(char *pcFunctionName, BaseType_t ToPrint);
+void xMicrobenchmarkSample( char * pcFunctionName,
+                            BaseType_t ToPrint );
 
-void vPrintMicrobenchmarkSamples(void);
+void vPrintMicrobenchmarkSamples( void );
 
 /*-----------------------------------------------------------*/
 

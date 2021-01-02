@@ -73,208 +73,224 @@
 #include "FreeRTOS_server_private.h"
 
 /* FreeRTOS+FAT includes. */
-// #include "ff_stdio.h"
+/* #include "ff_stdio.h" */
 
 /* Specifics for the peekpoke server. */
 #include "peekpoke.h"
 
 #ifndef HTTP_SERVER_BACKLOG
-	#define HTTP_SERVER_BACKLOG			( 12 )
+    #define HTTP_SERVER_BACKLOG    ( 12 )
 #endif
 
 #ifndef USE_HTML_CHUNKS
-	#define USE_HTML_CHUNKS				( 0 )
+    #define USE_HTML_CHUNKS    ( 0 )
 #endif
 
 #if !defined( ARRAY_SIZE )
-	#define ARRAY_SIZE(x) ( BaseType_t ) (sizeof( x ) / sizeof( x )[ 0 ] )
+    #define ARRAY_SIZE( x )    ( BaseType_t ) ( sizeof( x ) / sizeof( x )[ 0 ] )
 #endif
 
 /* Some defines to make the code more readbale */
-#define pcCOMMAND_BUFFER	pxClient->pxParent->pcCommandBuffer
-#define pcNEW_DIR			pxClient->pxParent->pcNewDir
-#define pcFILE_BUFFER		pxClient->pxParent->pcFileBuffer
+#define pcCOMMAND_BUFFER                      pxClient->pxParent->pcCommandBuffer
+#define pcNEW_DIR                             pxClient->pxParent->pcNewDir
+#define pcFILE_BUFFER                         pxClient->pxParent->pcFileBuffer
 
 #ifndef ipconfigHTTP_REQUEST_CHARACTER
-	#define ipconfigHTTP_REQUEST_CHARACTER		'?'
+    #define ipconfigHTTP_REQUEST_CHARACTER    '?'
 #endif
 
 /*_RB_ Need comment block, although fairly self evident. */
-static BaseType_t prvOpenURL( HTTPClient_t *pxClient, BaseType_t xIndex );
-static BaseType_t prvSendReply( HTTPClient_t *pxClient, BaseType_t xCode );
+static BaseType_t prvOpenURL( HTTPClient_t * pxClient,
+                              BaseType_t xIndex );
+static BaseType_t prvSendReply( HTTPClient_t * pxClient,
+                                BaseType_t xCode );
 
-static const char pcEmptyString[1] = { '\0' };
+static const char pcEmptyString[ 1 ] = { '\0' };
 
 typedef struct xTYPE_COUPLE
 {
-	const char *pcExtension;
-	const char *pcType;
+    const char * pcExtension;
+    const char * pcType;
 } TypeCouple_t;
 
-static BaseType_t prvSendReply( HTTPClient_t *pxClient, BaseType_t xCode )
+static BaseType_t prvSendReply( HTTPClient_t * pxClient,
+                                BaseType_t xCode )
 {
-	struct xTCP_SERVER *pxParent = pxClient->pxParent;
-	BaseType_t xRc;
+    struct xTCP_SERVER * pxParent = pxClient->pxParent;
+    BaseType_t xRc;
 
-	/* A normal command reply on the main socket (port 21). */
-	char *pcBuffer = pxParent->pcFileBuffer;
+    /* A normal command reply on the main socket (port 21). */
+    char * pcBuffer = pxParent->pcFileBuffer;
 
-	xRc = snprintf( pcBuffer, sizeof( pxParent->pcFileBuffer ),
-					"HTTP/1.1 %d %s\r\n"
-#if	USE_HTML_CHUNKS
-					"Transfer-Encoding: chunked\r\n"
-#endif
-					"Content-Type: %s\r\n"
-					"Connection: keep-alive\r\n"
-					"%s\r\n",
-					( int ) xCode,
-					webCodename (xCode),
-					pxParent->pcContentsType[0] ? pxParent->pcContentsType : "text/html",
-					pxParent->pcExtraContents );
+    xRc = snprintf( pcBuffer, sizeof( pxParent->pcFileBuffer ),
+                    "HTTP/1.1 %d %s\r\n"
+                    #if USE_HTML_CHUNKS
+                        "Transfer-Encoding: chunked\r\n"
+                    #endif
+                    "Content-Type: %s\r\n"
+                    "Connection: keep-alive\r\n"
+                    "%s\r\n",
+                    ( int ) xCode,
+                    webCodename( xCode ),
+                    pxParent->pcContentsType[ 0 ] ? pxParent->pcContentsType : "text/html",
+                    pxParent->pcExtraContents );
 
-	pxParent->pcContentsType[0] = '\0';
-	pxParent->pcExtraContents[0] = '\0';
+    pxParent->pcContentsType[ 0 ] = '\0';
+    pxParent->pcExtraContents[ 0 ] = '\0';
 
-	xRc = FreeRTOS_send( pxClient->xSocket, ( const void * ) pcBuffer, xRc, 0 );
-	pxClient->bits.bReplySent = pdTRUE_UNSIGNED;
+    xRc = FreeRTOS_send( pxClient->xSocket, ( const void * ) pcBuffer, xRc, 0 );
+    pxClient->bits.bReplySent = pdTRUE_UNSIGNED;
 
-	return xRc;
+    return xRc;
 }
 
 /*-----------------------------------------------------------*/
 
-static BaseType_t prvOpenURL( HTTPClient_t *pxClient, BaseType_t xIndex )
+static BaseType_t prvOpenURL( HTTPClient_t * pxClient,
+                              BaseType_t xIndex )
 {
-	BaseType_t xRc;
+    BaseType_t xRc;
 
-	pxClient->bits.ulFlags = 0;
+    pxClient->bits.ulFlags = 0;
 
-	FreeRTOS_debug_printf(("OpenURL: %s\r\n", pxClient->pcUrlData));
+    FreeRTOS_debug_printf( ( "OpenURL: %s\r\n", pxClient->pcUrlData ) );
 
-	/* 
-	 * The original code is using the "current filename" as the buffer
-	 * for output data. That's weird, as that field is only 129 bytes,
-	 * but we'll work with it, at least for now.
-	 */
+    /*
+     * The original code is using the "current filename" as the buffer
+     * for output data. That's weird, as that field is only 129 bytes,
+     * but we'll work with it, at least for now.
+     */
 
-	size_t xResult = peekPokeHandler( pxClient, xIndex, pxClient->pcUrlData, pxClient->pcCurrentFilename, sizeof( pxClient->pcCurrentFilename ) );
+    size_t xResult = peekPokeHandler( pxClient, xIndex, pxClient->pcUrlData, pxClient->pcCurrentFilename, sizeof( pxClient->pcCurrentFilename ) );
 
-	if( xResult > 0 )
-	{
-		FreeRTOS_debug_printf(("Successful handler: %d bytes\r\n", xResult));
+    if( xResult > 0 )
+    {
+        FreeRTOS_debug_printf( ( "Successful handler: %d bytes\r\n", xResult ) );
 
-		snprintf( pxClient->pxParent->pcExtraContents, sizeof( pxClient->pxParent->pcExtraContents ),
-				  "Content-Length: %d\r\n", ( int ) xResult );
-		xRc = prvSendReply( pxClient, WEB_REPLY_OK );	/* "Requested file action OK" */
-		if( xRc > 0 )
-		{
-			xRc = FreeRTOS_send( pxClient->xSocket, pxClient->pcCurrentFilename, xResult, 0 );
-			if( xRc <= 0 )
-			{
-				FreeRTOS_debug_printf(("Error returned from FreeRTOS_send: %d\r\n", xRc));
-			}
-		}
-		else
-		{
-			FreeRTOS_debug_printf(("Error returned from prvSendReply: %d\r\n", xRc));
-		}
-		/* Although against the coding standard of FreeRTOS, a return is
-		   done here  to simplify this conditional code. */
-		return xRc;
-	}
-	else
-	{
-		FreeRTOS_debug_printf(("Error in peekPokeHandler: %d\r\n", xResult));
+        snprintf( pxClient->pxParent->pcExtraContents, sizeof( pxClient->pxParent->pcExtraContents ),
+                  "Content-Length: %d\r\n", ( int ) xResult );
+        xRc = prvSendReply( pxClient, WEB_REPLY_OK ); /* "Requested file action OK" */
 
-		/* "404 File not found". */
-		xRc = prvSendReply( pxClient, WEB_NOT_FOUND );
-		if( xRc <= 0 )
-		{
-			FreeRTOS_debug_printf(("Error in prvSendReply for 404 not found: %d\r\n", xRc));
-		}
-	}
+        if( xRc > 0 )
+        {
+            xRc = FreeRTOS_send( pxClient->xSocket, pxClient->pcCurrentFilename, xResult, 0 );
 
-	return xRc;
+            if( xRc <= 0 )
+            {
+                FreeRTOS_debug_printf( ( "Error returned from FreeRTOS_send: %d\r\n", xRc ) );
+            }
+        }
+        else
+        {
+            FreeRTOS_debug_printf( ( "Error returned from prvSendReply: %d\r\n", xRc ) );
+        }
+
+        /* Although against the coding standard of FreeRTOS, a return is
+         * done here  to simplify this conditional code. */
+        return xRc;
+    }
+    else
+    {
+        FreeRTOS_debug_printf( ( "Error in peekPokeHandler: %d\r\n", xResult ) );
+
+        /* "404 File not found". */
+        xRc = prvSendReply( pxClient, WEB_NOT_FOUND );
+
+        if( xRc <= 0 )
+        {
+            FreeRTOS_debug_printf( ( "Error in prvSendReply for 404 not found: %d\r\n", xRc ) );
+        }
+    }
+
+    return xRc;
 }
 
-BaseType_t xHTTPClientWork( TCPClient_t *pxTCPClient )
+BaseType_t xHTTPClientWork( TCPClient_t * pxTCPClient )
 {
-	BaseType_t xRc;
-	HTTPClient_t *pxClient = ( HTTPClient_t * ) pxTCPClient;
+    BaseType_t xRc;
+    HTTPClient_t * pxClient = ( HTTPClient_t * ) pxTCPClient;
 
-	/* we're not supporting static files */
-	/*
-	  if( pxClient->pxFileHandle != NULL )
-	  {
-	  prvSendFile( pxClient );
-	  }
-	*/
+    /* we're not supporting static files */
 
-	xRc = FreeRTOS_recv( pxClient->xSocket, ( void * )pcCOMMAND_BUFFER, sizeof( pcCOMMAND_BUFFER ), 0 );
+    /*
+     * if( pxClient->pxFileHandle != NULL )
+     * {
+     * prvSendFile( pxClient );
+     * }
+     */
 
-	if( xRc > 0 )
-	{
-		BaseType_t xIndex;
-		const char *pcEndOfCmd;
-		const struct xWEB_COMMAND *curCmd;
-		char *pcBuffer = pcCOMMAND_BUFFER;
+    xRc = FreeRTOS_recv( pxClient->xSocket, ( void * ) pcCOMMAND_BUFFER, sizeof( pcCOMMAND_BUFFER ), 0 );
 
-		if( xRc < ( BaseType_t ) sizeof( pcCOMMAND_BUFFER ) )
-		{
-			pcBuffer[ xRc ] = '\0';
-		}
-		while( xRc && ( pcBuffer[ xRc - 1 ] == 13 || pcBuffer[ xRc - 1 ] == 10 ) )
-		{
-			pcBuffer[ --xRc ] = '\0';
-		}
-		pcEndOfCmd = pcBuffer + xRc;
+    if( xRc > 0 )
+    {
+        BaseType_t xIndex;
+        const char * pcEndOfCmd;
+        const struct xWEB_COMMAND * curCmd;
+        char * pcBuffer = pcCOMMAND_BUFFER;
 
-		curCmd = xWebCommands;
+        if( xRc < ( BaseType_t ) sizeof( pcCOMMAND_BUFFER ) )
+        {
+            pcBuffer[ xRc ] = '\0';
+        }
 
-		/* Pointing to "/index.html HTTP/1.1". */
-		pxClient->pcUrlData = pcBuffer;
+        while( xRc && ( pcBuffer[ xRc - 1 ] == 13 || pcBuffer[ xRc - 1 ] == 10 ) )
+        {
+            pcBuffer[ --xRc ] = '\0';
+        }
 
-		/* Pointing to "HTTP/1.1". */
-		pxClient->pcRestData = pcEmptyString;
+        pcEndOfCmd = pcBuffer + xRc;
 
-		/* Last entry is "ECMD_UNK". */
-		for( xIndex = 0; xIndex < WEB_CMD_COUNT - 1; xIndex++, curCmd++ )
-		{
-			BaseType_t xLength;
+        curCmd = xWebCommands;
 
-			xLength = curCmd->xCommandLength;
-			if( ( xRc >= xLength ) && ( memcmp( curCmd->pcCommandName, pcBuffer, xLength ) == 0 ) )
-			{
-				char *pcLastPtr;
+        /* Pointing to "/index.html HTTP/1.1". */
+        pxClient->pcUrlData = pcBuffer;
 
-				pxClient->pcUrlData += xLength + 1;
-				for( pcLastPtr = (char *)pxClient->pcUrlData; pcLastPtr < pcEndOfCmd; pcLastPtr++ )
-				{
-					char ch = *pcLastPtr;
-					if( ( ch == '\0' ) || ( strchr( "\n\r \t", ch ) != NULL ) )
-					{
-						*pcLastPtr = '\0';
-						pxClient->pcRestData = pcLastPtr + 1;
-						break;
-					}
-				}
-				break;
-			}
-		}
+        /* Pointing to "HTTP/1.1". */
+        pxClient->pcRestData = pcEmptyString;
 
-		if( xIndex < ( WEB_CMD_COUNT - 1 ) )
-		{
-			xRc = prvOpenURL( pxClient, xIndex );
-		}
-		else
-		{
-			FreeRTOS_printf( ( "unknown xIndex (%i), not running prvOpenURL\r\n", (int)xIndex ) );
-		}
-	}
-	else if( xRc < 0 )
-	{
-		/* The connection will be closed and the client will be deleted. */
-		FreeRTOS_printf( ( "xHTTPClientWork: rc = %d\r\n", (int)xRc ) );
-	}
-	return xRc;
+        /* Last entry is "ECMD_UNK". */
+        for( xIndex = 0; xIndex < WEB_CMD_COUNT - 1; xIndex++, curCmd++ )
+        {
+            BaseType_t xLength;
+
+            xLength = curCmd->xCommandLength;
+
+            if( ( xRc >= xLength ) && ( memcmp( curCmd->pcCommandName, pcBuffer, xLength ) == 0 ) )
+            {
+                char * pcLastPtr;
+
+                pxClient->pcUrlData += xLength + 1;
+
+                for( pcLastPtr = ( char * ) pxClient->pcUrlData; pcLastPtr < pcEndOfCmd; pcLastPtr++ )
+                {
+                    char ch = *pcLastPtr;
+
+                    if( ( ch == '\0' ) || ( strchr( "\n\r \t", ch ) != NULL ) )
+                    {
+                        *pcLastPtr = '\0';
+                        pxClient->pcRestData = pcLastPtr + 1;
+                        break;
+                    }
+                }
+
+                break;
+            }
+        }
+
+        if( xIndex < ( WEB_CMD_COUNT - 1 ) )
+        {
+            xRc = prvOpenURL( pxClient, xIndex );
+        }
+        else
+        {
+            FreeRTOS_printf( ( "unknown xIndex (%i), not running prvOpenURL\r\n", ( int ) xIndex ) );
+        }
+    }
+    else if( xRc < 0 )
+    {
+        /* The connection will be closed and the client will be deleted. */
+        FreeRTOS_printf( ( "xHTTPClientWork: rc = %d\r\n", ( int ) xRc ) );
+    }
+
+    return xRc;
 }

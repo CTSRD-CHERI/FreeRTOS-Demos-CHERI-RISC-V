@@ -44,26 +44,26 @@
 /* If Win32 port */
 #ifdef WIN32
 
-   #undef _WIN32_WINNT
-   #define _WIN32_WINNT 0x0600
+    #undef _WIN32_WINNT
+    #define _WIN32_WINNT    0x0600
 
-   /* Standard includes. */
-   #include <stdio.h>
-   #include <windows.h>
-   #include <direct.h>
+/* Standard includes. */
+    #include <stdio.h>
+    #include <windows.h>
+    #include <direct.h>
 
 /*******************************************************************************
  * The Win32 port by default saves the trace to file and then kills the
  * program when the recorder is stopped, to facilitate quick, simple tests
  * of the recorder.
  ******************************************************************************/
-   #define WIN32_PORT_SAVE_WHEN_STOPPED 1
-   #define WIN32_PORT_EXIT_WHEN_STOPPED 1
+    #define WIN32_PORT_SAVE_WHEN_STOPPED    1
+    #define WIN32_PORT_EXIT_WHEN_STOPPED    1
 
-#endif
+#endif /* ifdef WIN32 */
 
-#define DIRECTION_INCREMENTING 1
-#define DIRECTION_DECREMENTING 2
+#define DIRECTION_INCREMENTING    1
+#define DIRECTION_DECREMENTING    2
 
 /******************************************************************************
  * Supported ports
@@ -102,32 +102,32 @@
  *
  *****************************************************************************/
 
-#define PORT_NOT_SET                          -1
+#define PORT_NOT_SET                      -1
 
 /*** Officially supported hardware timer ports *******************************/
-#define PORT_HWIndependent                     0
-#define PORT_Win32                             1
-#define PORT_Atmel_AT91SAM7                    2
-#define PORT_Atmel_UC3A0                       3
-#define PORT_ARM_CortexM                       4
-#define PORT_Renesas_RX600                     5
-#define PORT_Microchip_dsPIC_AND_PIC24         6
+#define PORT_HWIndependent                0
+#define PORT_Win32                        1
+#define PORT_Atmel_AT91SAM7               2
+#define PORT_Atmel_UC3A0                  3
+#define PORT_ARM_CortexM                  4
+#define PORT_Renesas_RX600                5
+#define PORT_Microchip_dsPIC_AND_PIC24    6
 
 /*** Unofficial ports, provided by external developers, not yet verified *****/
-#define PORT_TEXAS_INSTRUMENTS_TMS570          7
-#define PORT_TEXAS_INSTRUMENTS_MSP430          8
-#define PORT_MICROCHIP_PIC32                   9
-#define PORT_XILINX_PPC405                    10
-#define PORT_XILINX_PPC440                    11
-#define PORT_XILINX_MICROBLAZE                12
-#define PORT_NXP_LPC210X                      13
+#define PORT_TEXAS_INSTRUMENTS_TMS570     7
+#define PORT_TEXAS_INSTRUMENTS_MSP430     8
+#define PORT_MICROCHIP_PIC32              9
+#define PORT_XILINX_PPC405                10
+#define PORT_XILINX_PPC440                11
+#define PORT_XILINX_MICROBLAZE            12
+#define PORT_NXP_LPC210X                  13
 
 /*** Select your port here! **************************************************/
-#define SELECTED_PORT PORT_Win32
+#define SELECTED_PORT                     PORT_Win32
 /*****************************************************************************/
 
-#if (SELECTED_PORT == PORT_NOT_SET)
-#error "You need to define SELECTED_PORT here!"
+#if ( SELECTED_PORT == PORT_NOT_SET )
+    #error "You need to define SELECTED_PORT here!"
 #endif
 
 /*******************************************************************************
@@ -207,205 +207,206 @@
  *
  ******************************************************************************/
 
-#if (SELECTED_PORT == PORT_Win32)
+#if ( SELECTED_PORT == PORT_Win32 )
 
-    #define HWTC_COUNT_DIRECTION DIRECTION_INCREMENTING
-    #define HWTC_COUNT (ulGetRunTimeCounterValue())
-    #define HWTC_PERIOD 0
-    #define HWTC_DIVISOR 1
+    #define HWTC_COUNT_DIRECTION    DIRECTION_INCREMENTING
+    #define HWTC_COUNT              ( ulGetRunTimeCounterValue() )
+    #define HWTC_PERIOD             0
+    #define HWTC_DIVISOR            1
 
-    #define IRQ_PRIORITY_ORDER 1  // Please update according to your hardware...
+    #define IRQ_PRIORITY_ORDER      1 /* Please update according to your hardware... */
 
-#elif (SELECTED_PORT == PORT_HWIndependent)
+#elif ( SELECTED_PORT == PORT_HWIndependent )
 
-    #define HWTC_COUNT_DIRECTION DIRECTION_INCREMENTING
-    #define HWTC_COUNT 0
-    #define HWTC_PERIOD 1
-    #define HWTC_DIVISOR 1
+    #define HWTC_COUNT_DIRECTION    DIRECTION_INCREMENTING
+    #define HWTC_COUNT              0
+    #define HWTC_PERIOD             1
+    #define HWTC_DIVISOR            1
 
-    #define IRQ_PRIORITY_ORDER 1  // Please update according to your hardware...
+    #define IRQ_PRIORITY_ORDER      1 /* Please update according to your hardware... */
 
-#elif (SELECTED_PORT == PORT_Atmel_AT91SAM7)
+#elif ( SELECTED_PORT == PORT_Atmel_AT91SAM7 )
 
-    /* HWTC_PERIOD is hardcoded for AT91SAM7X256-EK Board (48 MHz)
-    A more generic solution is to get the period from pxPIT->PITC_PIMR */
+/* HWTC_PERIOD is hardcoded for AT91SAM7X256-EK Board (48 MHz)
+ * A more generic solution is to get the period from pxPIT->PITC_PIMR */
 
-    #define HWTC_COUNT_DIRECTION DIRECTION_INCREMENTING
-    #define HWTC_COUNT (AT91C_BASE_PITC->PITC_PIIR & 0xFFFFF)
-    #define HWTC_PERIOD 2995
-    #define HWTC_DIVISOR 1
+    #define HWTC_COUNT_DIRECTION    DIRECTION_INCREMENTING
+    #define HWTC_COUNT              ( AT91C_BASE_PITC->PITC_PIIR & 0xFFFFF )
+    #define HWTC_PERIOD             2995
+    #define HWTC_DIVISOR            1
 
-    #define IRQ_PRIORITY_ORDER 1  // higher IRQ priority values are more significant
+    #define IRQ_PRIORITY_ORDER      1 /* higher IRQ priority values are more significant */
 
-#elif (SELECTED_PORT == PORT_Atmel_UC3A0)
+#elif ( SELECTED_PORT == PORT_Atmel_UC3A0 )
 
-    /* For Atmel AVR32 (AT32UC3A) */
+/* For Atmel AVR32 (AT32UC3A) */
 
-    #define HWTC_COUNT_DIRECTION DIRECTION_INCREMENTING
-    #define HWTC_COUNT sysreg_read(AVR32_COUNT)
-    #define HWTC_PERIOD ( TRACE_CPU_CLOCK_HZ / TRACE_TICK_RATE_HZ )
-    #define HWTC_DIVISOR 1
+    #define HWTC_COUNT_DIRECTION    DIRECTION_INCREMENTING
+    #define HWTC_COUNT              sysreg_read( AVR32_COUNT )
+    #define HWTC_PERIOD             ( TRACE_CPU_CLOCK_HZ / TRACE_TICK_RATE_HZ )
+    #define HWTC_DIVISOR            1
 
-    #define IRQ_PRIORITY_ORDER 1  // higher IRQ priority values are more significant
+    #define IRQ_PRIORITY_ORDER      1 /* higher IRQ priority values are more significant */
 
-#elif (SELECTED_PORT == PORT_ARM_CortexM)
+#elif ( SELECTED_PORT == PORT_ARM_CortexM )
 
-    /* For all chips using ARM Cortex M cores */
+/* For all chips using ARM Cortex M cores */
 
-    #define HWTC_COUNT_DIRECTION DIRECTION_DECREMENTING
-    #define HWTC_COUNT (*((uint32_t*)0xE000E018))
-    #define HWTC_PERIOD ((*(uint32_t*)0xE000E014) + 1)
-    #define HWTC_DIVISOR 2
+    #define HWTC_COUNT_DIRECTION    DIRECTION_DECREMENTING
+    #define HWTC_COUNT              ( *( ( uint32_t * ) 0xE000E018 ) )
+    #define HWTC_PERIOD             ( ( *( uint32_t * ) 0xE000E014 ) + 1 )
+    #define HWTC_DIVISOR            2
 
-    #define IRQ_PRIORITY_ORDER 0  // lower IRQ priority values are more significant
+    #define IRQ_PRIORITY_ORDER      0 /* lower IRQ priority values are more significant */
 
-#elif (SELECTED_PORT == PORT_Renesas_RX600)
+#elif ( SELECTED_PORT == PORT_Renesas_RX600 )
 
     #include "iodefine.h"
 
-    #define HWTC_COUNT_DIRECTION DIRECTION_INCREMENTING
-    #define HWTC_COUNT (CMT0.CMCNT)
-    #define HWTC_PERIOD ((((TRACE_PERIPHERAL_CLOCK_HZ/TRACE_TICK_RATE_HZ)-1)/8))
-    #define HWTC_DIVISOR 1
+    #define HWTC_COUNT_DIRECTION    DIRECTION_INCREMENTING
+    #define HWTC_COUNT              ( CMT0.CMCNT )
+    #define HWTC_PERIOD             ( ( ( ( TRACE_PERIPHERAL_CLOCK_HZ / TRACE_TICK_RATE_HZ ) - 1 ) / 8 ) )
+    #define HWTC_DIVISOR            1
 
-    #define IRQ_PRIORITY_ORDER 1  // higher IRQ priority values are more significant
+    #define IRQ_PRIORITY_ORDER      1 /* higher IRQ priority values are more significant */
 
-#elif (SELECTED_PORT == PORT_Microchip_dsPIC_AND_PIC24)
+#elif ( SELECTED_PORT == PORT_Microchip_dsPIC_AND_PIC24 )
 
-    /* For Microchip PIC24 and dsPIC (16 bit) */
+/* For Microchip PIC24 and dsPIC (16 bit) */
 
-    /* Note: The trace library was originally designed for 32-bit MCUs, and is slower
-       than intended on 16-bit MCUs. Storing an event on a PIC24 takes about 70 µs.
-       In comparison, 32-bit MCUs are often 10-20 times faster. If recording overhead
-       becomes a problem on PIC24, use the filters to exclude less interesting tasks
-       or system calls. */
+/* Note: The trace library was originally designed for 32-bit MCUs, and is slower
+ * than intended on 16-bit MCUs. Storing an event on a PIC24 takes about 70 µs.
+ * In comparison, 32-bit MCUs are often 10-20 times faster. If recording overhead
+ * becomes a problem on PIC24, use the filters to exclude less interesting tasks
+ * or system calls. */
 
-    #define HWTC_COUNT_DIRECTION DIRECTION_INCREMENTING
-    #define HWTC_COUNT (TMR1)
-    #define HWTC_PERIOD (PR1+1)
-    #define HWTC_DIVISOR 1
+    #define HWTC_COUNT_DIRECTION    DIRECTION_INCREMENTING
+    #define HWTC_COUNT              ( TMR1 )
+    #define HWTC_PERIOD             ( PR1 + 1 )
+    #define HWTC_DIVISOR            1
 
-    #define IRQ_PRIORITY_ORDER 0  // lower IRQ priority values are more significant
+    #define IRQ_PRIORITY_ORDER      0 /* lower IRQ priority values are more significant */
 
-#elif (SELECTED_PORT == PORT_NXP_LPC210X)
+#elif ( SELECTED_PORT == PORT_NXP_LPC210X )
     /* UNOFFICIAL PORT - NOT YET VERIFIED BY PERCEPIO */
 
-    /* Tested with LPC2106, but should work with most LPC21XX chips. */
+/* Tested with LPC2106, but should work with most LPC21XX chips. */
 
-    #define HWTC_COUNT_DIRECTION DIRECTION_INCREMENTING
-    #define HWTC_COUNT  *((uint32_t *)0xE0004008 )
-    #define HWTC_PERIOD ( TRACE_CPU_CLOCK_HZ / TRACE_TICK_RATE_HZ )
-    #define HWTC_DIVISOR 1
+    #define HWTC_COUNT_DIRECTION    DIRECTION_INCREMENTING
+    #define HWTC_COUNT              *( ( uint32_t * ) 0xE0004008 )
+    #define HWTC_PERIOD             ( TRACE_CPU_CLOCK_HZ / TRACE_TICK_RATE_HZ )
+    #define HWTC_DIVISOR            1
 
-    #define IRQ_PRIORITY_ORDER 0  // lower IRQ priority values are more significant
+    #define IRQ_PRIORITY_ORDER      0 /* lower IRQ priority values are more significant */
 
-#elif (SELECTED_PORT == PORT_TEXAS_INSTRUMENTS_TMS570)
+#elif ( SELECTED_PORT == PORT_TEXAS_INSTRUMENTS_TMS570 )
     /* UNOFFICIAL PORT - NOT YET VERIFIED BY PERCEPIO */
 
-    #define RTIFRC0 *((uint32_t *)0xFFFFFC10)
-    #define RTICOMP0 *((uint32_t *)0xFFFFFC50)
-    #define RTIUDCP0 *((uint32_t *)0xFFFFFC54)
-    #define HWTC_COUNT_DIRECTION DIRECTION_INCREMENTING
-    #define HWTC_COUNT (RTIFRC0 - (RTICOMP0 - RTIUDCP0))
-    #define HWTC_PERIOD (RTIUDCP0)
-    #define HWTC_DIVISOR 1
+    #define RTIFRC0                 *( ( uint32_t * ) 0xFFFFFC10 )
+    #define RTICOMP0                *( ( uint32_t * ) 0xFFFFFC50 )
+    #define RTIUDCP0                *( ( uint32_t * ) 0xFFFFFC54 )
+    #define HWTC_COUNT_DIRECTION    DIRECTION_INCREMENTING
+    #define HWTC_COUNT              ( RTIFRC0 - ( RTICOMP0 - RTIUDCP0 ) )
+    #define HWTC_PERIOD             ( RTIUDCP0 )
+    #define HWTC_DIVISOR            1
 
-    #define IRQ_PRIORITY_ORDER 0  // lower IRQ priority values are more significant
+    #define IRQ_PRIORITY_ORDER      0 /* lower IRQ priority values are more significant */
 
-#elif (SELECTED_PORT == PORT_TEXAS_INSTRUMENTS_MSP430)
+#elif ( SELECTED_PORT == PORT_TEXAS_INSTRUMENTS_MSP430 )
     /* UNOFFICIAL PORT - NOT YET VERIFIED BY PERCEPIO */
 
-    #define HWTC_COUNT_DIRECTION DIRECTION_INCREMENTING
-    #define HWTC_COUNT (TA0R)
-    #define HWTC_PERIOD TRACE_CPU_CLOCKS_PER_TICK
-    #define HWTC_DIVISOR 1
+    #define HWTC_COUNT_DIRECTION    DIRECTION_INCREMENTING
+    #define HWTC_COUNT              ( TA0R )
+    #define HWTC_PERIOD             TRACE_CPU_CLOCKS_PER_TICK
+    #define HWTC_DIVISOR            1
 
-    #define IRQ_PRIORITY_ORDER 1  // higher IRQ priority values are more significant
+    #define IRQ_PRIORITY_ORDER      1 /* higher IRQ priority values are more significant */
 
-#elif (SELECTED_PORT == PORT_MICROCHIP_PIC32)
+#elif ( SELECTED_PORT == PORT_MICROCHIP_PIC32 )
     /* UNOFFICIAL PORT - NOT YET VERIFIED BY PERCEPIO */
 
-    #define HWTC_COUNT_DIRECTION DIRECTION_INCREMENTING
-    #define HWTC_COUNT (ReadTimer1())     /* Should be available in BSP */
-    #define HWTC_PERIOD (ReadPeriod1()+1) /* Should be available in BSP */
-    #define HWTC_DIVISOR 1
+    #define HWTC_COUNT_DIRECTION    DIRECTION_INCREMENTING
+    #define HWTC_COUNT              ( ReadTimer1() )      /* Should be available in BSP */
+    #define HWTC_PERIOD             ( ReadPeriod1() + 1 ) /* Should be available in BSP */
+    #define HWTC_DIVISOR            1
 
-    #define IRQ_PRIORITY_ORDER 0  // lower IRQ priority values are more significant
+    #define IRQ_PRIORITY_ORDER      0 /* lower IRQ priority values are more significant */
 
-#elif (SELECTED_PORT == PORT_XILINX_PPC405)
+#elif ( SELECTED_PORT == PORT_XILINX_PPC405 )
     /* UNOFFICIAL PORT - NOT YET VERIFIED BY PERCEPIO */
 
-    #define HWTC_COUNT_DIRECTION DIRECTION_DECREMENTING
-    #define HWTC_COUNT  mfspr( 0x3db)
-    #define HWTC_PERIOD ( TRACE_CPU_CLOCK_HZ / TRACE_TICK_RATE_HZ )
-    #define HWTC_DIVISOR 1
+    #define HWTC_COUNT_DIRECTION    DIRECTION_DECREMENTING
+    #define HWTC_COUNT              mfspr( 0x3db )
+    #define HWTC_PERIOD             ( TRACE_CPU_CLOCK_HZ / TRACE_TICK_RATE_HZ )
+    #define HWTC_DIVISOR            1
 
-    #define IRQ_PRIORITY_ORDER 0  // lower IRQ priority values are more significant
+    #define IRQ_PRIORITY_ORDER      0 /* lower IRQ priority values are more significant */
 
-#elif (SELECTED_PORT == PORT_XILINX_PPC440)
+#elif ( SELECTED_PORT == PORT_XILINX_PPC440 )
     /* UNOFFICIAL PORT - NOT YET VERIFIED BY PERCEPIO */
 
-    /* This should work with most PowerPC chips */
+/* This should work with most PowerPC chips */
 
-    #define HWTC_COUNT_DIRECTION DIRECTION_DECREMENTING
-    #define HWTC_COUNT  mfspr( 0x016 )
-    #define HWTC_PERIOD ( TRACE_CPU_CLOCK_HZ / TRACE_TICK_RATE_HZ )
-    #define HWTC_DIVISOR 1
+    #define HWTC_COUNT_DIRECTION    DIRECTION_DECREMENTING
+    #define HWTC_COUNT              mfspr( 0x016 )
+    #define HWTC_PERIOD             ( TRACE_CPU_CLOCK_HZ / TRACE_TICK_RATE_HZ )
+    #define HWTC_DIVISOR            1
 
-    #define IRQ_PRIORITY_ORDER 0  // lower IRQ priority values are more significant
+    #define IRQ_PRIORITY_ORDER      0 /* lower IRQ priority values are more significant */
 
-#elif (SELECTED_PORT == PORT_XILINX_MICROBLAZE)
+#elif ( SELECTED_PORT == PORT_XILINX_MICROBLAZE )
     /* UNOFFICIAL PORT - NOT YET VERIFIED BY PERCEPIO */
 
-    /* This should work with most Microblaze configurations.
-     * It uses the AXI Timer 0 - the tick interrupt source.
-     * If an AXI Timer 0 peripheral is available on your hardware platform, no modifications are required.
-     */
+/* This should work with most Microblaze configurations.
+ * It uses the AXI Timer 0 - the tick interrupt source.
+ * If an AXI Timer 0 peripheral is available on your hardware platform, no modifications are required.
+ */
     #include "xtmrctr_l.h"
 
-    #define HWTC_COUNT_DIRECTION DIRECTION_DECREMENTING
-    #define HWTC_COUNT XTmrCtr_GetTimerCounterReg( XPAR_TMRCTR_0_BASEADDR, 0 )
-    #define HWTC_PERIOD ( TRACE_CPU_CLOCK_HZ / TRACE_TICK_RATE_HZ )
-    #define HWTC_DIVISOR 16
+    #define HWTC_COUNT_DIRECTION    DIRECTION_DECREMENTING
+    #define HWTC_COUNT              XTmrCtr_GetTimerCounterReg( XPAR_TMRCTR_0_BASEADDR, 0 )
+    #define HWTC_PERIOD             ( TRACE_CPU_CLOCK_HZ / TRACE_TICK_RATE_HZ )
+    #define HWTC_DIVISOR            16
 
-    #define IRQ_PRIORITY_ORDER 0  // lower IRQ priority values are more significant
+    #define IRQ_PRIORITY_ORDER      0 /* lower IRQ priority values are more significant */
 
-#elif (SELECTED_PORT != PORT_NOT_SET)
+#elif ( SELECTED_PORT != PORT_NOT_SET )
 
     #error "SELECTED_PORT had unsupported value!"
-    #define SELECTED_PORT PORT_NOT_SET
+    #define SELECTED_PORT    PORT_NOT_SET
 
-#endif
+#endif /* if ( SELECTED_PORT == PORT_Win32 ) */
 
-#if (SELECTED_PORT != PORT_NOT_SET)
+#if ( SELECTED_PORT != PORT_NOT_SET )
 
     #ifndef HWTC_COUNT_DIRECTION
-    #error "HWTC_COUNT_DIRECTION is not set!"
+        #error "HWTC_COUNT_DIRECTION is not set!"
     #endif
 
     #ifndef HWTC_COUNT
-    #error "HWTC_COUNT is not set!"
+        #error "HWTC_COUNT is not set!"
     #endif
 
     #ifndef HWTC_PERIOD
-    #error "HWTC_PERIOD is not set!"
+        #error "HWTC_PERIOD is not set!"
     #endif
 
     #ifndef HWTC_DIVISOR
-    #error "HWTC_DIVISOR is not set!"
+        #error "HWTC_DIVISOR is not set!"
     #endif
 
     #ifndef IRQ_PRIORITY_ORDER
-    #error "IRQ_PRIORITY_ORDER is not set!"
-    #elif (IRQ_PRIORITY_ORDER != 0) && (IRQ_PRIORITY_ORDER != 1)
-    #error "IRQ_PRIORITY_ORDER has bad value!"
+        #error "IRQ_PRIORITY_ORDER is not set!"
+    #elif ( IRQ_PRIORITY_ORDER != 0 ) && ( IRQ_PRIORITY_ORDER != 1 )
+        #error "IRQ_PRIORITY_ORDER has bad value!"
     #endif
 
-    #if (HWTC_DIVISOR < 1)
-    #error "HWTC_DIVISOR must be a non-zero positive value!"
+    #if ( HWTC_DIVISOR < 1 )
+        #error "HWTC_DIVISOR must be a non-zero positive value!"
     #endif
 
-#endif
+#endif /* if ( SELECTED_PORT != PORT_NOT_SET ) */
+
 /*******************************************************************************
  * vTraceConsoleMessage
  *
@@ -413,12 +414,12 @@
  * This needs to be correctly defined to see status reports from the trace
  * status monitor task (this is defined in trcUser.c).
  ******************************************************************************/
-#if (SELECTED_PORT == PORT_Atmel_AT91SAM7)
+#if ( SELECTED_PORT == PORT_Atmel_AT91SAM7 )
 /* Port specific includes */
-#include "console.h"
+    #include "console.h"
 #endif
 
-#define vTraceConsoleMessage(x)
+#define vTraceConsoleMessage( x )
 
 /*******************************************************************************
  * vTracePortGetTimeStamp
@@ -431,7 +432,7 @@
  * the code of vTracePortGetTimeStamp if using the HWTC macros.
  *
  ******************************************************************************/
-void vTracePortGetTimeStamp(uint32_t *puiTimestamp);
+void vTracePortGetTimeStamp( uint32_t * puiTimestamp );
 
 /*******************************************************************************
  * vTracePortEnd
@@ -441,9 +442,9 @@ void vTracePortGetTimeStamp(uint32_t *puiTimestamp);
  * This is used by the Win32 port to store the trace to a file. The file path is
  * set using vTracePortSetFileName.
  ******************************************************************************/
-void vTracePortEnd(void);
+void vTracePortEnd( void );
 
-#if (INCLUDE_SAVE_TO_FILE == 1)
+#if ( INCLUDE_SAVE_TO_FILE == 1 )
 
 /*******************************************************************************
  * vTracePortSetOutFile
@@ -452,23 +453,23 @@ void vTracePortEnd(void);
  * This is set in a separate function, since the Win32 port calls vTracePortSave
  * in vTracePortEnd if WIN32_PORT_SAVE_WHEN_STOPPED is set.
  ******************************************************************************/
-void vTracePortSetOutFile(char* path);
+    void vTracePortSetOutFile( char * path );
 
 /******************************************************************************
- * vTracePortSave
- *
- * Saves the trace to a file on a target-side file system. The path is set in a
- * separate function, vTracePortSetOutFile, since the Win32 port may call
- * vTracePortSave in vTracePortEnd, if using WIN32_PORT_SAVE_WHEN_STOPPED.
- ******************************************************************************/
-void vTracePortSave(void);
+* vTracePortSave
+*
+* Saves the trace to a file on a target-side file system. The path is set in a
+* separate function, vTracePortSetOutFile, since the Win32 port may call
+* vTracePortSave in vTracePortEnd, if using WIN32_PORT_SAVE_WHEN_STOPPED.
+******************************************************************************/
+    void vTracePortSave( void );
 
 #else
 
-#define vTraceConsoleMessage(x)
-#define vTracePortSetOutFile(path)
-#define vTracePortSave(void)
+    #define vTraceConsoleMessage( x )
+    #define vTracePortSetOutFile( path )
+    #define vTracePortSave( void )
 
-#endif
+#endif /* if ( INCLUDE_SAVE_TO_FILE == 1 ) */
 
-#endif
+#endif /* ifndef TRCPORT_H */
