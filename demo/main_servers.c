@@ -451,7 +451,6 @@ int main_servers( void )
 
 static void prvCreateDiskAndExampleFiles( void )
 {
-    static uint8_t ucRAMDisk[ mainRAM_DISK_SECTORS * mainRAM_DISK_SECTOR_SIZE ];
     FF_Disk_t * pxDisk;
 
     /* Create the RAM disk. */
@@ -462,6 +461,7 @@ static void prvCreateDiskAndExampleFiles( void )
         /* Print out information on the disk. */
         FF_VirtIODiskShowPartition( pxDisk );
     #else
+        static uint8_t ucRAMDisk[ mainRAM_DISK_SECTORS * mainRAM_DISK_SECTOR_SIZE ];
         pxDisk = FF_RAMDiskInit( mainRAM_DISK_NAME, ucRAMDisk, mainRAM_DISK_SECTORS, mainIO_MANAGER_CACHE_SIZE );
         configASSERT( pxDisk );
 
