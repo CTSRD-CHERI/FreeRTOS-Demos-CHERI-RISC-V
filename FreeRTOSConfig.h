@@ -119,6 +119,7 @@
 #define configUSE_APPLICATION_TASK_TAG             0
 #define configUSE_COUNTING_SEMAPHORES              1
 
+#define configSUPPORT_STATIC_ALLOCATION            1
 /* FreeRTOS+FAT requires 2 pointers if a CWD is supported. */
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS    3
 
