@@ -262,6 +262,7 @@ class FreeRTOSBspFett(FreeRTOSBsp):
         if ctx.env.VIRTIO_BLK:
             self.defines += ['configHAS_VIRTIO_BLK     =     1']
 
+
 ########################### BSPS END ###############################
 
 
@@ -283,7 +284,7 @@ class FreeRTOSLib:
         bld(export_includes=self.export_includes, name=self.name + "_headers")
 
         if self.is_compartment:
-          self.cflags += ['-cheri-cap-table-abi=gprel']
+            self.cflags += ['-cheri-cap-table-abi=gprel']
 
         bld.stlib(features=['c'],
                   asflags=bld.env.CFLAGS + bld.env.ASFLAGS,
@@ -429,7 +430,7 @@ class FreeRTOSLibVirtIO(FreeRTOSLib):
         ]
 
         if ctx.env.VIRTIO_BLK:
-            self.srcs += [ self.libvirtio_dir + 'virtio-blk.c']
+            self.srcs += [self.libvirtio_dir + 'virtio-blk.c']
 
         self.includes = [self.libvirtio_dir]
         self.export_includes = [self.libvirtio_dir]
@@ -494,7 +495,9 @@ class FreeRTOSLibFAT(FreeRTOSLib):
         self.name = "freertos_fat"
 
         if ctx.env.VIRTIO_BLK:
-            self.srcs = [self.libfat_dir + 'portable/virtio-blk/ff_virtioblk_disk.c']
+            self.srcs = [
+                self.libfat_dir + 'portable/virtio-blk/ff_virtioblk_disk.c'
+            ]
             self.includes = [self.libfat_dir + 'portable/virtio-blk']
             self.export_includes = [self.libfat_dir + 'portable/virtio-blk']
         else:
@@ -538,6 +541,233 @@ class FreeRTOSLibCLI(FreeRTOSLib):
         FreeRTOSLib.__init__(self, ctx)
 
 
+class FreeRTOSLibAWSOTA(FreeRTOSLib):
+
+    libawsota_dir = '../../../FreeRTOS-Plus/Source/aws-ota/source/'
+
+    def __init__(self, ctx):
+        self.name = "freertos_libota"
+        self.srcs = [
+            self.libawsota_dir + 'ota.c',
+            self.libawsota_dir + 'ota_base64.c',
+            self.libawsota_dir + 'ota_cbor.c',
+            self.libawsota_dir + 'ota_http.c',
+            self.libawsota_dir + 'ota_interface.c',
+            self.libawsota_dir + 'ota_mqtt.c',
+            self.libawsota_dir + 'portable/os/ota_os_freertos.c',
+        ]
+
+        self.includes = [
+            self.libawsota_dir + 'include', self.libawsota_dir + 'portable/os/'
+        ]
+
+        self.export_includes = [
+            self.libawsota_dir + 'include', self.libawsota_dir + 'portable/os/'
+        ]
+
+        FreeRTOSLib.__init__(self, ctx)
+
+
+class FreeRTOSLibcoreJSON(FreeRTOSLib):
+
+    libcorejson_dir = '../../../FreeRTOS-Plus/Source/coreJSON/source/'
+
+    def __init__(self, ctx):
+        self.name = "freertos_libcorejson"
+        self.srcs = [
+            self.libcorejson_dir + 'core_json.c',
+        ]
+
+        self.includes = [self.libcorejson_dir + 'include']
+
+        self.export_includes = [self.libcorejson_dir + 'include']
+
+        FreeRTOSLib.__init__(self, ctx)
+
+
+class FreeRTOSLibcoreMQTT(FreeRTOSLib):
+
+    libcoremqtt_dir = '../../../FreeRTOS-Plus/Source/Application-Protocols/coreMQTT/source/'
+
+    def __init__(self, ctx):
+        self.name = "freertos_libcoremqtt"
+        self.srcs = [
+            self.libcoremqtt_dir + 'core_mqtt.c',
+            self.libcoremqtt_dir + 'core_mqtt_serializer.c',
+            self.libcoremqtt_dir + 'core_mqtt_state.c',
+        ]
+
+        self.includes = [
+            self.libcoremqtt_dir + 'include',
+            self.libcoremqtt_dir + 'interface'
+        ]
+
+        self.export_includes = [
+            self.libcoremqtt_dir + 'include',
+            self.libcoremqtt_dir + 'interface'
+        ]
+
+        FreeRTOSLib.__init__(self, ctx)
+
+
+class FreeRTOSLibTinyCbor(FreeRTOSLib):
+
+    libtinycbor_dir = '../../../FreeRTOS-Plus/ThirdParty/tinycbor/'
+
+    def __init__(self, ctx):
+        self.name = "libtinycbor"
+        self.srcs = [
+            self.libtinycbor_dir + 'src/cborencoder.c',
+            self.libtinycbor_dir + 'src/cborencoder_close_container_checked.c',
+            self.libtinycbor_dir + 'src/cborerrorstrings.c',
+            self.libtinycbor_dir + 'src/cborparser.c',
+            self.libtinycbor_dir + 'src/cborparser_dup_string.c',
+            self.libtinycbor_dir + 'src/cborpretty.c',
+            self.libtinycbor_dir + 'src/cborpretty_stdio.c',
+            self.libtinycbor_dir + 'src/cborvalidation.c',
+        ]
+
+        self.includes = [
+            self.libtinycbor_dir + 'src/',
+        ]
+
+        self.export_includes = [
+            self.libtinycbor_dir + 'src/',
+        ]
+
+        FreeRTOSLib.__init__(self, ctx)
+
+
+class FreeRTOSLibNetworkTransport(FreeRTOSLib):
+
+    libnetworktransport_dir = '../../../FreeRTOS-Plus/Source/Application-Protocols/network_transport/'
+
+    def __init__(self, ctx):
+        self.name = "freertos_libnetwork_transport"
+        self.srcs = [
+            self.libnetworktransport_dir +
+            'freertos_plus_tcp/using_mbedtls/using_mbedtls.c',
+            self.libnetworktransport_dir +
+            'freertos_plus_tcp/using_plaintext/using_plaintext.c',
+            self.libnetworktransport_dir +
+            'freertos_plus_tcp/sockets_wrapper.c',
+        ]
+
+        self.includes = [
+            self.libnetworktransport_dir + 'freertos_plus_tcp/using_mbedtls/',
+            self.libnetworktransport_dir +
+            'freertos_plus_tcp/using_plaintext/',
+            self.libnetworktransport_dir + 'freertos_plus_tcp/',
+        ]
+
+        self.export_includes = [
+            self.libnetworktransport_dir + 'freertos_plus_tcp/using_mbedtls/',
+            self.libnetworktransport_dir +
+            'freertos_plus_tcp/using_plaintext/',
+            self.libnetworktransport_dir + 'freertos_plus_tcp/',
+        ]
+
+        FreeRTOSLib.__init__(self, ctx)
+
+
+class FreeRTOSLibMbedTLS(FreeRTOSLib):
+
+    libmbedtls_dir = '../../../FreeRTOS-Plus/Source/Utilities/mbedtls_freertos/'
+    mbedtls_dir = '../../.././FreeRTOS-Plus/ThirdParty/mbedtls/'
+
+    def __init__(self, ctx):
+        self.name = "freertos_libmbedtls"
+        self.srcs = [
+            self.libmbedtls_dir + 'mbedtls_error.c',
+            self.libmbedtls_dir + 'mbedtls_freertos_port.c',
+            self.mbedtls_dir + 'library/platform_util.c',
+            self.mbedtls_dir + 'library/aes.c',
+            self.mbedtls_dir + 'library/aesni.c',
+            self.mbedtls_dir + 'library/arc4.c',
+            self.mbedtls_dir + 'library/asn1parse.c',
+            self.mbedtls_dir + 'library/asn1write.c',
+            self.mbedtls_dir + 'library/base64.c',
+            self.mbedtls_dir + 'library/bignum.c',
+            self.mbedtls_dir + 'library/blowfish.c',
+            self.mbedtls_dir + 'library/camellia.c',
+            self.mbedtls_dir + 'library/ccm.c',
+            self.mbedtls_dir + 'library/certs.c',
+            self.mbedtls_dir + 'library/cipher.c',
+            self.mbedtls_dir + 'library/cipher_wrap.c',
+            self.mbedtls_dir + 'library/cmac.c',
+            self.mbedtls_dir + 'library/ctr_drbg.c',
+            self.mbedtls_dir + 'library/debug.c',
+            self.mbedtls_dir + 'library/des.c',
+            self.mbedtls_dir + 'library/dhm.c',
+            self.mbedtls_dir + 'library/ecdh.c',
+            self.mbedtls_dir + 'library/ecdsa.c',
+            self.mbedtls_dir + 'library/ecjpake.c',
+            self.mbedtls_dir + 'library/ecp.c',
+            self.mbedtls_dir + 'library/ecp_curves.c',
+            self.mbedtls_dir + 'library/entropy.c',
+            self.mbedtls_dir + 'library/entropy_poll.c',
+            self.mbedtls_dir + 'library/error.c',
+            self.mbedtls_dir + 'library/gcm.c',
+            self.mbedtls_dir + 'library/havege.c',
+            self.mbedtls_dir + 'library/hmac_drbg.c',
+            self.mbedtls_dir + 'library/md.c',
+            self.mbedtls_dir + 'library/md2.c',
+            self.mbedtls_dir + 'library/md4.c',
+            self.mbedtls_dir + 'library/md5.c',
+            self.mbedtls_dir + 'library/memory_buffer_alloc.c',
+            self.mbedtls_dir + 'library/net_sockets.c',
+            self.mbedtls_dir + 'library/oid.c',
+            self.mbedtls_dir + 'library/padlock.c',
+            self.mbedtls_dir + 'library/pem.c',
+            self.mbedtls_dir + 'library/pk.c',
+            self.mbedtls_dir + 'library/pk_wrap.c',
+            self.mbedtls_dir + 'library/pkcs11.c',
+            self.mbedtls_dir + 'library/pkcs12.c',
+            self.mbedtls_dir + 'library/pkcs5.c',
+            self.mbedtls_dir + 'library/pkparse.c',
+            self.mbedtls_dir + 'library/pkwrite.c',
+            self.mbedtls_dir + 'library/platform.c',
+            self.mbedtls_dir + 'library/ripemd160.c',
+            self.mbedtls_dir + 'library/rsa.c',
+            self.mbedtls_dir + 'library/rsa_internal.c',
+            self.mbedtls_dir + 'library/sha1.c',
+            self.mbedtls_dir + 'library/sha256.c',
+            self.mbedtls_dir + 'library/sha512.c',
+            self.mbedtls_dir + 'library/ssl_cache.c',
+            self.mbedtls_dir + 'library/ssl_ciphersuites.c',
+            self.mbedtls_dir + 'library/ssl_cli.c',
+            self.mbedtls_dir + 'library/ssl_cookie.c',
+            self.mbedtls_dir + 'library/ssl_srv.c',
+            self.mbedtls_dir + 'library/ssl_ticket.c',
+            self.mbedtls_dir + 'library/ssl_tls.c',
+            self.mbedtls_dir + 'library/ssl_msg.c',
+            self.mbedtls_dir + 'library/threading.c',
+            self.mbedtls_dir + 'library/timing.c',
+            self.mbedtls_dir + 'library/version.c',
+            self.mbedtls_dir + 'library/version_features.c',
+            self.mbedtls_dir + 'library/x509.c',
+            self.mbedtls_dir + 'library/x509_create.c',
+            self.mbedtls_dir + 'library/x509_crl.c',
+            self.mbedtls_dir + 'library/x509_crt.c',
+            self.mbedtls_dir + 'library/x509_csr.c',
+            self.mbedtls_dir + 'library/x509write_crt.c',
+            self.mbedtls_dir + 'library/x509write_csr.c',
+            self.mbedtls_dir + 'library/xtea.c',
+        ]
+
+        self.includes = [
+            self.libmbedtls_dir,
+            '../../../FreeRTOS-Plus/ThirdParty/mbedtls/include/'
+        ]
+
+        self.export_includes = [
+            self.libmbedtls_dir,
+            '../../../FreeRTOS-Plus/ThirdParty/mbedtls/include/'
+        ]
+
+        FreeRTOSLib.__init__(self, ctx)
+
+
 ########################### LIBS END #############################
 
 
@@ -553,6 +783,13 @@ def freertos_libs_init(bld_ctx):
     bld_ctx.env.libs["freertos_fat"] = FreeRTOSLibFAT(bld_ctx)
     bld_ctx.env.libs["cheri"] = FreeRTOSLibCheri(bld_ctx)
     bld_ctx.env.libs["virtio"] = FreeRTOSLibVirtIO(bld_ctx)
+    bld_ctx.env.libs["freertos_libota"] = FreeRTOSLibAWSOTA(bld_ctx)
+    bld_ctx.env.libs["libtinycbor"] = FreeRTOSLibTinyCbor(bld_ctx)
+    bld_ctx.env.libs["freertos_libcorejson"] = FreeRTOSLibcoreJSON(bld_ctx)
+    bld_ctx.env.libs["freertos_libcoremqtt"] = FreeRTOSLibcoreMQTT(bld_ctx)
+    bld_ctx.env.libs["freertos_libmbedtls"] = FreeRTOSLibMbedTLS(bld_ctx)
+    bld_ctx.env.libs[
+        "freertos_libnetwork_transport"] = FreeRTOSLibNetworkTransport(bld_ctx)
 
 
 def freertos_bsps_init(bld_ctx):
@@ -582,13 +819,16 @@ def freertos_init(bld):
 
 ########################### UTILS START #############################
 
+
 # Size in MiB
-def create_disk_image(ctx, size = 5):
+def create_disk_image(ctx, size=5):
     with open(ctx.env.PREFIX + '/bin/freertos.img', 'wb') as f:
         f.seek(1024 * 1024 * size)
         f.write('0')
 
+
 ########################### UTILS END   #############################
+
 
 def options(ctx):
     # Tools
@@ -873,7 +1113,7 @@ def build(bld):
     # LIBS - Build required libs
     for lib in bld.env.LIB_DEPS:
         if lib in bld.env.LIB_DEPS_EMBED_FAT:
-          bld.env.libs[lib].is_compartment = True
+            bld.env.libs[lib].is_compartment = True
         bld.env.libs[lib].build(bld)
 
     # PROG - FreeRTOS Program
