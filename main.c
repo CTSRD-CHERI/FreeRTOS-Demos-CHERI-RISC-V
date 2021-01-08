@@ -41,12 +41,19 @@
     #include <dlfcn.h>
     #include <rtl/rtl-trace.h>
     #include <rtl/rtl-archive.h>
+#endif
 
+#if mainCONFIG_INIT_FAT_FILESYSTEM
 /* FreeRTOS+FAT includes. */
     #include "ff_headers.h"
     #include "ff_stdio.h"
-    #include "ff_ramdisk.h"
-#endif
+
+    #if configHAS_VIRTIO_BLK
+        #include "ff_virtioblk_disk.h"
+    #else
+        #include "ff_ramdisk.h"
+    #endif
+#endif /* mainCONFIG_INIT_FAT_FILESYSTEM */
 
 /* Bsp includes. */
 #include "bsp.h"
@@ -83,7 +90,7 @@
 #elif mainDEMO_TYPE == 42
     #pragma message "Demo type 42: Modbus"
     extern void main_modbus( void );
-#else  /* if mainDEMO_TYPE == 1 */
+#else /* if mainDEMO_TYPE == 1 */
     #ifdef configPROG_ENTRY
         extern void configPROG_ENTRY( void );
     #else
@@ -145,6 +152,37 @@ uint32_t port_get_current_mtime( void )
 }
 /*-----------------------------------------------------------*/
 
+#if mainCONFIG_INIT_FAT_FILESYSTEM
+
+/* The number and size of sectors that will make up the RAM disk.  The RAM disk
+ * is huge to allow some verbose FTP tests. */
+    #ifndef mainDISK_NAME
+        #define mainDISK_NAME            "/"
+    #endif
+
+    #define mainRAM_DISK_SECTOR_SIZE     512UL                                                    /* Currently fixed! */
+    #define mainRAM_DISK_SECTORS         ( ( 5UL * 1024UL * 1024UL ) / mainRAM_DISK_SECTOR_SIZE ) /* 5M bytes. */
+    #define mainIO_MANAGER_CACHE_SIZE    ( 15UL * mainRAM_DISK_SECTOR_SIZE )
+
+    static void prvCreateDisk( void )
+    {
+        FF_Disk_t * pxDisk;
+
+        /* Create the VirtIO Block Disk. */
+        #if configHAS_VIRTIO_BLK
+            pxDisk = FF_VirtIODiskInit( mainDISK_NAME, mainIO_MANAGER_CACHE_SIZE );
+        #else
+            static uint8_t ucRAMDisk[ mainRAM_DISK_SECTORS * mainRAM_DISK_SECTOR_SIZE ];
+            pxDisk = FF_RAMDiskInit( mainDISK_NAME, ucRAMDisk, mainRAM_DISK_SECTORS, mainIO_MANAGER_CACHE_SIZE );
+        #endif /* configHAS_VIRTIO_BLK */
+
+        configASSERT( pxDisk );
+
+        /* Print out information on the disk. */
+        FF_RAMDiskShowPartition( pxDisk );
+    }
+#endif /* mainCONFIG_INIT_FAT_FILESYSTEM */
+
 #if mainCONFIG_USE_DYNAMIC_LOADER
 
     #ifndef configPROG_ENTRY
@@ -152,27 +190,16 @@ uint32_t port_get_current_mtime( void )
     "to which the dynamic loader jumps to"
     #endif
 
-/* The number and size of sectors that will make up the RAM disk.  The RAM disk
- * is huge to allow some verbose FTP tests. */
-    #define mainRAM_DISK_SECTOR_SIZE     512UL                                                    /* Currently fixed! */
-    #define mainRAM_DISK_SECTORS         ( ( 5UL * 1024UL * 1024UL ) / mainRAM_DISK_SECTOR_SIZE ) /* 5M bytes. */
-    #define mainIO_MANAGER_CACHE_SIZE    ( 15UL * mainRAM_DISK_SECTOR_SIZE )
+    #ifndef mainCONFIG_INIT_FAT_FILESYSTEM
+        #error "The dynamic loader requires a FAT filesystem, use mainCONFIG_INIT_FAT_FILESYSTEM"
+    #endif
 
     void vFatEmbedLibFiles( void );
 
     static void prvLoader( void )
     {
         typedef void (* prog_entry_t)( void );
-        static uint8_t ucRAMDisk[ mainRAM_DISK_SECTORS * mainRAM_DISK_SECTOR_SIZE ];
-        FF_Disk_t * pxDisk;
         prog_entry_t entry = NULL;
-
-        /* Create the RAM disk. */
-        pxDisk = FF_RAMDiskInit( mainRAM_DISK_NAME, ucRAMDisk, mainRAM_DISK_SECTORS, mainIO_MANAGER_CACHE_SIZE );
-        configASSERT( pxDisk );
-
-        /* Print out information on the disk. */
-        FF_RAMDiskShowPartition( pxDisk );
 
         /* Embed the libs in the file systems*/
         vFatEmbedLibFiles();
@@ -248,7 +275,7 @@ int demo_main( void )
         {
             main_modbus();
         }
-    #else  /* if mainDEMO_TYPE == 1 */
+    #else /* if mainDEMO_TYPE == 1 */
         #ifdef configPROG_ENTRY
             #if mainCONFIG_USE_DYNAMIC_LOADER
                 /* Create a task that dynamically loads libs and apps from the file system */
@@ -261,7 +288,7 @@ int demo_main( void )
             #else
                 configPROG_ENTRY();
             #endif
-        #else  /* ifdef configPROG_ENTRY */
+        #else /* ifdef configPROG_ENTRY */
         #error "Unsupported Demo"
         #endif /* ifdef configPROG_ENTRY */
     #endif /* if mainDEMO_TYPE == 1 */
