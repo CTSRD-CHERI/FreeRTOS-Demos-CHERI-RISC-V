@@ -36,7 +36,7 @@
 #include <FreeRTOS.h>
 #include <task.h>
 
-#ifdef mainCONFIG_USE_DYNAMIC_LOADER
+#if mainCONFIG_USE_DYNAMIC_LOADER
 /* FreeRTOS-libdl includes to dynamically load and link objects */
     #include <dlfcn.h>
     #include <rtl/rtl-trace.h>
@@ -251,6 +251,10 @@ uint32_t port_get_current_mtime( void )
 int demo_main( void )
 {
     prvSetupHardware();
+
+    #if mainCONFIG_INIT_FAT_FILESYSTEM
+        prvCreateDisk();
+    #endif
 
     /* The mainCREATE_SIMPLE_BLINKY_DEMO_ONLY setting is described at the top
      * of this file. */
