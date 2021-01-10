@@ -67,7 +67,10 @@ def configure(ctx):
     if ctx.env.COMPARTMENTALIZE:
          ctx.env.append_value(
             'LIB_DEPS_EMBED_FAT',
-            ['freertos_tcpip', 'freertos_cli', 'virtio'])
+            ['freertos_tcpip', 'freertos_cli'])
+
+         if not ctx.env.VIRTIO_BLK:
+             ctx.env.append_value('LIB_DEPS_EMBED_FAT', ['virtio'])
 
     ctx.env.append_value('EXPORT_DEFINES', [
         'ipconfigUSE_FAT_LIBDL              = 1'
