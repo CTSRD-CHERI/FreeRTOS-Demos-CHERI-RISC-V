@@ -171,15 +171,19 @@ uint32_t port_get_current_mtime( void )
         /* Create the VirtIO Block Disk. */
         #if configHAS_VIRTIO_BLK
             pxDisk = FF_VirtIODiskInit( mainDISK_NAME, mainIO_MANAGER_CACHE_SIZE );
+
+            /* Print out information on the disk. */
+            FF_VirtIODiskShowPartition( pxDisk );
         #else
             static uint8_t ucRAMDisk[ mainRAM_DISK_SECTORS * mainRAM_DISK_SECTOR_SIZE ];
             pxDisk = FF_RAMDiskInit( mainDISK_NAME, ucRAMDisk, mainRAM_DISK_SECTORS, mainIO_MANAGER_CACHE_SIZE );
+
+            /* Print out information on the disk. */
+            FF_RAMDiskShowPartition( pxDisk );
         #endif /* configHAS_VIRTIO_BLK */
 
         configASSERT( pxDisk );
 
-        /* Print out information on the disk. */
-        FF_RAMDiskShowPartition( pxDisk );
     }
 #endif /* mainCONFIG_INIT_FAT_FILESYSTEM */
 
