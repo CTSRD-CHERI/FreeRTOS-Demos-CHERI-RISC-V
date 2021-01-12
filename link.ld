@@ -92,8 +92,7 @@ _HEAP_SIZE = 0x4000;
  * Define memory layout
  ****************************************************************************/
 MEMORY {
-	imem : ORIGIN = MEM_START, LENGTH = 0x10000000
-	dmem : ORIGIN = MEM_START + 0x10000000, LENGTH = 0x10000000
+	mem : ORIGIN = MEM_START, LENGTH = 0x10000000
 	uncached : ORIGIN = 0xc0000000, LENGTH = 0x0010000
 }
 
@@ -105,20 +104,22 @@ ENTRY(boot)
  * Define the sections, and where they are mapped in memory
  ****************************************************************************/
 SECTIONS {
+
+  . = SIZEOF_HEADERS;
 	.text : {
       . = ALIGN(8);
 	    *boot.o(.text);
 		*(.text);
 		*(.text.*);
-	} > imem
+	} > mem
 
 	.init : {
 	   KEEP (*(.init))
-	} > imem
+	} > mem
 
     .fini : {
        KEEP (*(.fini))
-    } > imem
+    } > mem
 
     .rodata : {
        __rodata_start = .;
@@ -126,21 +127,13 @@ SECTIONS {
        *(.rodata.*)
        *(.gnu.linkonce.r.*)
        __rodata_end = .;
-	} > dmem
-
-	.sbss (NOLOAD) : {
-	   __sbss_start = .;
-	   *(.sbss)
-	   *(.sbss.*)
-	   *(.gnu.linkonce.sb.*)
-	   __sbss_end = .;
-	} > dmem
+	} > mem
 
     .sdata : {
         _gp = . + 0x800;
         *(.srodata.cst16) *(.srodata.cst8) *(.srodata.cst4) *(.srodata.cst2) *(.srodata*)
         *(.sdata .sdata.* .gnu.linkonce.s.*)
-     }	> dmem
+     }	> mem
 
 	.data : {
 	   . = ALIGN(16);
@@ -149,35 +142,35 @@ SECTIONS {
 	   *(.data.*)
 	   *(.gnu.linkonce.d.*)
 	   __data_end = .;
-	} > dmem
+	} > mem
 
 	.htif (NOLOAD) : {
 	   *(.htif)
-	} > dmem
+	} > mem
 
 	.eh_frame : {
 	   *(.eh_frame)
-	} > dmem
+	} > mem
 
     __cap_relocs : {
        . = ALIGN(16);
-    } > dmem
+    } > mem
 
     .symtab : {
        __symtab_start = .;
         *(.symtab)
        __symtab_end = .;
-    } > dmem :symtab
+    } > mem :symtab
 
     .strtab : {
        __strtab_start = .;
         *(.strtab)
        __strtab_end = .;
-     } > dmem :strtab
+     } > mem :strtab
 
     .captable : {
        . = ALIGN(16);
-    } > dmem :captable
+    } > mem :captable
 
     .bss (NOLOAD) : {
        . = ALIGN(16);
@@ -188,7 +181,15 @@ SECTIONS {
        *(COMMON)
        . = ALIGN(16);
        __bss_end = .;
-    } > dmem
+    } > mem
+
+    .sbss (NOLOAD) : {
+       __sbss_start = .;
+       *(.sbss)
+       *(.sbss.*)
+       *(.gnu.linkonce.sb.*)
+       __sbss_end = .;
+    } > mem
 
     /* Generate Stack and Heap definitions */
     .heap (NOLOAD) : {
@@ -197,7 +198,7 @@ SECTIONS {
        _heap_start = .;
        . += _HEAP_SIZE;
        _heap_end = .;
-    } > dmem
+    } > mem
 
     .stack (NOLOAD) : {
        . = ALIGN(16);
@@ -207,7 +208,7 @@ SECTIONS {
        _stack = .;
        __stack = _stack;
        __freertos_irq_stack_top = .;
-    } > dmem
+    } > mem
 
     .uncached (NOLOAD) : {
        *(.uncached)
