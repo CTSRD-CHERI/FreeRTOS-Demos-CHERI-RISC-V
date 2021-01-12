@@ -56,6 +56,7 @@ def configure(ctx):
         'mainRAM_DISK_NAME                  = "/"',
         '_STAT_H_                           = 1',
         'ipconfigUSE_FAT_LIBDL              = 1',
+        'mainCONFIG_INIT_FAT_FILESYSTEM     = 1',
         'mainCONFIG_USE_DYNAMIC_LOADER      = 0',
         'configEMBED_LIBS_FAT               = 1',
         'configLIBDL_LIB_PATH               = "/lib/"',
