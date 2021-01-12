@@ -21,7 +21,7 @@ described below.
 
 ## Using cheribuild
 
-1. Clone [cheribuild](git@github.com:CTSRD-CHERI/cheribuild.git) and checkout **hmka2** branch
+1. Clone [cheribuild](https://github.com/CTSRD-CHERI/cheribuild) and checkout **hmka2** branch
 2. Build all the dependencies cheribuild requires in the README **Pre-Build Setup** section.
 3. To build this demo with all of its dependencies run:
 
