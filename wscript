@@ -1160,7 +1160,8 @@ def build(bld):
         libpath=['.', bld.env.PROGRAM_PATH],
         use=main_libs,
         ldflags=bld.env.CFLAGS + ['-Wl,--start-group'] +
-        ['-l' + lib for lib in bld.env.LIB_DEPS] + ['-Wl,--end-group'] + [
+        ['-l' + lib for lib in bld.env.LIB_DEPS] +
+        ['-l' + lib for lib in bld.env.LIB] + ['-Wl,--end-group'] + [
             '-T',
             bld.path.abspath() + '/link.ld', '-nostartfiles',
             '-nostdlib', '-Wl,--defsym=MEM_START=' + str(bld.env.MEMSTART),
