@@ -3,6 +3,9 @@
 This demo is intended to be generic enough to run on different (CHERI-)RISC-V configurations,
 multilibs, platforms, apps, etc. It has been tested on FPGA/F1, Spike, QEMU, Piccolo and Sail.
 
+This repo/demo is **NOT** standalone and is expected to be a submodule part of a classical
+[FreeRTOS distribution](https://github.com/CTSRD-CHERI/FreeRTOS/tree/hmka2).
+
 # Build
 The demo builds on Linux-based systems using WAF build system. There are two ways
 to build the demo: either directly with WAF, or with *_cheribuild_*. cheribuild
@@ -85,6 +88,13 @@ Run:
 ```
 
 ## Using WAF
+
+Clone FreeRTOS distribution along with its submodules:
+
+```
+$ git clone --single-branch --branch hmka2 git@github.com:CTSRD-CHERI/FreeRTOS.git --recurse-submodules
+$ cd FreeRTOS/FreeRTOS/Demo/RISC-V-Generic/
+```
 
 ### Building with GCC
 ```
