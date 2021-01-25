@@ -187,8 +187,6 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
         self.platform = "gfe"
         self.bld_ctx = ctx,
 
-        self.MEMSTART = 0xC0000000
-
         self.srcs = ['./bsp/uart16550.c']
 
     @staticmethod
@@ -226,12 +224,12 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
         else:
             ctx.define('MCAUSE_EXTERNAL_INTERRUPT', 0x8000000b)
 
+        ctx.env.MEMSTART = 0xC0000000
+
 class FreeRTOSBspFett(FreeRTOSBsp):
     def __init__(self, ctx):
         self.platform = "fett"
         self.bld_ctx = ctx,
-
-        self.MEMSTART = 0xC0000000
 
         self.srcs = ['./bsp/uart16550.c', './bsp/sifive_test.c']
 
@@ -268,6 +266,8 @@ class FreeRTOSBspFett(FreeRTOSBsp):
 
         if ctx.env.VIRTIO_BLK:
             ctx.define('configHAS_VIRTIO_BLK', 1)
+
+        ctx.env.MEMSTART = 0xC0000000
 
 
 ########################### BSPS END ###############################
