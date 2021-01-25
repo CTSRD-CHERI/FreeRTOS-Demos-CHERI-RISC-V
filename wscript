@@ -893,6 +893,11 @@ def options(ctx):
 
     bsp = FreeRTOSBsp(ctx)
 
+    ctx.add_option('--debug',
+                   action='store_true',
+                   default=False,
+                   help='Enable debug build')
+
     # BSP options
     ctx.add_option('--riscv-platform',
                    action='store',
@@ -943,6 +948,7 @@ def configure(ctx):
     ctx.env.PROGRAM_PATH = ctx.options.program_path
     ctx.env.PROGRAM_ENTRY = ctx.env.PROG
     ctx.env.COMPARTMENTALIZE = ctx.options.compartmentalize
+    ctx.env.DEBUG = ctx.options.debug
 
     # Libs - Minimal libs required for any FreeRTOS Demo
     ctx.env.append_value('LIB', ['c'])
@@ -1035,7 +1041,16 @@ def configure(ctx):
     # CFLAGS - Shared required CFLAGS
     ctx.env.append_value(
         'CFLAGS',
-        ['-g', '-O0', '-march=' + ctx.env.MARCH, '-mabi=' + ctx.env.MABI])
+        ['-march=' + ctx.env.MARCH, '-mabi=' + ctx.env.MABI])
+
+    if ctx.env.DEBUG:
+        ctx.env.append_value('CFLAGS', ['-g', '-O0'])
+        ctx.define('DEBUG', 1)
+    else:
+        ctx.env.append_value('CFLAGS', ['-Os'])
+        ctx.define('NDEBUG', 1)
+
+
 
     # PROG - For legacy compatibility
     if not any('configPROG_ENTRY' in define for define in ctx.env.DEFINES):
