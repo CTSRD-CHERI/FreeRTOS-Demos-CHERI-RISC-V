@@ -71,8 +71,8 @@
 #define FREERTOS_CONFIG_H
 
 #include "stdint.h"
-#ifndef __waf__
-    #include "bsp/qemu_virt.h"
+#ifdef __waf__
+    #include "waf_config.h"
 #endif
 
 /*-----------------------------------------------------------
