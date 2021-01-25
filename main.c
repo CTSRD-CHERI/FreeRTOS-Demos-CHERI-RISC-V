@@ -58,7 +58,7 @@
 /* Bsp includes. */
 #include "bsp.h"
 
-#ifdef CONFIG_ENABLE_CHERI
+#ifdef __CHERI_PURE_CAPABILITY__
     #include <cheri_init_globals.h>
     #include <cheri/cheri-utility.h>
 
@@ -68,7 +68,7 @@
                               __builtin_cheri_program_counter_get(),
                               __builtin_cheri_global_data_get() );
     }
-#endif /* CONFIG_ENABLE_CHERI */
+#endif /* __CHERI_PURE_CAPABILITY__ */
 
 /******************************************************************************
  */

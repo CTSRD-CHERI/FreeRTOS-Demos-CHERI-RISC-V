@@ -70,14 +70,14 @@
     1 tab == 4 spaces!
 */
 
-#ifdef CONFIG_ENABLE_CHERI
+#if __CHERI_PURE_CAPABILITY__
 .extern xISRStackTop
 .extern pvAlmightyDataCap
 .extern pvAlmightyCodeCap
 
 # The CPU starts in hybrid, and the boot initialisation has to be in hybrid.
 .option nocapmode
-#endif /* CONFIG_ENABLE_CHERI */
+#endif /* __CHERI_PURE_CAPABILITY__ */
 
 /* Startup code */
 .text
@@ -87,7 +87,7 @@ boot:
     li t6, 0x1800
     csrw mstatus, t6
 
-#ifdef CONFIG_ENABLE_CHERI
+#ifdef __CHERI_PURE_CAPABILITY__
     # W^X for PCC and DDC
     cspecialrw      ct0, ddc, cnull
     li              t1, (1<<1)
@@ -104,7 +104,7 @@ boot:
     cjr             ct0
 #else
     j _mstart
-#endif /* CONFIG_ENABLE_CHERI */
+#endif /* __CHERI_PURE_CAPABILITY__ */
 
 _mstart:
     li	x1, 0
@@ -164,7 +164,7 @@ write_stack_pattern:
     jal	fill_block
 
 init_stack:
-#ifdef CONFIG_ENABLE_CHERI
+#if __CHERI_PURE_CAPABILITY__
     # From now on, do purecap ABI but in hybrid mode.
     la              sp, _stack_end
     cfromptr        csp, ddc, sp # Get DDC.
@@ -213,7 +213,7 @@ init_stack:
 #else
     /* set stack pointer */
     la	sp, _stack
-#endif /* CONFIG_ENABLE_CHERI */
+#endif /* __CHERI_PURE_CAPABILITY__ */
 
 	j	demo_main
 
@@ -227,6 +227,6 @@ fb_end:
     ret
 .size boot, . - boot
 
-#ifdef CONFIG_ENABLE_CHERI
+#ifdef __CHERI_PURE_CAPABILITY__
 .option capmode
-#endif /* CONFIG_ENABLE_CHERI */
+#endif /* __CHERI_PURE_CAPABILITY__ */

@@ -4,9 +4,9 @@
 #include <FreeRTOSConfig.h>
 #include "uart16550.h"
 
-#ifdef CONFIG_ENABLE_CHERI
+#ifdef __CHERI_PURE_CAPABILITY__
     #include <cheric.h>
-#endif /* CONFIG_ENABLE_CHERI */
+#endif /* __CHERI_PURE_CAPABILITY__ */
 
 #if configUART16550_REGSHIFT == 1
     volatile uint8_t * uart16550;
@@ -70,11 +70,11 @@ void uart16550_init( unsigned long base )
 
     uint32_t divisor;
     divisor = configPERIPH_CLOCK_HZ / ( 16 * configUART16550_BAUD );
-    #ifdef CONFIG_ENABLE_CHERI
+    #ifdef __CHERI_PURE_CAPABILITY__
         extern void * pvAlmightyDataCap;
         uart16550 = ( uintptr_t ) cheri_setoffset( pvAlmightyDataCap, ( size_t ) base );
         uart16550 = cheri_csetbounds( uart16550, 0x1000 );
-    #endif /* CONFIG_ENABLE_CHERI */
+    #endif /* __CHERI_PURE_CAPABILITY__ */
 
     /* http://wiki.osdev.org/Serial_Ports */
     uart16550[ 1 ] = 0x00;                    /* Disable all interrupts */

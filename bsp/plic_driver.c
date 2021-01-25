@@ -3,9 +3,9 @@
 #include "plic_driver.h"
 #include <string.h>
 
-#ifdef CONFIG_ENABLE_CHERI
+#ifdef __CHERI_PURE_CAPABILITY__
     #include <cheric.h>
-#endif /* CONFIG_ENABLE_CHERI */
+#endif /* __CHERI_PURE_CAPABILITY__ */
 
 /* Note that there are no assertions or bounds checking on these */
 /* parameter values. */
@@ -28,12 +28,12 @@ void PLIC_init( plic_instance_t * this_plic,
                 uint32_t num_sources,
                 uint32_t num_priorities )
 {
-    #ifdef CONFIG_ENABLE_CHERI
+    #ifdef __CHERI_PURE_CAPABILITY__
         extern void * pvAlmightyDataCap;
         this_plic->base_addr = ( uintptr_t ) cheri_setoffset( pvAlmightyDataCap, base_addr );
     #else
         this_plic->base_addr = base_addr;
-    #endif /* CONFIG_ENABLE_CHERI */
+    #endif /* __CHERI_PURE_CAPABILITY__ */
 
     this_plic->num_sources = num_sources;
     this_plic->num_priorities = num_priorities;
