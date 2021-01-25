@@ -65,10 +65,32 @@ def configure(ctx):
         'configMAXLEN_COMPNAME              = 255'
     ])
 
+    ctx.define('configPROG_ENTRY', 'main_servers')
+    ctx.define('mainCREATE_HTTP_SERVER', 1)
+    ctx.define('ipconfigUSE_HTTP', 1)
+    ctx.define('ipconfigUSE_FTP', 1)
+    ctx.define('ipconfigUSE_FAT_LIBDL', 1)
+    ctx.define('ffconfigMAX_FILENAME', 255)
+    ctx.define('configHTTP_ROOT', "/ram/websrc/")
+    ctx.define('configUSE_NET_VIRTIO', 1)
+    ctx.define('mainRAM_DISK_NAME', "/")
+    ctx.define('_STAT_H_', 1)
+    ctx.define('mainCONFIG_INIT_FAT_FILESYSTEM', 1)
+    ctx.define('configEMBED_LIBS_FAT', 1)
+    ctx.define('configLIBDL_LIB_PATH', "/lib/")
+    ctx.define('configLIBDL_CONF_PATH', "/etc/")
+    ctx.define('configCOMPARTMENTS_NUM', 1024)
+    ctx.define('configMAXLEN_COMPNAME', 255)
+
     if ctx.env.COMPARTMENTALIZE:
          ctx.env.append_value(
             'LIB_DEPS_EMBED_FAT',
             ['freertos_tcpip', 'freertos_cli'])
+
+         ctx.env.append_value('DEFINES', [
+            'mainCONFIG_USE_DYNAMIC_LOADER      = 1',
+         ])
+         ctx.define('mainCONFIG_USE_DYNAMIC_LOADER', 1)
 
          if not ctx.env.VIRTIO_BLK:
              ctx.env.append_value('LIB_DEPS_EMBED_FAT', ['virtio'])

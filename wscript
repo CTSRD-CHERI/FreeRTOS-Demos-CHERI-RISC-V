@@ -142,6 +142,29 @@ class FreeRTOSBspQemuVirt(FreeRTOSBsp):
         if ctx.env.VIRTIO_BLK:
             self.defines += ['configHAS_VIRTIO_BLK     =     1']
 
+    @staticmethod
+    def configure(ctx):
+        ctx.define('PLATFORM_QEMU_VIRT', 1)
+        ctx.define('configCLINT_BASE_ADDRESS', 0x2000000)
+        ctx.define('configUART16550_BASE', 0x10000000)
+        ctx.define('configUART16550_BAUD', 115200)
+        ctx.define('configUART16550_REGSHIFT', 1)
+        ctx.define('configCPU_CLOCK_HZ', 10000000)
+        ctx.define('configPERIPH_CLOCK_HZ', 10000000)
+        ctx.define('configHAS_VIRTIO', 1)
+        ctx.define('configHAS_VIRTIO_NET', 1)
+        ctx.define('VIRTIO_NET_MMIO_ADDRESS', 0x10008000)
+        ctx.define('VIRTIO_NET_MMIO_SIZE', 0x1000)
+        ctx.define('VIRTIO_NET_PLIC_INTERRUPT_ID', 0x8)
+        ctx.define('VIRTIO_NET_PLIC_INTERRUPT_PRIO', 0x1)
+        ctx.define('VIRTIO_BLK_MMIO_ADDRESS', 0x10007000)
+        ctx.define('VIRTIO_BLK_MMIO_SIZE', 0x1000 )
+        ctx.define('PLIC_BASE_ADDR', 0xC000000)
+        ctx.define('PLIC_NUM_SOURCES', 127)
+        ctx.define('PLIC_NUM_PRIORITIES', 7)
+
+        if ctx.env.VIRTIO_BLK:
+            ctx.define('configHAS_VIRTIO_BLK', 1)
 
 class FreeRTOSBspSpike(FreeRTOSBsp):
     def __init__(self, ctx):
@@ -154,6 +177,11 @@ class FreeRTOSBspSpike(FreeRTOSBsp):
             'configCLINT_BASE_ADDRESS    =     0x2000000'
         ]
 
+    @staticmethod
+    def configure(ctx):
+        ctx.define('PLATFORM_SPIKE', 1)
+        ctx.define('configCLINT_BASE_ADDRESS', 0x2000000)
+
 
 class FreeRTOSBspSail(FreeRTOSBsp):
     def __init__(self, ctx):
@@ -165,6 +193,11 @@ class FreeRTOSBspSail(FreeRTOSBsp):
             'PLATFORM_SAIL               =     1',
             'configCLINT_BASE_ADDRESS    =     0x2000000'
         ]
+
+    @staticmethod
+    def configure(ctx):
+        ctx.define('PLATFORM_SAIL', 1)
+        ctx.define('configCLINT_BASE_ADDRESS', 0x2000000)
 
 
 class FreeRTOSBspPiccolo(FreeRTOSBsp):
@@ -180,6 +213,14 @@ class FreeRTOSBspPiccolo(FreeRTOSBsp):
             'configUART16550_BAUD        =     115200LL',
             'configUART16550_REGSHIFT    =     1',
         ]
+
+    @staticmethod
+    def configure(ctx):
+        ctx.define('PLATFORM_PICCOLO', 1)
+        ctx.define('configCLINT_BASE_ADDRESS', 0x2000000)
+        ctx.define('configUART16550_BASE', 0xC0000000)
+        ctx.define('configUART16550_BAUD', 115200)
+        ctx.define('configUART16550_REGSHIFT', 1)
 
 
 class FreeRTOSBspGfe(FreeRTOSBsp):
@@ -223,6 +264,41 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
             if ctx.env.RISCV_XLEN == "64" else str(0x8000000b)
         ]
 
+    @staticmethod
+    def configure(ctx):
+        ctx.define('PLATFORM_GFE', 1)
+        ctx.define('configCLINT_BASE_ADDRESS', 0x10000000)
+        ctx.define('CLINT_CTRL_ADDR', 0x10000000)
+        ctx.define('configUART16550_BASE', 0x62300000)
+        ctx.define('configUART16550_BAUD', 115200)
+        ctx.define('configUART16550_REGSHIFT', 2)
+        ctx.define('configCPU_CLOCK_HZ', 100000000)
+        ctx.define('configPERIPH_CLOCK_HZ', 100000000)
+        ctx.define('PLIC_BASE_ADDR', 0xC000000)
+        ctx.define('PLIC_NUM_SOURCES', 16)
+        ctx.define('PLIC_NUM_PRIORITIES', 16)
+        ctx.define('PLIC_SOURCE_UART0', 0x1)
+        ctx.define('PLIC_SOURCE_ETH', 0x2)
+        ctx.define('PLIC_SOURCE_DMA_MM2S', 0x3)
+        ctx.define('PLIC_SOURCE_DMA_S2MM', 0x4)
+        ctx.define('PLIC_SOURCE_SPI0', 0x5)
+        ctx.define('PLIC_SOURCE_UART1', 0x6)
+        ctx.define('PLIC_SOURCE_IIC0', 0x7)
+        ctx.define('PLIC_SOURCE_SPI1', 0x8)
+        ctx.define('PLIC_PRIORITY_UART0', 0x1)
+        ctx.define('PLIC_PRIORITY_ETH', 0x2)
+        ctx.define('PLIC_PRIORITY_DMA_MM2S', 0x3)
+        ctx.define('PLIC_PRIORITY_DMA_S2MM', 0x3)
+        ctx.define('PLIC_PRIORITY_SPI0', 0x3)
+        ctx.define('PLIC_PRIORITY_UART1', 0x1)
+        ctx.define('PLIC_PRIORITY_IIC0', 0x3)
+        ctx.define('PLIC_PRIORITY_SPI1', 0x4)
+
+        if ctx.env.RISCV_XLEN == '64':
+            ctx.define('MCAUSE_EXTERNAL_INTERRUPT', 0x800000000000000b)
+        else:
+            ctx.define('MCAUSE_EXTERNAL_INTERRUPT', 0x8000000b)
+
 class FreeRTOSBspFett(FreeRTOSBsp):
     def __init__(self, ctx):
         self.platform = "fett"
@@ -261,6 +337,39 @@ class FreeRTOSBspFett(FreeRTOSBsp):
 
         if ctx.env.VIRTIO_BLK:
             self.defines += ['configHAS_VIRTIO_BLK     =     1']
+
+    @staticmethod
+    def configure(ctx):
+        ctx.define('PLATFORM_FETT', 1)
+        ctx.define('configCLINT_BASE_ADDRESS', 0x10000000)
+        ctx.define('CLINT_CTRL_ADDR', 0x10000000)
+        ctx.define('configUART16550_BASE', 0x62300000)
+        ctx.define('configUART16550_BAUD', 115200)
+        ctx.define('configUART16550_REGSHIFT', 2)
+        ctx.define('SIFIVE_TEST_BASE', 0x50000000)
+        ctx.define('configCPU_CLOCK_HZ', 100000000)
+        ctx.define('configPERIPH_CLOCK_HZ', 250000000)
+        ctx.define('PLIC_BASE_ADDR', 0xC000000)
+        ctx.define('PLIC_NUM_SOURCES', 16)
+        ctx.define('PLIC_NUM_PRIORITIES', 7)
+        ctx.define('PLIC_SOURCE_UART0', 0x1)
+        ctx.define('PLIC_PRIORITY_UART0', 0x1)
+        ctx.define('configHAS_VIRTIO', 1)
+        ctx.define('configHAS_VIRTIO_NET', 1)
+        ctx.define('VIRTIO_NET_MMIO_ADDRESS', 0x40000000)
+        ctx.define('VIRTIO_NET_MMIO_SIZE', 0x1000)
+        ctx.define('VIRTIO_BLK_MMIO_ADDRESS', 0x40002000)
+        ctx.define('VIRTIO_BLK_MMIO_SIZE', 0x1000)
+        ctx.define('VIRTIO_NET_PLIC_INTERRUPT_ID', 0x2)
+        ctx.define('VIRTIO_NET_PLIC_INTERRUPT_PRIO', 0x1)
+
+        if ctx.env.RISCV_XLEN == '64':
+            ctx.define('MCAUSE_EXTERNAL_INTERRUPT', 0x800000000000000b)
+        else:
+            ctx.define('MCAUSE_EXTERNAL_INTERRUPT', 0x8000000b)
+
+        if ctx.env.VIRTIO_BLK:
+            ctx.define('configHAS_VIRTIO_BLK', 1)
 
 
 ########################### BSPS END ###############################
@@ -791,6 +900,23 @@ def freertos_libs_init(bld_ctx):
     bld_ctx.env.libs[
         "freertos_libnetwork_transport"] = FreeRTOSLibNetworkTransport(bld_ctx)
 
+def freertos_bsp_configure(conf):
+    platform = conf.options.riscv_platform
+
+    if platform == 'qemu_virt':
+        FreeRTOSBspQemuVirt.configure(conf)
+    elif platform == 'spike':
+        FreeRTOSBspSpike.configure(conf)
+    elif platform == 'sail':
+        FreeRTOSBspSail.configure(conf)
+    elif platform == 'gfe':
+        FreeRTOSBspGfe.configure(conf)
+    elif platform == 'fett':
+        FreeRTOSBspFett.configure(conf)
+    elif platform == 'piccolo':
+        FreeRTOSBspPiccolo.configure(conf)
+    else:
+        conf.fatal('Failed invalid to configure BSP')
 
 def freertos_bsps_init(bld_ctx):
     bld_ctx.env.freertos_bsps = {}
@@ -970,6 +1096,9 @@ def configure(ctx):
     if ctx.options.purecap and not ctx.env.PURECAP:
 
         ctx.env.append_value('DEFINES', ['CONFIG_ENABLE_CHERI=1'])
+
+        ctx.define('CONFIG_ENABLE_CHERI', 1)
+
         ctx.env.PURECAP = True
 
         if ctx.options.toolchain != "llvm":
@@ -1008,6 +1137,19 @@ def configure(ctx):
             'configMAXLEN_COMPNAME              = 255'
         ])
 
+        ctx.define('configPORT_ALLOW_APP_EXCEPTION_HANDLERS', 1)
+        ctx.define('mainRAM_DISK_NAME', "/")
+        ctx.define('_STAT_H_', 1)
+        ctx.define('ipconfigUSE_FAT_LIBDL', 1)
+        ctx.define('ffconfigMAX_FILENAME', 255)
+        ctx.define('mainCONFIG_INIT_FAT_FILESYSTEM', 1)
+        ctx.define('mainCONFIG_USE_DYNAMIC_LOADER', 1)
+        ctx.define('configEMBED_LIBS_FAT', 1)
+        ctx.define('configLIBDL_LIB_PATH',"/lib/")
+        ctx.define('configLIBDL_CONF_PATH', "/etc/")
+        ctx.define('configCOMPARTMENTS_NUM', 1024)
+        ctx.define('configMAXLEN_COMPNAME', 255)
+
     # CFLAGS - Shared required CFLAGS
     ctx.env.append_value(
         'CFLAGS',
@@ -1017,6 +1159,9 @@ def configure(ctx):
     if not any('configPROG_ENTRY' in define for define in ctx.env.DEFINES):
         ctx.env.append_value('DEFINES', ['configPROG_ENTRY=' + ctx.env.PROG])
 
+    freertos_bsp_configure(ctx)
+
+    ctx.write_config_header('config.h')
 
 # Copied from https://nachtimwald.com/2019/10/09/python-binary-to-c-header/
 def bin2header(data, var_name='var'):
