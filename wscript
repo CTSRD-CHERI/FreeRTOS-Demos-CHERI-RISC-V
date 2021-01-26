@@ -972,7 +972,7 @@ def configure(ctx):
         ctx.env.append_value('CFLAGS', '-mcmodel=medium')
 
         ctx.env.append_value('STLIBPATH', [])
-        ctx.env.append_value('STLIB', 'clang_rt.builtins-' + ctx.env.ARCH)
+        ctx.env.append_value('LIB', 'clang_rt.builtins-' + ctx.env.ARCH)
         ctx.env.append_value('STLIBPATH', [ctx.env.SYSROOT + '/lib'])
         ctx.env.append_value('LINKFLAGS', ['-L' + ctx.env.SYSROOT + '/lib'])
 
@@ -1175,6 +1175,9 @@ def build(bld):
     main_sources = ['main.c']
     main_libs = bld.env.LIB_DEPS + [bld.env.PROG]
 
+    # LIBS - wrap libs in groups for circular deps (mainly for gcc)
+    bld.env.STLIB_MARKER = ['-Wl,-Bstatic', '-Wl,--start-group']
+
     if bld.env.COMPARTMENTALIZE:
 
         # Generate the libs_fat_embedded.h header with libs
@@ -1184,9 +1187,7 @@ def build(bld):
 
         # Need to include all unused functions because a future dynamically loaded
         # object might want to link against it
-        bld.env.append_value('CFLAGS', ['-Wl,--whole-archive'])
-
-        main_libs = []
+        bld.env.append_value('STLIB_MARKER', ['-Wl,--whole-archive'])
 
         # Compartmentalization needs libdl + fat
         if 'freertos_fat' not in bld.env.LIB_DEPS:
@@ -1194,19 +1195,30 @@ def build(bld):
         if 'freertos_libdl' not in bld.env.LIB_DEPS:
             main_libs += ['freertos_libdl', 'freertos_libdl_headers']
 
+    bld.env.SHLIB_MARKER = ['-Wl,--no-whole-archive', '-lc', '-Wl,--end-group']
+
+    bld.env.append_value('STLIB', main_libs)
+    # Remoeve any lib duplicates
+    bld.env.STLIB = list(dict.fromkeys(bld.env.STLIB))
+    # Remoeve dynamically loaded libs
+    bld.env.STLIB = [lib for lib in bld.env.STLIB if lib not in bld.env.LIB_DEPS_EMBED_FAT]
+    # Make sure all libs are built (manualy dep)
+    for lib in bld.env.STLIB:
+        tg = bld.get_tgen_by_name(lib)
+        tg.post()
+        for task in tg.tasks:
+            task.run()
+
     bld.program(
         source=main_sources,
         target=PROG_NAME,
         features="c",
         includes=['.'],
         libpath=['.', bld.env.PROGRAM_PATH],
-        use=main_libs,
-        ldflags=bld.env.CFLAGS + ['-Wl,--start-group'] +
-        ['-l' + lib for lib in bld.env.LIB_DEPS] +
-        ['-l' + lib for lib in bld.env.LIB] + ['-Wl,--end-group'] + [
-            '-T',
-            bld.path.abspath() + '/link.ld', '-nostartfiles',
-            '-nostdlib', '-Wl,--defsym=MEM_START=' + str(bld.env.MEMSTART),
+        ldflags=bld.env.CFLAGS +
+            ['-T',
+            bld.path.abspath() + '/link.ld', '-nostartfiles', '-nostdlib',
+            '-Wl,--defsym=MEM_START=' + str(bld.env.MEMSTART),
             '-defsym=_STACK_SIZE=4K'
         ],
     )
