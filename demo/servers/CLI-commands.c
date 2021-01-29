@@ -181,7 +181,7 @@ static BaseType_t prvCCallCommand( char * pcWriteBuffer,
  */
 static BaseType_t prvFaultCommand( char * pcWriteBuffer,
                                    size_t xWriteBufferLen,
-                                   const char * pcCommandString );
+                                   const char * pcCommandString ) __attribute__((optnone));
 
 /*
  * Implements the "trace start" and "trace stop" commands;
