@@ -1,3 +1,5 @@
+#include "FreeRTOS.h"
+#include "task.h"
 #include "bsp.h"
 #include "plic_driver.h"
 
@@ -63,6 +65,10 @@ plic_instance_t Plic;
             size_t epc = 0;
             size_t cheri_cause;
             void * mepcc;
+            #if configCHERI_COMPARTMENTALIZATION
+                size_t xCompID = -1;
+                rtems_rtl_obj * obj = NULL;
+            #endif
 
             asm volatile ( "csrr %0, mcause" : "=r" ( cause )::);
             asm volatile ( "csrr %0, mepc" : "=r" ( epc )::);
@@ -102,6 +108,23 @@ plic_instance_t Plic;
                     ccsr,
                     cheri_cause,
                     reg_num, is_scr );
+
+            #if configCHERI_COMPARTMENTALIZATION
+                xCompID = xPortGetCurrentCompartmentID();
+                obj = rtl_cherifreertos_compartment_get_obj( xCompID );
+
+                if( obj != NULL )
+                {
+                    void * ret = xPortGetCurrentCompartmentReturn();
+                    printf( "\033[0;31m" );
+                    printf( "<<<< Fault in Task: %s: Compartment #%d: %s:%s\n", pcTaskGetName( NULL ), xCompID, obj->aname, obj->oname );
+                    printf( "\033[0m" );
+
+                    /* Caller compartment return */
+                    *( exception_frame ) = ret;
+                    return 0;
+                }
+            #endif /* if configCHERI_COMPARTMENTALIZATION */
         #endif /* ifdef __CHERI_PURE_CAPABILITY__ */
 
         while( 1 )
