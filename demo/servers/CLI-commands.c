@@ -177,6 +177,13 @@ static BaseType_t prvCCallCommand( char * pcWriteBuffer,
                                    const char * pcCommandString );
 
 /*
+ * Defines a command to trigger faults
+ */
+static BaseType_t prvFaultCommand( char * pcWriteBuffer,
+                                   size_t xWriteBufferLen,
+                                   const char * pcCommandString );
+
+/*
  * Implements the "trace start" and "trace stop" commands;
  */
 #if configINCLUDE_TRACE_RELATED_CLI_COMMANDS == 1
@@ -325,6 +332,16 @@ static const CLI_Command_Definition_t xParameterEcho =
 #endif /* ifdef ipconfigUSE_FAT_LIBDL */
 /*-----------------------------------------------------------*/
 
+/* Structure that defines the "fault" command line command */
+    static const CLI_Command_Definition_t xFault =
+    {
+        "fault",
+        "fault:\r\n trigger a fault\r\n\r\n",
+        prvFaultCommand, /* The function to run. */
+        0                /* No parameters are expected. */
+    };
+/*-----------------------------------------------------------*/
+
 void vRegisterCLICommands( void )
 {
     static BaseType_t xCommandRegistered = pdFALSE;
@@ -372,6 +389,8 @@ void vRegisterCLICommands( void )
             FreeRTOS_CLIRegisterCommand( &xDlOpen );
             FreeRTOS_CLIRegisterCommand( &xCCall );
         #endif
+
+        FreeRTOS_CLIRegisterCommand( &xFault );
 
         xCommandRegistered = pdTRUE;
     }
@@ -934,4 +953,13 @@ static BaseType_t prvDisplayIPConfig( char * pcWriteBuffer,
         return pdFALSE;
     }
 #endif /* ifdef ipconfigUSE_FAT_LIBDL */
+
+    static BaseType_t prvFaultCommand( char * pcWriteBuffer,
+                                       size_t xWriteBufferLen,
+                                       const char * pcCommandString )
+    {
+        int* invalid_pointer = NULL;
+        *invalid_pointer = 0;
+        return pdTRUE;
+    }
        /*-----------------------------------------------------------*/
