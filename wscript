@@ -1028,6 +1028,7 @@ def configure(ctx):
         ctx.define('configPORT_ALLOW_APP_EXCEPTION_HANDLERS', 1)
         ctx.define('mainRAM_DISK_NAME', "/")
         ctx.define('_STAT_H_', 1)
+        ctx.define('configCHERI_COMPARTMENTALIZATION', 1)
         ctx.define('ipconfigUSE_FAT_LIBDL', 1)
         ctx.define('ffconfigMAX_FILENAME', 255)
         ctx.define('mainCONFIG_INIT_FAT_FILESYSTEM', 1)
