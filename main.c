@@ -198,15 +198,19 @@ uint32_t port_get_current_mtime( void )
         #error "The dynamic loader requires a FAT filesystem, use mainCONFIG_INIT_FAT_FILESYSTEM"
     #endif
 
-    void vFatEmbedLibFiles( void );
+    #ifndef configFF_FORMATTED_DISK_IMAGE
+        void vFatEmbedLibFiles( void );
+    #endif
 
     static void prvLoader( void )
     {
         typedef void (* prog_entry_t)( void );
         prog_entry_t entry = NULL;
 
+        #ifndef configFF_FORMATTED_DISK_IMAGE
         /* Embed the libs in the file systems*/
-        vFatEmbedLibFiles();
+            vFatEmbedLibFiles();
+        #endif
 
         rtems_rtl_trace_set_mask( RTEMS_RTL_TRACE_UNRESOLVED );
 

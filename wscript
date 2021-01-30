@@ -31,6 +31,7 @@
 #
 
 import os
+import subprocess
 from waflib.Task import Task
 from waflib.TaskGen import after, before_method, feature
 from waflib.TaskGen import extension
@@ -841,13 +842,62 @@ def freertos_init(bld):
 
 ########################### UTILS START #############################
 
-
 # Size in MiB
 def create_disk_image(ctx, size=5):
+
     with open(ctx.env.PREFIX + '/bin/freertos.img', 'wb') as f:
+        filepath = ctx.env.PREFIX + '/bin/freertos.img'
+        mtoolsrcpath = ctx.env.PREFIX + '/mtoolsrc'
+        libdl_config_path = ctx.env.PREFIX + '/libdl.conf'
+        os.environ["MTOOLSRC"] = mtoolsrcpath
         f.seek(1024 * 1024 * size)
         f.write('0')
+        f.flush()
 
+        # If the user hasn't asked to partition/format/write a disk image, skip
+        if not ctx.env.CREATE_DISK_IMAGE:
+            return
+
+        # Imply disk geometry
+        sectors = 8
+        tracks = 256
+        heads = (size * 1024 * 1024) / (512 * sectors * tracks)
+
+        # Create an mtools conf file read by the following commands
+        with open(mtoolsrcpath, 'wb') as mtools_conf:
+            mtools_conf.write('drive /: file="' + filepath + '" partition=1')
+
+        # Initialize the parition table to FAT32 and remove any paritions
+        subprocess.Popen(["mpartition", '-I', '-s', str(sectors), '-t', str(tracks) ,'-h', str(heads), '-T', '0x0C', "/:"])
+
+        # Create a single primary FAT32 parition occupying the entire disk
+        subprocess.Popen(["mpartition", '-cpva', '-s', str(sectors), '-t', str(tracks) ,'-h', str(heads), '-T', '0x0C', "/:"])
+
+        # Format the disk/parition with 8 hidden sectors
+        subprocess.Popen(["mformat", '-H', '8', "/:"])
+
+        # Create /lib/ directory
+        subprocess.Popen(["mmd", "lib"])
+
+        # Create /etc/ directory
+        subprocess.Popen(["mmd", "etc"])
+
+        # Get the libraries to write in the disk image
+        LIBS_TO_EMBED = ["lib" + lib + ".a" for lib in ctx.env.LIB_DEPS_EMBED_FAT]
+
+        # Create a libdl.conf file that contains the list of libraries, read by libdl
+        with open(libdl_config_path, 'wb') as libdlconf:
+            libdl_config = '\n'.join(['/lib/' + lib for lib in LIBS_TO_EMBED])
+            libdl_config += '\n'
+            libdlconf.write(libdl_config)
+            subprocess.Popen(["mcd", "/etc/"])
+            subprocess.Popen(["mcopy", '-tvpn', libdl_config_path, '/:'+'libdl.conf'])
+
+        # Write the libraries to /lib/
+        for lib in LIBS_TO_EMBED:
+            lib_path = str(ctx.path.get_bld().ant_glob('**/' + lib, quiet=True)[0])
+            subprocess.Popen(["mcd", "/lib/"])
+            subprocess.Popen(["mcopy", '-vpn', lib_path, '/:/lib/'+lib],)
 
 ########################### UTILS END   #############################
 
@@ -913,6 +963,11 @@ def options(ctx):
                    default=False,
                    help='Use VirtIO Block Device for the file system')
 
+    ctx.add_option('--create-disk-image',
+                   action='store_true',
+                   default=False,
+                   help='Create and write data into an external disk image')
+
     # Features options
     ctx.add_option('--compartmentalize',
                    action='store_true',
@@ -945,6 +1000,7 @@ def configure(ctx):
     ctx.env.SYSROOT = ctx.options.sysroot
     ctx.env.MEMSTART = ctx.options.mem_start
     ctx.env.VIRTIO_BLK = ctx.options.use_virtio_blk
+    ctx.env.CREATE_DISK_IMAGE = ctx.options.create_disk_image
     ctx.env.PROGRAM_PATH = ctx.options.program_path
     ctx.env.PROGRAM_ENTRY = ctx.env.PROG
     ctx.env.COMPARTMENTALIZE = ctx.options.compartmentalize
@@ -1039,6 +1095,14 @@ def configure(ctx):
         ctx.define('configCOMPARTMENTS_NUM', 1024)
         ctx.define('configMAXLEN_COMPNAME', 255)
 
+    if ctx.env.CREATE_DISK_IMAGE:
+        try:
+            ctx.find_program('mtools')
+        except ctx.errors.ConfigurationError:
+            ctx.to_log('mtools program is required to be installed to create disk images')
+
+        ctx.define('configFF_FORMATTED_DISK_IMAGE', 1)
+
     # CFLAGS - Shared required CFLAGS
     ctx.env.append_value(
         'CFLAGS',
@@ -1080,7 +1144,6 @@ def bin2header(data, var_name='var'):
 # in the file system
 def gen_header_libs(bld):
     # Add the main app to be embedded
-    bld.env.LIB_DEPS_EMBED_FAT += [bld.env.PROG]
     LIBS_TO_EMBED = ["lib" + lib + ".a" for lib in bld.env.LIB_DEPS_EMBED_FAT]
 
     # Make sure all libraries are built and ready
@@ -1136,11 +1199,6 @@ const xLibFileToCopy_t xLibFilesToCopy[] = {
     with open(str(bld.path.get_bld()) + "/libs_fat_embedded.h", 'w') as f:
         f.write(header_content)
 
-    for embed_lib in bld.env.LIB_DEPS_EMBED_FAT:
-        if embed_lib in bld.env.LIB_DEPS:
-            bld.env.LIB_DEPS.remove(embed_lib)
-
-
 def build(bld):
 
     # Init FreeRTOS bsps, libs, and demos
@@ -1181,10 +1239,22 @@ def build(bld):
 
     if bld.env.COMPARTMENTALIZE:
 
-        # Generate the libs_fat_embedded.h header with libs
-        gen_header_libs(bld)
-        # Build the C files that embeds the libs into the FAT filesystem
-        main_sources += ['libs_fat_embedded.c']
+        # Requested-to-be-compartmentalized libraries are in LIB_DEPS_EMBED_FAT
+        # Add the application to them
+        bld.env.LIB_DEPS_EMBED_FAT += [bld.env.PROG]
+        for embed_lib in bld.env.LIB_DEPS_EMBED_FAT:
+            if embed_lib in bld.env.LIB_DEPS:
+                bld.env.LIB_DEPS.remove(embed_lib)
+
+        # Generate a header with hex contet of the libraries and embed/write them
+        # in run-time. If ctx.env.CREATE_DISK_IMAGE is true, then the image will
+        # be created on the host and ready to used by FreeRTOS without the need
+        # to parition, format or write any libs in run-time.
+        if not bld.env.CREATE_DISK_IMAGE:
+            # Generate the libs_fat_embedded.h header with libs
+            gen_header_libs(bld)
+            # Build the C files that embeds the libs into the FAT filesystem
+            main_sources += ['libs_fat_embedded.c']
 
         # Need to include all unused functions because a future dynamically loaded
         # object might want to link against it
