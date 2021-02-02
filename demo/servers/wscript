@@ -75,10 +75,10 @@ def configure(ctx):
         ctx.define('NDEBUG', 1)
 
     if ctx.env.MODBUS_EXEC_PERIOD:
-        ctx.define('modbusEXEC_PERIOD_MS', ctx.env.MODBUS_EXEC_PERIOD)
+        ctx.define('modbusEXEC_PERIOD_MS', int(ctx.env.MODBUS_EXEC_PERIOD))
 
     if ctx.env.MODBUS_NETWORK_DELAY:
-        ctx.define('modbusNETWORK_DELAY_MS', ctx.env.MODBUS_NETWORK_DELAY)
+        ctx.define('modbusNETWORK_DELAY_MS', int(ctx.env.MODBUS_NETWORK_DELAY))
 
     if ctx.env.MODBUS_OBJECT_CAPS:
         ctx.define('MODBUS_OBJECT_CAPS', 1)
