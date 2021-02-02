@@ -1,0 +1,13 @@
+- propagate changes to mb_modbus perms from cheri layer to macaroon layer
+- transmit macaroons in a side channel (i.e., not with modbus state)
+	- if we manage this, then macaroons layer doesn't need to receive state at all.  it currently only uses tab_string
+	- remove all the use of tab_string in the demo, macaroons library, and modbus
+- find a way to avoid shared use of state variables like mb_mapping and ctx to avoid concurrency problems
+	- alt. consider use of a mutex
+	- alt. consider gatekeeper tasks
+
+Known problems:
+- Running the server alone on QEMU will hang on first call to `FreeRTOS_accept()` after a client on the host connects.
+    - Workaround: Wait about 5 seconds on the client between connecting and sending the first message
+- The microbenchmark demo for macaroons (`modbus_macaroons_layer_microbenchmark`) will hang after replying to a `modbus_write_string` request.
+    - This seems to only occur after several successful modbus functions, all of which are preceded by a `modbus_write_string` to send the macaroon

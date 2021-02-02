@@ -1,0 +1,8 @@
+[submodule "libmodbus"]
+	path = libmodbus
+	url = git@github.com:dodsonmg/libmodbus.git
+	branch = modcap
+[submodule "libmacaroons"]
+	path = libmacaroons
+	url = git@github.com:dodsonmg/libmacaroons.git
+	branch = modcap

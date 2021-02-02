@@ -39,6 +39,7 @@ def configure(ctx):
         ctx.path.abspath() + "/DemoTasks/include",
         ctx.path.abspath() + "/Common/FreeRTOS_Plus_TCP_Demos/include",
         ctx.path.abspath() + "/Common/FreeRTOS_Plus_CLI_Demos/include",
+        ctx.path.abspath() + "/Common/FreeRTOS_Modbus_Demos/include",
         ctx.path.abspath() + "/Common/Utilities/include",
         ctx.path.abspath() + "/Common/Demo_IP_Protocols/include"
     ])
@@ -65,6 +66,29 @@ def configure(ctx):
     ctx.define('configCOMPARTMENTS_NUM', 1024)
     ctx.define('configMAXLEN_COMPNAME', 255)
 
+    if ctx.env.MODBUS_MICROBENCHMARK:
+        ctx.define('MODBUS_MICROBENCHMARK', 1)
+        ctx.define('NDEBUG', 1)
+
+    if ctx.env.MODBUS_MACROBENCHMARK:
+        ctx.define('MODBUS_MICROBENCHMARK', 1)
+        ctx.define('NDEBUG', 1)
+
+    if ctx.env.MODBUS_EXEC_PERIOD:
+        ctx.define('modbusEXEC_PERIOD_MS', ctx.env.MODBUS_EXEC_PERIOD)
+
+    if ctx.env.MODBUS_NETWORK_DELAY:
+        ctx.define('modbusNETWORK_DELAY_MS', ctx.env.MODBUS_NETWORK_DELAY)
+
+    if ctx.env.MODBUS_OBJECT_CAPS:
+        ctx.define('MODBUS_OBJECT_CAPS', 1)
+
+    if ctx.env.MODBUS_OBJECT_CAPS_STUBS:
+        ctx.define('MODBUS_OBJECT_CAPS_STUBS', 1)
+
+    if ctx.env.MODBUS_NETWORK_CAPS:
+        ctx.define('MODBUS_NETWORK_CAPS', 1)
+
     if ctx.env.COMPARTMENTALIZE:
          ctx.env.append_value(
             'LIB_DEPS_EMBED_FAT',
@@ -86,6 +110,8 @@ def configure(ctx):
         'LIB_DEPS',
         ['freertos_tcpip', 'freertos_cli', 'freertos_libdl', 'freertos_fat', 'virtio'])
 
+    ctx.recurse('Common/FreeRTOS_Modbus_Demos/modcap')
+
 
 def build(bld):
     name = "main_servers"
@@ -93,6 +119,8 @@ def build(bld):
     print("Building main_servers Demo")
 
     cflags = []
+
+    bld.recurse('Common/FreeRTOS_Modbus_Demos/modcap')
 
     if bld.env.COMPARTMENTALIZE:
         cflags = ['-cheri-cap-table-abi=gprel']
@@ -110,6 +138,7 @@ def build(bld):
             'Common/FreeRTOS_Plus_CLI_Demos/TCPCommandConsole.c',
             'Common/FreeRTOS_Plus_CLI_Demos/UDPCommandConsole.c',
             'Common/FreeRTOS_Plus_CLI_Demos/File-related-CLI-commands.c',
+            'Common/FreeRTOS_Modbus_Demos/ModbusServer.c',
             'Common/Demo_IP_Protocols/FTP/FreeRTOS_FTP_server.c',
             'Common/Demo_IP_Protocols/FTP/FreeRTOS_FTP_commands.c',
             'Common/FreeRTOS_Plus_TCP_Demos/TFTPServer.c',
@@ -120,6 +149,7 @@ def build(bld):
         ],
         use=[
             "freertos_core_headers", "freertos_bsp_headers", "freertos_tcpip_headers", "freertos_cli_headers",
-            "freertos_libdl_headers", "freertos_fat_headers", "virtio_headers", "cheri_headers"
+            "freertos_libdl_headers", "freertos_fat_headers", "virtio_headers", "cheri_headers", "modbus",
+            "modbus_object_caps", "modbus_network_caps", "modbus_benchmarks", "virtio"
         ],
         target=name)
