@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <sys/time.h>
 
+#include "FreeRTOSConfig.h"
 #include "modbus/modbus.h"
 
 #include "modbus_test_constants.h"

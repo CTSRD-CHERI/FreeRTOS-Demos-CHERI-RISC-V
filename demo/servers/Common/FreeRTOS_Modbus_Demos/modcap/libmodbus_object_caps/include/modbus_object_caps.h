@@ -29,6 +29,7 @@
 #define _MODBUS_OBJECT_CAPABILITIES_H_
 
 #include <stdio.h>
+#include <FreeRTOSConfig.h>
 
 /* For CHERI */
 #ifdef __CHERI_PURE_CAPABILITY__

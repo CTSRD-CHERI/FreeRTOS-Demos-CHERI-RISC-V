@@ -73,6 +73,7 @@ mission critical applications that require provable dependability.
 #include <stdarg.h>
 
 /* FreeRTOS includes. */
+#include "FreeRTOSConfig.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
