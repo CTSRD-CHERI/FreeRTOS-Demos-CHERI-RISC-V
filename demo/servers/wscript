@@ -71,7 +71,7 @@ def configure(ctx):
         ctx.define('NDEBUG', 1)
 
     if ctx.env.MODBUS_MACROBENCHMARK:
-        ctx.define('MODBUS_MICROBENCHMARK', 1)
+        ctx.define('MODBUS_MACROBENCHMARK', 1)
         ctx.define('NDEBUG', 1)
 
     if ctx.env.MODBUS_EXEC_PERIOD:
