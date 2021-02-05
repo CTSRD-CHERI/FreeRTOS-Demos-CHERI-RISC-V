@@ -974,6 +974,11 @@ def options(ctx):
                    default=False,
                    help='Expermintal CHERI-based SW compartmentalization')
 
+    ctx.add_option('--compartmentalization_mode',
+                   action='store',
+                   default="objs",
+                   help='Comparmentalization mode (either objs or libs)')
+
     # Run options
     ctx.add_option('--run',
                    action='store_true',
@@ -1004,6 +1009,7 @@ def configure(ctx):
     ctx.env.PROGRAM_PATH = ctx.options.program_path
     ctx.env.PROGRAM_ENTRY = ctx.env.PROG
     ctx.env.COMPARTMENTALIZE = ctx.options.compartmentalize
+    ctx.env.COMP_MODE = ctx.options.compartmentalization_mode
     ctx.env.DEBUG = ctx.options.debug
 
     # Libs - Minimal libs required for any FreeRTOS Demo
@@ -1094,6 +1100,13 @@ def configure(ctx):
         ctx.define('configLIBDL_CONF_PATH', "/etc/")
         ctx.define('configCOMPARTMENTS_NUM', 1024)
         ctx.define('configMAXLEN_COMPNAME', 255)
+
+        if ctx.env.COMP_MODE == "objs":
+            ctx.define('configCHERI_COMPARTMENTALIZATION_MODE', 1)
+        elif ctx.env.COMP_MODE == "libs":
+            ctx.define('configCHERI_COMPARTMENTALIZATION_MODE', 2)
+        else:
+            ctx.fatal('Invalid compartmentalization mode: either objs or libs are supported')
 
     if ctx.env.CREATE_DISK_IMAGE:
         try:
