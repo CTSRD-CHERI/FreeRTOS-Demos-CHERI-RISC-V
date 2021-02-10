@@ -46,7 +46,7 @@
  * 1 then FreeRTOS_debug_printf should be defined to the function used to print
  * out the debugging messages. */
 #if ( mainDEMO_TYPE != 0xCB002 )
-    #define ipconfigHAS_DEBUG_PRINTF    1
+    #define ipconfigHAS_DEBUG_PRINTF    0
 #endif
 #if ( ipconfigHAS_DEBUG_PRINTF == 1 )
     #define FreeRTOS_debug_printf( X )    printf X
