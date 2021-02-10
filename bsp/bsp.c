@@ -1,4 +1,5 @@
 #include "FreeRTOS.h"
+#include "FreeRTOSConfig.h"
 #include "task.h"
 #include "bsp.h"
 #include "plic_driver.h"
@@ -111,6 +112,7 @@ plic_instance_t Plic;
 
             #if configCHERI_COMPARTMENTALIZATION
                 xCompID = xPortGetCurrentCompartmentID();
+            #if configCHERI_COMPARTMENTALIZATION_MODE == 1
                 obj = rtl_cherifreertos_compartment_get_obj( xCompID );
 
                 if( obj != NULL )
@@ -124,6 +126,22 @@ plic_instance_t Plic;
                     *( exception_frame ) = ret;
                     return 0;
                 }
+            #elif configCHERI_COMPARTMENTALIZATION_MODE == 2
+                rtems_rtl_archive* archive = rtl_cherifreertos_compartment_get_archive( xCompID );
+
+                if( archive != NULL )
+                {
+                    void * ret = xPortGetCurrentCompartmentReturn();
+                    printf( "\033[0;31m" );
+                    printf( "<<<< Fault in Task: %s: Compartment #%d: %s\n", pcTaskGetName( NULL ), xCompID, archive->name );
+                    printf( "\033[0m" );
+
+                    /* Caller compartment return */
+                    *( exception_frame ) = ret;
+                    return 0;
+                }
+
+            #endif
             #endif /* if configCHERI_COMPARTMENTALIZATION */
         #endif /* ifdef __CHERI_PURE_CAPABILITY__ */
 
