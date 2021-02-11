@@ -940,13 +940,8 @@ static BaseType_t prvDisplayIPConfig( char * pcWriteBuffer,
             return pdFALSE;
         }
 
-        #ifdef __CHERI_PURE_CAPABILITY__
-            void * data_cap = NULL;
-            int ret = dlinfo( obj_handle, RTLD_DI_CHERI_CAPTABLE, &data_cap );
-            asm volatile ( ".balign 4\nccall %0, %1" : : "C" ( call ), "C" ( data_cap ) : );
-        #else
-            call();
-        #endif /* __CHERI_PURE_CAPABILITY__ */
+        /* Jump to the module's function */
+        call();
 
         /* There is no more data to return after this single string, so return
          * pdFALSE. */
