@@ -16,7 +16,7 @@ plic_instance_t Plic;
     #include <cheri/cheri-utility.h>
     #include "portmacro.h"
 
-    #ifdef __CHERI_PURE_CAPABILITY__
+    #if configCHERI_COMPARTMENTALIZATION
         static void inter_compartment_call( uintptr_t * exception_frame,
                                             ptraddr_t mepc )
         {
@@ -82,6 +82,7 @@ plic_instance_t Plic;
             int is_scr = ( ( ccsr >> 10 ) & 0x1 );
             cheri_cause = ( unsigned ) ( ( ccsr ) & 0x1f );
 
+            #if configCHERI_COMPARTMENTALIZATION
             /* ccall */
             if( cheri_cause == 0x19 )
             {
@@ -95,6 +96,7 @@ plic_instance_t Plic;
                 inter_compartment_call( exception_frame, epc );
                 return 0;
             }
+            #endif
 
             for( int i = 0; i < 35; i++ )
             {
