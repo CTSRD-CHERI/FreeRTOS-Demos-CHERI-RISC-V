@@ -220,8 +220,7 @@ uint32_t port_get_current_mtime( void )
             rtems_rtl_trace_set_mask( RTEMS_RTL_TRACE_UNRESOLVED );
         #endif
 
-        /* TODO: Make this generic to load the main object of any program */
-        void * obj = dlopen( "/lib/libmain_servers.a:main_servers.c.1.o", RTLD_GLOBAL | RTLD_NOW );
+        void * obj = dlopen( configLIBDL_PROG_START_OBJ, RTLD_GLOBAL | RTLD_NOW );
 
         if( obj == NULL )
         {

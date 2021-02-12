@@ -47,6 +47,8 @@ def configure(ctx):
         'configPROG_ENTRY                   = main_servers',
     ])
 
+    ctx.env.LIBDL_PROG_START_FILE = "main_servers.c"
+
     ctx.define('mainCREATE_HTTP_SERVER', 1)
     ctx.define('ipconfigUSE_HTTP', 1)
     ctx.define('ipconfigUSE_FTP', 1)

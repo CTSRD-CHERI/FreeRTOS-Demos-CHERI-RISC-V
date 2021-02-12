@@ -1086,6 +1086,9 @@ def configure(ctx):
                                                        '/wscript'):
         ctx.recurse(ctx.env.PROGRAM_PATH)
 
+    # This define is used if FreeRTOS is configured/built with dynamic loading support
+    ctx.define('configLIBDL_PROG_START_OBJ', '/lib/lib'+ctx.env.PROG+'.a:'+ctx.env.LIBDL_PROG_START_FILE+'.1.o')
+
     if ctx.env.COMPARTMENTALIZE:
         ctx.define('configPORT_ALLOW_APP_EXCEPTION_HANDLERS', 1)
         ctx.define('mainRAM_DISK_NAME', "/")
