@@ -1086,13 +1086,15 @@ def configure(ctx):
                                                        '/wscript'):
         ctx.recurse(ctx.env.PROGRAM_PATH)
 
+    # FreeRTOS has itw own non-libc file system
+    ctx.define('_STAT_H_', 1)
+
     # This define is used if FreeRTOS is configured/built with dynamic loading support
     ctx.define('configLIBDL_PROG_START_OBJ', '/lib/lib'+ctx.env.PROG+'.a:'+ctx.env.LIBDL_PROG_START_FILE+'.1.o')
 
     if ctx.env.COMPARTMENTALIZE:
         ctx.define('configPORT_ALLOW_APP_EXCEPTION_HANDLERS', 1)
         ctx.define('mainRAM_DISK_NAME', "/")
-        ctx.define('_STAT_H_', 1)
         ctx.define('configCHERI_COMPARTMENTALIZATION', 1)
         ctx.define('ipconfigUSE_FAT_LIBDL', 1)
         ctx.define('ffconfigMAX_FILENAME', 255)
@@ -1104,12 +1106,18 @@ def configure(ctx):
         ctx.define('configCOMPARTMENTS_NUM', 1024)
         ctx.define('configMAXLEN_COMPNAME', 255)
 
+        # Compartmentalizaion requires the dynamic loader/linker lib and a filesystem
+        ctx.env.append_value('LIB_DEPS', ['freertos_libdl', 'freertos_fat'])
+
         if ctx.env.COMP_MODE == "objs":
             ctx.define('configCHERI_COMPARTMENTALIZATION_MODE', 1)
         elif ctx.env.COMP_MODE == "libs":
             ctx.define('configCHERI_COMPARTMENTALIZATION_MODE', 2)
         else:
             ctx.fatal('Invalid compartmentalization mode: either objs or libs are supported')
+    else:
+        ctx.define('configCOMPARTMENTS_NUM', 0)
+        ctx.define('configMAXLEN_COMPNAME', 0)
 
     if ctx.env.CREATE_DISK_IMAGE:
         try:
@@ -1166,15 +1174,15 @@ def gen_header_libs(bld):
     for lib in bld.env.LIB_DEPS_EMBED_FAT:
         tg = bld.get_tgen_by_name(lib)
         tg.post()
-        for task in tg.tasks:
-            for obj_file in task.outputs:
-                if bld.env.PROG in str(obj_file):
-                    print(str(obj_file).split('/')[-1])
-                    bld.env.append_value(
-                        'DEFINES',
-                        'mainCONFIG_USE_DYNAMIC_LOADER_START_OBJ = ' +
-                        str(obj_file).split('/')[-1])
-            print(task.outputs)
+        #for task in tg.tasks:
+            #for obj_file in task.outputs:
+                #if bld.env.PROG in str(obj_file):
+                #    print(str(obj_file).split('/')[-1])
+                #    bld.env.append_value(
+                #        'DEFINES',
+                #        'mainCONFIG_USE_DYNAMIC_LOADER_START_OBJ = ' +
+                #        str(obj_file).split('/')[-1])
+            #print(task.outputs)
         for task in tg.tasks:
             task.run()
 
