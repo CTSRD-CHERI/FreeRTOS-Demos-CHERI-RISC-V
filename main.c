@@ -172,14 +172,18 @@ uint32_t port_get_current_mtime( void )
         #if configHAS_VIRTIO_BLK
             pxDisk = FF_VirtIODiskInit( mainDISK_NAME, mainIO_MANAGER_CACHE_SIZE );
 
-            /* Print out information on the disk. */
-            FF_VirtIODiskShowPartition( pxDisk );
+            #if DEBUG
+                /* Print out information on the disk. */
+                FF_VirtIODiskShowPartition( pxDisk );
+            #endif
         #else
             static uint8_t ucRAMDisk[ mainRAM_DISK_SECTORS * mainRAM_DISK_SECTOR_SIZE ];
             pxDisk = FF_RAMDiskInit( mainDISK_NAME, ucRAMDisk, mainRAM_DISK_SECTORS, mainIO_MANAGER_CACHE_SIZE );
 
-            /* Print out information on the disk. */
-            FF_RAMDiskShowPartition( pxDisk );
+            #if DEBUG
+                /* Print out information on the disk. */
+                FF_RAMDiskShowPartition( pxDisk );
+            #endif
         #endif /* configHAS_VIRTIO_BLK */
 
         configASSERT( pxDisk );
@@ -212,7 +216,9 @@ uint32_t port_get_current_mtime( void )
             vFatEmbedLibFiles();
         #endif
 
-        rtems_rtl_trace_set_mask( RTEMS_RTL_TRACE_UNRESOLVED );
+        #if DEBUG
+            rtems_rtl_trace_set_mask( RTEMS_RTL_TRACE_UNRESOLVED );
+        #endif
 
         /* TODO: Make this generic to load the main object of any program */
         void * obj = dlopen( "/lib/libmain_servers.a:main_servers.c.1.o", RTLD_GLOBAL | RTLD_NOW );
@@ -226,7 +232,10 @@ uint32_t port_get_current_mtime( void )
     #define str( s )     # s
     #define xstr( s )    str( s )
 
-        printf( "Searching loaded objects for %s\n", xstr( configPROG_ENTRY ) );
+        #if DEBUG
+            printf( "Searching loaded objects for %s\n", xstr( configPROG_ENTRY ) );
+        #endif
+
         entry = ( prog_entry_t ) dlsym( obj, xstr( configPROG_ENTRY ) );
 
         if( entry == NULL )
@@ -236,10 +245,14 @@ uint32_t port_get_current_mtime( void )
         }
         else
         {
-            printf( "Found entry %s @ %p\n", xstr( configPROG_ENTRY ), entry );
+            #if DEBUG
+                printf( "Found entry %s @ %p\n", xstr( configPROG_ENTRY ), entry );
+            #endif
         }
 
-        printf( "Jumping to the app entry: %s\n", xstr( configPROG_ENTRY ) );
+        #if DEBUG
+            printf( "Jumping to the app entry: %s\n", xstr( configPROG_ENTRY ) );
+        #endif
 
         vTaskSuspendAll();
         entry();
