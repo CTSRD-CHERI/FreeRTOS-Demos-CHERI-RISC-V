@@ -1134,6 +1134,7 @@ def configure(ctx):
 
     if ctx.env.DEBUG:
         ctx.env.append_value('CFLAGS', ['-g', '-O0'])
+        ctx.define('configPORT_ALLOW_APP_EXCEPTION_HANDLERS', 1)
         ctx.define('DEBUG', 1)
     else:
         ctx.env.append_value('CFLAGS', ['-Os'])
