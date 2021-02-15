@@ -124,14 +124,13 @@
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS    3
 
 /* TODO: use only for debugging */
+#if DEBUG
 #define configGENERATE_RUN_TIME_STATS              1
 #define configRECORD_STACK_HIGH_ADDRESS            ( 1 )
 #define INCLUDE_uxTaskGetStackHighWaterMark        1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION    1
 #define configPORT_ALLOW_APP_EXCEPTION_HANDLERS    1
-
-/* See http://www.nadler.com/embedded/newlibAndFreeRTOS.html */
-#define configUSE_NEWLIB_REENTRANT                 0 /* Required for thread-safety of newlib sprintf, */
+#endif
 
 /* Runtime stats definitions */
 /* TODO: use only for debugging */
