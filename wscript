@@ -190,6 +190,23 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
 
         self.srcs = ['./bsp/uart16550.c']
 
+        # Xilinx Drivers
+        self.srcs += [
+            '../RISC-V_Galois_demo/bsp/xilinx/axidma/xaxidma_bd.c',
+            '../RISC-V_Galois_demo/bsp/xilinx/axidma/xaxidma_bdring.c',
+            '../RISC-V_Galois_demo/bsp/xilinx/axidma/xaxidma.c',
+            '../RISC-V_Galois_demo/bsp/xilinx/axidma/xaxidma_selftest.c',
+            '../RISC-V_Galois_demo/bsp/xilinx/axidma/xaxidma_g.c',
+            '../RISC-V_Galois_demo/bsp/xilinx/axidma/xaxidma_sinit.c',
+            '../RISC-V_Galois_demo/bsp/xilinx/axiethernet/xaxiethernet.c',
+            '../RISC-V_Galois_demo/bsp/xilinx/axiethernet/xaxiethernet_control.c',
+            '../RISC-V_Galois_demo/bsp/xilinx/axiethernet/xaxiethernet_g.c',
+            '../RISC-V_Galois_demo/bsp/xilinx/axiethernet/xaxiethernet_sinit.c',
+            '../RISC-V_Galois_demo/bsp/xilinx/common/xbasic_types.c',
+            '../RISC-V_Galois_demo/bsp/xilinx/common/xil_io.c',
+            '../RISC-V_Galois_demo/bsp/xilinx/common/xil_assert.c',
+        ]
+
     @staticmethod
     def configure(ctx):
         ctx.define('PLATFORM_GFE', 1)
@@ -220,12 +237,73 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
         ctx.define('PLIC_PRIORITY_IIC0', 0x3)
         ctx.define('PLIC_PRIORITY_SPI1', 0x4)
 
+        # Galois/Xilinx defines
+
+        # DMA defines
+        ctx.define('BSP_USE_DMA', 1)
+        ctx.define('XPAR_XAXIDMA_NUM_INSTANCES', 1)
+        ctx.define('XPAR_AXI_DMA', 1)
+        ctx.define('XPAR_AXIDMA_0_DEVICE_ID', 0)
+        ctx.define('XPAR_AXIDMA_0_BASEADDR', 0x62200000, 'Virtual base address of DMA engine')
+        ctx.define('XPAR_AXIDMA_0_SG_INCLUDE_STSCNTRL_STRM', 1, 'Control/status stream')
+        ctx.define('XPAR_AXIDMA_0_INCLUDE_MM2S', 1, 'AXI4 memory-mapped to stream')
+        ctx.define('XPAR_AXIDMA_0_INCLUDE_MM2S_DRE', 1)
+        ctx.define('XPAR_AXIDMA_0_M_AXI_MM2S_DATA_WIDTH', 32, 'Allow unaligned transfers')
+        ctx.define('XPAR_AXIDMA_0_INCLUDE_S2MM', 1, 'AXI stream to memory-mapped')
+        ctx.define('XPAR_AXIDMA_0_INCLUDE_S2MM_DRE', 1)
+        ctx.define('XPAR_AXIDMA_0_M_AXI_S2MM_DATA_WIDTH', 32, 'Allow unaligned transfers')
+        ctx.define('XPAR_AXIDMA_0_INCLUDE_SG', 1)
+        ctx.define('XPAR_AXIDMA_0_NUM_MM2S_CHANNELS', 1)
+        ctx.define('XPAR_AXIDMA_0_NUM_S2MM_CHANNELS', 1)
+        ctx.define('XPAR_AXI_DMA_0_MM2S_BURST_SIZE', 16)
+        ctx.define('XPAR_AXI_DMA_0_S2MM_BURST_SIZE', 16)
+        ctx.define('XPAR_AXI_DMA_0_MICRO_DMA', 0)
+        ctx.define('XPAR_AXI_DMA_0_ADDR_WIDTH', 64)
+        ctx.define('XPAR_AXIDMA_0_SG_LENGTH_WIDTH', 16)
+
+        # Ethernet defines
+        ctx.define('BSP_USE_ETHERNET', 1)
+        ctx.define('XPAR_XAXIETHERNET_NUM_INSTANCES', 1)
+        ctx.define('XPAR_AXIETHERNET_0_PHYADDR', 0x03)
+        ctx.define('XPAR_AXIETHERNET_0_DEVICE_ID', 0)
+        ctx.define('XPAR_AXIETHERNET_0_BASEADDR', 0x62100000)
+        ctx.define('XPAR_AXIETHERNET_0_TEMAC_TYPE', 2, '0 for SoftTemac at 10/100 Mbps, 1 for SoftTemac at 10/100/1000 Mbps and 2 for Vitex6 Hard Temac')
+        ctx.define('XPAR_AXIETHERNET_0_TXCSUM', 0, 'TxCsum indicates that the device has checksum offload on the Tx channel or not.')
+        ctx.define('XPAR_AXIETHERNET_0_RXCSUM', 0, 'RxCsum indicates that the device has checksum offload on the Rx channel or not')
+        ctx.define('XPAR_AXIETHERNET_0_PHY_TYPE', 'XAE_PHY_TYPE_SGMII', False, 'PhyType indicates which type of PHY interface is used (MII, GMII, RGMII, etc.)')
+        ctx.define('XPAR_AXIETHERNET_0_TXVLAN_TRAN', 0)
+        ctx.define('XPAR_AXIETHERNET_0_RXVLAN_TRAN', 0)
+        ctx.define('XPAR_AXIETHERNET_0_TXVLAN_TAG', 0)
+        ctx.define('XPAR_AXIETHERNET_0_RXVLAN_TAG', 0)
+        ctx.define('XPAR_AXIETHERNET_0_TXVLAN_STRP', 0)
+        ctx.define('XPAR_AXIETHERNET_0_RXVLAN_STRP', 0)
+        ctx.define('XPAR_AXIETHERNET_0_MCAST_EXTEND', 0, 'Extended multicast address filtering')
+        ctx.define('XPAR_AXIETHERNET_0_STATS', 1, 'Statistics gathering options')
+        ctx.define('XPAR_AXIETHERNET_0_AVB', 0, 'Ethernet Audio Video Bridging')
+        ctx.define('XPAR_AXIETHERNET_0_ENABLE_SGMII_OVER_LVDS', 1, 'SGMII over LVDS')
+        ctx.define('XPAR_AXIETHERNET_0_ENABLE_1588', 0, 'Enable 1588 option')
+        ctx.define('XPAR_AXIETHERNET_0_SPEED', 'XAE_SPEED_1000_MBPS', False, 'Tells whether MAC is 1G or 2p5G')
+        ctx.define('XPAR_AXIETHERNET_0_NUM_TABLE_ENTRIES', 4, ' Number of table entries for the multicast address filtering')
+        ctx.define('XPAR_AXIETHERNET_0_INTR', 'PLIC_SOURCE_ETH', False, 'Axi Ethernet interrupt ID.')
+        ctx.define('XPAR_AXIETHERNET_0_CONNECTED_TYPE', 'XPAR_AXI_DMA', False, 'AxiDevType is the type of device attached to the Axi Ethernets AXI4-Stream interface.')
+        ctx.define('XPAR_AXIETHERNET_0_CONNECTED_BASEADDR', 0x62200000, 'AxiDevBaseAddress is the base address of the device attached to the Axi Ethernets AXI4-Stream interface.')
+        ctx.define('XPAR_AXIETHERNET_0_FIFO_INTR', 0xFF)
+        ctx.define('XPAR_AXIETHERNET_0_DMA_RX_INTR', 'PLIC_SOURCE_DMA_S2MM', False)
+        ctx.define('XPAR_AXIETHERNET_0_DMA_TX_INTR', 'PLIC_SOURCE_DMA_MM2S', False)
+
         if ctx.env.RISCV_XLEN == '64':
-            ctx.define('MCAUSE_EXTERNAL_INTERRUPT', 0x800000000000000b)
+            ctx.define('MCAUSE_EXTERNAL_INTERRUPT', 0x800000000000000, False)
         else:
-            ctx.define('MCAUSE_EXTERNAL_INTERRUPT', 0x8000000b)
+            ctx.define('MCAUSE_EXTERNAL_INTERRUPT', 0x8000000, False)
 
         ctx.env.MEMSTART = 0xC0000000
+
+        ctx.env.append_value('INCLUDES', [
+            ctx.path.abspath() + '/../RISC-V_Galois_demo/bsp/xilinx',
+            ctx.path.abspath() + '/../RISC-V_Galois_demo/bsp/xilinx/common',
+            ctx.path.abspath() + '/../RISC-V_Galois_demo/bsp/xilinx/axidma',
+            ctx.path.abspath() + '/../RISC-V_Galois_demo/bsp/xilinx/axiethernet',
+        ])
 
 class FreeRTOSBspFett(FreeRTOSBsp):
     def __init__(self, ctx):
@@ -452,6 +530,7 @@ class FreeRTOSLibTCPIP(FreeRTOSLib):
 
     def __init__(self, ctx):
         self.name = "freertos_tcpip"
+        self.driver_srcs = []
 
         self.includes = [
             self.libtcpip_dir, self.libtcpip_dir + '/include',
@@ -467,6 +546,13 @@ class FreeRTOSLibTCPIP(FreeRTOSLib):
             self.driver_srcs = [
                 self.libtcpip_dir +
                 '/portable/NetworkInterface/virtio/NetworkInterface.c']
+        elif ctx.env.PLATFORM == "gfe":
+            self.driver_srcs = [
+                self.libtcpip_dir +
+                '/portable/NetworkInterface/RISC-V/riscv_hal_eth.c',
+                self.libtcpip_dir +
+                '/portable/NetworkInterface/RISC-V/NetworkInterface.c',
+            ]
 
         self.srcs = self.driver_srcs + [
             self.libtcpip_dir + '/FreeRTOS_IP.c', self.libtcpip_dir +
