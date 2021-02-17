@@ -1089,10 +1089,9 @@ def configure(ctx):
     # FreeRTOS has itw own non-libc file system
     ctx.define('_STAT_H_', 1)
 
-    # This define is used if FreeRTOS is configured/built with dynamic loading support
-    ctx.define('configLIBDL_PROG_START_OBJ', '/lib/lib'+ctx.env.PROG+'.a:'+ctx.env.LIBDL_PROG_START_FILE+'.1.o')
-
     if ctx.env.COMPARTMENTALIZE:
+        # This define is used if FreeRTOS is configured/built with dynamic loading support
+        ctx.define('configLIBDL_PROG_START_OBJ', '/lib/lib'+ctx.env.PROG+'.a:'+ctx.env.LIBDL_PROG_START_FILE+'.1.o')
         ctx.define('configPORT_ALLOW_APP_EXCEPTION_HANDLERS', 1)
         ctx.define('mainRAM_DISK_NAME', "/")
         ctx.define('configCHERI_COMPARTMENTALIZATION', 1)
