@@ -364,20 +364,6 @@
 #define configMAC_ADDR4                 0xDB
 #define configMAC_ADDR5                 0x77
 
-/* Default IP address configuration.  Used in ipconfigUSE_DNS is set to 0, or
- * ipconfigUSE_DNS is set to 1 but a DNS server cannot be contacted. */
-#define configIP_ADDR0                  10
-#define configIP_ADDR1                  0
-#define configIP_ADDR2                  2
-#define configIP_ADDR3                  15
-
-/* Default gateway IP address configuration.  Used in ipconfigUSE_DNS is set to
- * 0, or ipconfigUSE_DNS is set to 1 but a DNS server cannot be contacted. */
-#define configGATEWAY_ADDR0             10
-#define configGATEWAY_ADDR1             0
-#define configGATEWAY_ADDR2             2
-#define configGATEWAY_ADDR3             2
-
 /* Default DNS server configuration.  OpenDNS addresses are 208.67.222.222 and
  * 208.67.220.220.  Used in ipconfigUSE_DNS is set to 0, or ipconfigUSE_DNS is set
  * to 1 but a DNS server cannot be contacted.*/
@@ -385,13 +371,6 @@
 #define configDNS_SERVER_ADDR1          8
 #define configDNS_SERVER_ADDR2          8
 #define configDNS_SERVER_ADDR3          8
-
-/* Default netmask configuration.  Used in ipconfigUSE_DNS is set to 0, or
- * ipconfigUSE_DNS is set to 1 but a DNS server cannot be contacted. */
-#define configNET_MASK0                 255
-#define configNET_MASK1                 255
-#define configNET_MASK2                 255
-#define configNET_MASK3                 0
 
 /* The UDP port to which print messages are sent. */
 #define configPRINT_PORT                ( 45000 )

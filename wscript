@@ -32,6 +32,7 @@
 
 import os
 import subprocess
+import ipaddress
 from waflib.Task import Task
 from waflib.TaskGen import after, before_method, feature
 from waflib.TaskGen import extension
@@ -1065,12 +1066,42 @@ def options(ctx):
                    default="objs",
                    help='Comparmentalization mode (either objs or libs)')
 
+    # IP options
+    ctx.add_option('--ipaddr',
+                   action='store',
+                   default='10.0.2.15/24',
+                   help='Static IP Address for FreeRTOS')
+
+    ctx.add_option('--gateway',
+                   action='store',
+                   default='10.0.2.2',
+                   help='Gateway address for FreeRTOS')
+
     # Run options
     ctx.add_option('--run',
                    action='store_true',
                    default=False,
                    help='Run the program after it is built')
 
+def ipaddr_freertos_ipconfig(ip, gateway, ctx):
+    try:
+        interface = ipaddress.ip_interface(ip)
+        gateway = ipaddress.ip_interface(gateway)
+        ipaddr_str, netmask_str = interface.with_netmask.split('/')
+        gateway_str = str(gateway.ip)
+        print('FreeRTOS IP Configs -> ', ipaddr_str, '/', netmask_str)
+
+        ipaddr_arr = ipaddr_str.split('.')
+        netmask_arr = netmask_str.split('.')
+        gateway_arr = gateway_str.split('.')
+        for index in range(len(ipaddr_arr)):
+            ctx.define('configIP_ADDR'+str(index), int(ipaddr_arr[index]))
+        for index in range(len(netmask_arr)):
+            ctx.define('configNET_MASK'+str(index), int(netmask_arr[index]))
+        for index in range(len(gateway_arr)):
+            ctx.define('configGATEWAY_ADDR'+str(index), int(gateway_arr[index]))
+    except:
+        ctx.fatal('Invalid IP address')
 
 def configure(ctx):
 
@@ -1097,6 +1128,10 @@ def configure(ctx):
     ctx.env.COMPARTMENTALIZE = ctx.options.compartmentalize
     ctx.env.COMP_MODE = ctx.options.compartmentalization_mode
     ctx.env.DEBUG = ctx.options.debug
+    ctx.env.IP_ADDR = ctx.options.ipaddr
+    ctx.env.GATEWAY_ADDR = ctx.options.gateway
+
+    ipaddr_freertos_ipconfig(ctx.env.IP_ADDR, ctx.env.GATEWAY_ADDR, ctx)
 
     # Libs - Minimal libs required for any FreeRTOS Demo
     ctx.env.append_value('LIB', ['c'])
