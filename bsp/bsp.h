@@ -26,7 +26,7 @@
 extern plic_instance_t Plic;
 
 void prvSetupHardware( void );
-BaseType_t external_interrupt_handler( uint32_t cause );
+BaseType_t external_interrupt_handler( UBaseType_t cause );
 
 /**
  * Exit the simulator with a status code

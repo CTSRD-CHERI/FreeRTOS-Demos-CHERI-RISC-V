@@ -178,12 +178,19 @@ void prvSetupHardware( void )
 {
     /* Resets PLIC, threshold 0, nothing enabled */
 
-    #if PLATFORM_QEMU_VIRT || PLATFORM_FETT
+    #if PLATFORM_QEMU_VIRT || PLATFORM_FETT || PLATFORM_GFE
         PLIC_init( &Plic, PLIC_BASE_ADDR, PLIC_NUM_SOURCES, PLIC_NUM_PRIORITIES );
     #endif
 
     #ifdef configUART16550_BASE
         uart16550_init( configUART16550_BASE );
+    #endif
+
+    #if PLATFORM_GFE
+        configASSERT(BSP_USE_DMA);
+        PLIC_set_priority(&Plic, PLIC_SOURCE_ETH, PLIC_PRIORITY_ETH);
+        PLIC_set_priority(&Plic, PLIC_SOURCE_DMA_MM2S, PLIC_PRIORITY_DMA_MM2S);
+        PLIC_set_priority(&Plic, PLIC_SOURCE_DMA_S2MM, PLIC_PRIORITY_DMA_S2MM);
     #endif
 
     #ifdef __CHERI_PURE_CAPABILITY__
@@ -192,8 +199,7 @@ void prvSetupHardware( void )
     #endif
 }
 
-#ifndef PLATFORM_QEMU_VIRT
-    #ifndef PLATFORM_FETT
+    #if !(PLATFORM_QEMU_VIRT || PLATFORM_FETT || PLATFORM_GFE)
         __attribute__( ( weak ) ) BaseType_t xNetworkInterfaceInitialise( void )
         {
             printf( "xNetworkInterfaceInitialise is not implemented, No NIC backend driver\n" );
@@ -206,14 +212,13 @@ void prvSetupHardware( void )
             printf( "xNetworkInterfaceOutput is not implemented, No NIC backend driver\n" );
             return pdPASS;
         }
-    #endif /* ifndef PLATFORM_FETT */
-#endif /* ifndef PLATFORM_QEMU_VIRT */
+    #endif
 
 /**
  * Define an external interrupt handler
  * cause = 0x8...000000b == Machine external interrupt
  */
-BaseType_t external_interrupt_handler( uint32_t cause )
+BaseType_t external_interrupt_handler( UBaseType_t cause )
 {
     BaseType_t pxHigherPriorityTaskWoken = 0;
 

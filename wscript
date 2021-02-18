@@ -236,7 +236,7 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
         ctx.define('PLIC_PRIORITY_SPI0', 0x3)
         ctx.define('PLIC_PRIORITY_UART1', 0x1)
         ctx.define('PLIC_PRIORITY_IIC0', 0x3)
-        ctx.define('PLIC_PRIORITY_SPI1', 0x4)
+        ctx.define('PLIC_PRIORITY_SPI1', 0x2)
 
         # Galois/Xilinx defines
 
@@ -245,7 +245,7 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
         ctx.define('XPAR_XAXIDMA_NUM_INSTANCES', 1)
         ctx.define('XPAR_AXI_DMA', 1)
         ctx.define('XPAR_AXIDMA_0_DEVICE_ID', 0)
-        ctx.define('XPAR_AXIDMA_0_BASEADDR', 0x62200000, 'Virtual base address of DMA engine')
+        ctx.define('XPAR_AXIDMA_0_BASEADDR', '0x62200000ULL', False, 'Virtual base address of DMA engine')
         ctx.define('XPAR_AXIDMA_0_SG_INCLUDE_STSCNTRL_STRM', 1, 'Control/status stream')
         ctx.define('XPAR_AXIDMA_0_INCLUDE_MM2S', 1, 'AXI4 memory-mapped to stream')
         ctx.define('XPAR_AXIDMA_0_INCLUDE_MM2S_DRE', 1)
@@ -267,7 +267,7 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
         ctx.define('XPAR_XAXIETHERNET_NUM_INSTANCES', 1)
         ctx.define('XPAR_AXIETHERNET_0_PHYADDR', 0x03)
         ctx.define('XPAR_AXIETHERNET_0_DEVICE_ID', 0)
-        ctx.define('XPAR_AXIETHERNET_0_BASEADDR', 0x62100000)
+        ctx.define('XPAR_AXIETHERNET_0_BASEADDR', '0x62100000ULL', False)
         ctx.define('XPAR_AXIETHERNET_0_TEMAC_TYPE', 2, '0 for SoftTemac at 10/100 Mbps, 1 for SoftTemac at 10/100/1000 Mbps and 2 for Vitex6 Hard Temac')
         ctx.define('XPAR_AXIETHERNET_0_TXCSUM', 0, 'TxCsum indicates that the device has checksum offload on the Tx channel or not.')
         ctx.define('XPAR_AXIETHERNET_0_RXCSUM', 0, 'RxCsum indicates that the device has checksum offload on the Rx channel or not')
@@ -287,15 +287,15 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
         ctx.define('XPAR_AXIETHERNET_0_NUM_TABLE_ENTRIES', 4, ' Number of table entries for the multicast address filtering')
         ctx.define('XPAR_AXIETHERNET_0_INTR', 'PLIC_SOURCE_ETH', False, 'Axi Ethernet interrupt ID.')
         ctx.define('XPAR_AXIETHERNET_0_CONNECTED_TYPE', 'XPAR_AXI_DMA', False, 'AxiDevType is the type of device attached to the Axi Ethernets AXI4-Stream interface.')
-        ctx.define('XPAR_AXIETHERNET_0_CONNECTED_BASEADDR', 0x62200000, 'AxiDevBaseAddress is the base address of the device attached to the Axi Ethernets AXI4-Stream interface.')
+        ctx.define('XPAR_AXIETHERNET_0_CONNECTED_BASEADDR', '0x62200000ULL', False, 'AxiDevBaseAddress is the base address of the device attached to the Axi Ethernets AXI4-Stream interface.')
         ctx.define('XPAR_AXIETHERNET_0_FIFO_INTR', 0xFF)
         ctx.define('XPAR_AXIETHERNET_0_DMA_RX_INTR', 'PLIC_SOURCE_DMA_S2MM', False)
         ctx.define('XPAR_AXIETHERNET_0_DMA_TX_INTR', 'PLIC_SOURCE_DMA_MM2S', False)
 
         if ctx.env.RISCV_XLEN == '64':
-            ctx.define('MCAUSE_EXTERNAL_INTERRUPT', 0x800000000000000, False)
+            ctx.define('MCAUSE_EXTERNAL_INTERRUPT', '0x800000000000000b', False)
         else:
-            ctx.define('MCAUSE_EXTERNAL_INTERRUPT', 0x8000000, False)
+            ctx.define('MCAUSE_EXTERNAL_INTERRUPT', '0x8000000b', False)
 
         ctx.env.MEMSTART = 0xC0000000
 
