@@ -70,6 +70,10 @@
     1 tab == 4 spaces!
 */
 
+#ifdef NETBOOT
+.extern xDtbAddr
+#endif
+
 #if __CHERI_PURE_CAPABILITY__
 .extern xISRStackTop
 .extern pvAlmightyDataCap
@@ -103,8 +107,15 @@ boot:
     csetoffset      ct0, ct0, t2
     cjr             ct0
 #else
-    j _mstart
+#ifdef NETBOOT
+#if __riscv_xlen == 64
+    sd              a1, xDtbAddr, t6
+#else
+    sw              a1, xDtbAddr, t6
+#endif
+#endif
 #endif /* __CHERI_PURE_CAPABILITY__ */
+    j _mstart
 
 _mstart:
     li	x1, 0
