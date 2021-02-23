@@ -193,7 +193,7 @@ void prvSetupHardware( void )
         PLIC_set_priority(&Plic, PLIC_SOURCE_DMA_S2MM, PLIC_PRIORITY_DMA_S2MM);
     #endif
 
-    #ifdef __CHERI_PURE_CAPABILITY__
+    #if ((__CHERI_PURE_CAPABILITY__ && DEBUG) || configCHERI_COMPARTMENTALIZATION)
         /* Setup an exception handler for CHERI */
         vPortSetExceptionHandler( 0x1c, cheri_exception_handler );
     #endif

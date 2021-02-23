@@ -822,8 +822,11 @@ static void prvMiscInitialisation( void )
     FreeRTOS_debug_printf( ( "Random numbers: %08X %08X %08X %08X\n", ipconfigRAND32(), ipconfigRAND32(), ipconfigRAND32(), ipconfigRAND32() ) );
 
     #ifdef __CHERI_PURE_CAPABILITY__
-        /* Setup an exception handler for CHERI */
-        #if mainCONFIG_USE_DYNAMIC_LOADER == 0
+        /* Setup an exception handler for CHERI. This is only used for debugging when the demo is built
+         * with purecap and without compartmentalization support. If ccompartmentalization is enabled,
+         * the RISC-V-Generic BSP instead sets this handler to catch/handle compartment faults.
+         */
+        #if (DEBUG && configPORT_ALLOW_APP_EXCEPTION_HANDLERS && !configCHERI_COMPARTMENTALIZATION)
             vPortSetExceptionHandler( 0x1c, cheri_exception_handler );
         #endif
     #endif
