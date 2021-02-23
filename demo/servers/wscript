@@ -64,6 +64,7 @@ def configure(ctx):
     ctx.define('configLIBDL_CONF_PATH', "/etc/")
     ctx.define('configCOMPARTMENTS_NUM', 1024)
     ctx.define('configMAXLEN_COMPNAME', 255)
+    ctx.define('configGENERATE_RUN_TIME_STATS', 1)
 
     if ctx.env.COMPARTMENTALIZE:
          ctx.env.append_value(
