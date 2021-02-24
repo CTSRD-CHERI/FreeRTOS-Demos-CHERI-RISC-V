@@ -217,8 +217,6 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
         ctx.define('configUART16550_BASE', 0x62300000)
         ctx.define('configUART16550_BAUD', 115200)
         ctx.define('configUART16550_REGSHIFT', 2)
-        ctx.define('configCPU_CLOCK_HZ', 100000000)
-        ctx.define('configPERIPH_CLOCK_HZ', 100000000)
         ctx.define('PLIC_BASE_ADDR', 0xC000000)
         ctx.define('PLIC_BASE_SIZE', 0x400000)
         ctx.define('PLIC_NUM_SOURCES', 16)
@@ -239,6 +237,14 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
         ctx.define('PLIC_PRIORITY_UART1', 0x1)
         ctx.define('PLIC_PRIORITY_IIC0', 0x3)
         ctx.define('PLIC_PRIORITY_SPI1', 0x2)
+
+        if 'p3' in ctx.env.PLATFORM:
+            ctx.define('configCPU_CLOCK_HZ', 25000000)
+            ctx.define('configPERIPH_CLOCK_HZ', 25000000)
+            ctx.define('configMTIME_HZ', 250000)
+        else:
+            ctx.define('configCPU_CLOCK_HZ', 100000000)
+            ctx.define('configPERIPH_CLOCK_HZ', 100000000)
 
         # Galois/Xilinx defines
 
@@ -491,7 +497,7 @@ class FreeRTOSLibBsp(FreeRTOSLib):
         self.arch = ctx.env.ARCH
 
         self.freertos_platform = ctx.env.freertos_demos[ctx.env.DEMO][
-            ctx.env.ARCH][ctx.env.PLATFORM]
+            ctx.env.ARCH][ctx.env.PLATFORM.split('-')[0]]
 
         #self.defines = self.freertos_platform.defines
 
@@ -601,7 +607,7 @@ class FreeRTOSLibTCPIP(FreeRTOSLib):
             self.driver_srcs = [
                 self.libtcpip_dir +
                 '/portable/NetworkInterface/virtio/NetworkInterface.c']
-        elif ctx.env.PLATFORM == "gfe":
+        elif 'gfe' in ctx.env.PLATFORM:
             self.driver_srcs = [
                 self.libtcpip_dir +
                 '/portable/NetworkInterface/RISC-V/riscv_hal_eth.c',
@@ -947,7 +953,7 @@ def freertos_bsp_configure(conf):
         FreeRTOSBspSpike.configure(conf)
     elif platform == 'sail':
         FreeRTOSBspSail.configure(conf)
-    elif platform == 'gfe':
+    elif 'gfe' in platform:
         FreeRTOSBspGfe.configure(conf)
     elif platform == 'fett':
         FreeRTOSBspFett.configure(conf)
