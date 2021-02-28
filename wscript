@@ -1311,6 +1311,7 @@ def configure(ctx):
             ctx.to_log('mtools program is required to be installed to create disk images')
 
         ctx.define('configFF_FORMATTED_DISK_IMAGE', 1)
+        ctx.env.append_value('LIB_DEPS', ['virtio'])
 
     # CFLAGS - Shared required CFLAGS
     ctx.env.append_value(
