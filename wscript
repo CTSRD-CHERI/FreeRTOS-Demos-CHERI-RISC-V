@@ -1434,6 +1434,7 @@ def build(bld):
         # Just for legacy compatibility where simple programs with one file are assumed
         # to have main_xxx.c files under demo/ and don't define their own wscript.
         bld.stlib(source=['./demo/' + bld.env.PROG + '.c'],
+                  cflags = ['-cheri-cap-table-abi=gprel'] if bld.env.COMPARTMENTALIZE else [],
                   target=bld.env.PROG)
 
     main_sources = ['main.c']
