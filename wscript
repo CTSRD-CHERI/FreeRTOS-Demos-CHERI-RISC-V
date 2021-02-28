@@ -1267,12 +1267,17 @@ def configure(ctx):
                                                        '/wscript'):
         ctx.recurse(ctx.env.PROGRAM_PATH)
 
+    # PROG - For legacy compatibility
+    if not any('configPROG_ENTRY' in define for define in ctx.env.DEFINES):
+        ctx.env.append_value('DEFINES', ['configPROG_ENTRY=' + ctx.env.PROG])
+        ctx.env.LIBDL_PROG_START_FILE = ctx.env.PROG + '.c'
+
     # FreeRTOS has itw own non-libc file system
     ctx.define('_STAT_H_', 1)
 
     if ctx.env.COMPARTMENTALIZE:
         # This define is used if FreeRTOS is configured/built with dynamic loading support
-        ctx.define('configLIBDL_PROG_START_OBJ', '/lib/lib'+ctx.env.PROG+'.a:'+ctx.env.LIBDL_PROG_START_FILE+'.1.o')
+        #ctx.define('configLIBDL_PROG_START_OBJ', '/lib/lib'+ctx.env.PROG+'.a:'+ctx.env.LIBDL_PROG_START_FILE+'.1.o')
         ctx.define('configPORT_ALLOW_APP_EXCEPTION_HANDLERS', 1)
         ctx.define('mainRAM_DISK_NAME', "/")
         ctx.define('configCHERI_COMPARTMENTALIZATION', 1)
@@ -1319,12 +1324,6 @@ def configure(ctx):
     else:
         ctx.env.append_value('CFLAGS', ['-Os'])
         ctx.define('NDEBUG', 1)
-
-
-
-    # PROG - For legacy compatibility
-    if not any('configPROG_ENTRY' in define for define in ctx.env.DEFINES):
-        ctx.env.append_value('DEFINES', ['configPROG_ENTRY=' + ctx.env.PROG])
 
     freertos_bsp_configure(ctx)
 
@@ -1443,6 +1442,19 @@ def build(bld):
     bld.env.STLIB_MARKER = ['-Wl,-Bstatic', '-Wl,--start-group']
 
     if bld.env.COMPARTMENTALIZE:
+
+        tg = bld.get_tgen_by_name(bld.env.PROG)
+        tg.post()
+        for task in tg.tasks:
+            for obj_file in task.outputs:
+                if bld.env.PROG in str(obj_file) and \
+                not any('configLIBDL_PROG_START_OBJ' in define for define in bld.env.DEFINES):
+                    print(str(obj_file).split('/')[-1])
+                    bld.env.append_value(
+                        'DEFINES', 'configLIBDL_PROG_START_OBJ = ' +
+                        '"/lib/lib'+bld.env.PROG+'.a:' +
+                        str(obj_file).split('/')[-1] + '"')
+
 
         # Requested-to-be-compartmentalized libraries are in LIB_DEPS_EMBED_FAT
         # Add the application to them
