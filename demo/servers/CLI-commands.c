@@ -172,7 +172,7 @@ static BaseType_t prvDlOpenCommand( char * pcWriteBuffer,
 /*
  * Defines a command that dynamically loads, links and calls a function within a compartment
  */
-static BaseType_t prvCCallCommand( char * pcWriteBuffer,
+static BaseType_t prvExeCommand( char * pcWriteBuffer,
                                    size_t xWriteBufferLen,
                                    const char * pcCommandString );
 
@@ -321,12 +321,12 @@ static const CLI_Command_Definition_t xParameterEcho =
     };
 /*-----------------------------------------------------------*/
 
-/* Structure that defines the "ccall" command line command */
-    static const CLI_Command_Definition_t xCCall =
+/* Structure that defines the "exe" command line command */
+    static const CLI_Command_Definition_t xExe =
     {
-        "ccall",
-        "ccall <object_file> <function>:\r\n call function from object_file compartment  \r\n\r\n",
-        prvCCallCommand, /* The function to run. */
+        "exe",
+        "exe <object_file> <function>:\r\n call function from object_file compartment  \r\n\r\n",
+        prvExeCommand, /* The function to run. */
         2                /* Two parameter are expected. Valid values are files and function names */
     };
 #endif /* ifdef ipconfigUSE_FAT_LIBDL */
@@ -387,7 +387,7 @@ void vRegisterCLICommands( void )
 
         #ifdef ipconfigUSE_FAT_LIBDL
             FreeRTOS_CLIRegisterCommand( &xDlOpen );
-            FreeRTOS_CLIRegisterCommand( &xCCall );
+            FreeRTOS_CLIRegisterCommand( &xExe );
         #endif
 
         FreeRTOS_CLIRegisterCommand( &xFault );
@@ -887,7 +887,7 @@ static BaseType_t prvDisplayIPConfig( char * pcWriteBuffer,
     }
     /*-----------------------------------------------------------*/
 
-    static BaseType_t prvCCallCommand( char * pcWriteBuffer,
+    static BaseType_t prvExeCommand( char * pcWriteBuffer,
                                        size_t xWriteBufferLen,
                                        const char * pcCommandString )
     {
