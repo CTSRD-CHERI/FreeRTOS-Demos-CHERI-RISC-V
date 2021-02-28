@@ -998,7 +998,7 @@ def create_disk_image(ctx, size=5):
         libdl_config_path = ctx.env.PREFIX + '/libdl.conf'
         os.environ["MTOOLSRC"] = mtoolsrcpath
         f.seek(1024 * 1024 * size)
-        f.write('0')
+        f.write(b'0')
         f.flush()
 
         # If the user hasn't asked to partition/format/write a disk image, skip
@@ -1012,7 +1012,7 @@ def create_disk_image(ctx, size=5):
 
         # Create an mtools conf file read by the following commands
         with open(mtoolsrcpath, 'wb') as mtools_conf:
-            mtools_conf.write('drive /: file="' + filepath + '" partition=1')
+            mtools_conf.write(str.encode('drive /: file="' + filepath + '" partition=1'))
 
         # Initialize the parition table to FAT32 and remove any paritions
         subprocess.Popen(["mpartition", '-I', '-s', str(sectors), '-t', str(tracks) ,'-h', str(heads), '-T', '0x0C', "/:"])
@@ -1036,7 +1036,7 @@ def create_disk_image(ctx, size=5):
         with open(libdl_config_path, 'wb') as libdlconf:
             libdl_config = '\n'.join(['/lib/' + lib for lib in LIBS_TO_EMBED])
             libdl_config += '\n'
-            libdlconf.write(libdl_config)
+            libdlconf.write(str.encode(libdl_config))
             subprocess.Popen(["mcd", "/etc/"])
             subprocess.Popen(["mcopy", '-tvpn', libdl_config_path, '/:'+'libdl.conf'])
 
@@ -1336,7 +1336,7 @@ def bin2header(data, var_name='var'):
     out.append('unsigned char {var_name}[] = {{'.format(var_name=var_name))
     l = [data[i:i + 12] for i in range(0, len(data), 12)]
     for i, x in enumerate(l):
-        line = ', '.join(['0x{val:02x}'.format(val=ord(c)) for c in x])
+        line = ', '.join(['0x{val:02x}'.format(val=ord(chr(c))) for c in x])
         out.append('  {line}{end_comma}'.format(
             line=line, end_comma=',' if i < len(l) - 1 else ''))
     out.append('};')
@@ -1382,12 +1382,12 @@ typedef struct LIBFILE_TO_COPY {
     for lib in LIBS_TO_EMBED:
         lib_path = str(bld.path.get_bld().ant_glob('**/' + lib, quiet=True)[0])
         lib = lib.replace('.', '_')
-        with open(lib_path, 'r') as f:
+        with open(lib_path, 'rb') as f:
             data = f.read()
             header_content += (bin2header(data, lib)) + '\n'
 
     # Write the libdl.conf hex
-    header_content += bin2header(libdl_config, 'libdl_conf') + '\n'
+    header_content += bin2header(str.encode(libdl_config), 'libdl_conf') + '\n'
 
     header_content += """
 const xLibFileToCopy_t xLibFilesToCopy[] = {
