@@ -218,6 +218,7 @@ uint32_t port_get_current_mtime( void )
 
         #if DEBUG
             rtems_rtl_trace_set_mask( RTEMS_RTL_TRACE_UNRESOLVED );
+            printf("main.c: Loading %s\n", configLIBDL_PROG_START_OBJ);
         #endif
 
         void * obj = dlopen( configLIBDL_PROG_START_OBJ, RTLD_GLOBAL | RTLD_NOW );
