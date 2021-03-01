@@ -1365,7 +1365,8 @@ def gen_header_libs(bld):
                 #        str(obj_file).split('/')[-1])
             #print(task.outputs)
         for task in tg.tasks:
-            task.run()
+            if not task.hasrun():
+                task.run()
 
     # Create a libdl.conf file that contains the list of libraries
     libdl_config = '\n'.join(['/lib/' + lib for lib in LIBS_TO_EMBED])
@@ -1497,7 +1498,8 @@ def build(bld):
         tg = bld.get_tgen_by_name(lib)
         tg.post()
         for task in tg.tasks:
-            task.run()
+            if not task.hasrun:
+                task.run()
 
     bld.program(
         source=main_sources,
