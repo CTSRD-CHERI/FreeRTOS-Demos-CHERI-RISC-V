@@ -325,9 +325,9 @@ static const CLI_Command_Definition_t xParameterEcho =
     static const CLI_Command_Definition_t xExe =
     {
         "exe",
-        "exe <object_file> <function>:\r\n call function from object_file compartment  \r\n\r\n",
+        "exe <object_file> <function> <[args]>:\r\n call function from object_file compartment  \r\n\r\n",
         prvExeCommand, /* The function to run. */
-        2                /* Two parameter are expected. Valid values are files and function names */
+        -1             /* Besides object_file and function, the other can enter any number of args */
     };
 #endif /* ifdef ipconfigUSE_FAT_LIBDL */
 /*-----------------------------------------------------------*/
@@ -891,9 +891,11 @@ static BaseType_t prvDisplayIPConfig( char * pcWriteBuffer,
                                        size_t xWriteBufferLen,
                                        const char * pcCommandString )
     {
-        typedef int (* call_t)( void );
+        typedef int (* call_t)( int argc, char **argv);
         const char * pcParameter1;
         const char * pcParameter2;
+        int arg_index = 0;
+        char *argv[10] = {NULL};
         call_t call = NULL;
 
         void * obj_handle;
@@ -910,7 +912,29 @@ static BaseType_t prvDisplayIPConfig( char * pcWriteBuffer,
         memcpy( pcWriteBuffer, pcParameter1, lParameterStringLength );
         pcWriteBuffer[ lParameterStringLength ] = 0;
 
-        rtems_rtl_trace_set_mask( RTEMS_RTL_TRACE_UNRESOLVED );
+        char * secondparam = pcWriteBuffer + lParameterStringLength + 1;
+
+        pcParameter2 = FreeRTOS_CLIGetParameter
+                       (
+            pcCommandString,                        /* The arg string itself. */
+            2,                                      /* Return the second parameter. */
+            &lParameterStringLength                 /* Store the parameter string length. */
+                       );
+
+        memcpy( secondparam, pcParameter2, lParameterStringLength );
+        secondparam[ lParameterStringLength ] = 0;
+
+        while(pcParameter2 = FreeRTOS_CLIGetParameter(pcCommandString, arg_index + 3, &lParameterStringLength)) {
+            char *arg = pvPortMalloc(lParameterStringLength + 1);
+            arg[lParameterStringLength] = 0;
+            memcpy(arg, pcParameter2, lParameterStringLength);
+            argv[arg_index] = arg;
+            arg_index++;
+        }
+
+        #if DEBUG
+            rtems_rtl_trace_set_mask( RTEMS_RTL_TRACE_UNRESOLVED );
+        #endif /* DEBUG */
 
         obj_handle = dlopen( pcWriteBuffer, RTLD_NOW | RTLD_GLOBAL );
 
@@ -919,18 +943,6 @@ static BaseType_t prvDisplayIPConfig( char * pcWriteBuffer,
             snprintf( pcWriteBuffer, xWriteBufferLen, "%s", "Failed to open file\n" );
             return pdFALSE;
         }
-
-        char * secondparam = pcWriteBuffer + lParameterStringLength + 1;
-
-        pcParameter2 = FreeRTOS_CLIGetParameter
-                       (
-            pcCommandString,                        /* The command string itself. */
-            2,                                      /* Return the second parameter. */
-            &lParameterStringLength                 /* Store the parameter string length. */
-                       );
-
-        memcpy( secondparam, pcParameter2, lParameterStringLength );
-        secondparam[ lParameterStringLength ] = 0;
 
         call = dlsym( obj_handle, secondparam );
 
@@ -941,7 +953,12 @@ static BaseType_t prvDisplayIPConfig( char * pcWriteBuffer,
         }
 
         /* Jump to the module's function */
-        call();
+        call( arg_index, argv );
+
+        dlclose( obj_handle );
+
+        for( int i = 0; i < arg_index; i++ )
+            vPortFree( argv[i] );
 
         /* There is no more data to return after this single string, so return
          * pdFALSE. */
