@@ -52,6 +52,12 @@
     #define FreeRTOS_debug_printf( X )    printf X
 #endif
 
+/* Prototype for the function used to print to console over UDP
+ * The function prints to the console before the network is connected;
+ * then a UDP port after the network has connected. */
+extern void vLoggingPrintf( const char * pcFormatString,
+                            ... );
+
 /* Set to 1 to print out non debugging messages, for example the output of the
  * FreeRTOS_netstat() command, and ping replies.  If ipconfigHAS_PRINTF is set to 1
  * then FreeRTOS_printf should be set to the function used to print out the
