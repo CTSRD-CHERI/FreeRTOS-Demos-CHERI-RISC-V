@@ -59,7 +59,7 @@ plic_instance_t Plic;
 
     #endif /* ifdef __CHERI_PURE_CAPABILITY__ */
 
-    static UBaseType_t cheri_exception_handler( uintptr_t * exception_frame )
+    static UBaseType_t default_exception_handler( uintptr_t * exception_frame )
     {
         #ifdef __CHERI_PURE_CAPABILITY__
             size_t cause = 0;
@@ -151,21 +151,6 @@ plic_instance_t Plic;
         {
         }
     }
-
-    static UBaseType_t default_exception_handler( uintptr_t * exception_frame )
-    {
-        size_t cause = 0;
-        size_t epc = 0;
-
-        asm volatile ( "csrr %0, mcause" : "=r" ( cause )::);
-        asm volatile ( "csrr %0, mepc" : "=r" ( epc )::);
-        printf( "mcause = %u\n", cause );
-        printf( "mepc = %llx\n", epc );
-
-        while( 1 )
-        {
-        }
-    }
 #endif /* ifdef __CHERI_PURE_CAPABILITY__ */
 /*-----------------------------------------------------------*/
 
@@ -195,7 +180,8 @@ void prvSetupHardware( void )
 
     #if ((__CHERI_PURE_CAPABILITY__ && DEBUG) || configCHERI_COMPARTMENTALIZATION)
         /* Setup an exception handler for CHERI */
-        vPortSetExceptionHandler( 0x1c, cheri_exception_handler );
+        for (int i = 0; i < 64; i++)
+            vPortSetExceptionHandler( i, default_exception_handler );
     #endif
 }
 
