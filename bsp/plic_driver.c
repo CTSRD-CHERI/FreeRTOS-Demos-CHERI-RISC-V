@@ -19,7 +19,7 @@ static void volatile_memzero( uint8_t * base,
 {
     volatile uint32_t * ptr;
 
-    for( ptr = base; ptr < ( base + size ); ptr++ )
+    for( ptr = base; ptr < ( base + size ) && ptr != PLIC_BASE_ADDR; ptr++ )
     {
         *ptr = 0;
     }
