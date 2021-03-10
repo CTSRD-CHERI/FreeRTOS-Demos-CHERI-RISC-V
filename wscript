@@ -483,6 +483,15 @@ class FreeRTOSLibCore(FreeRTOSLib):
 
         FreeRTOSLib.__init__(self, ctx)
 
+    @staticmethod
+    def configure(ctx):
+        freertos_core_dir = ctx.path.abspath() + '/../../Source/'
+        ctx.env.append_value('INCLUDES', [
+            freertos_core_dir + '/include',
+            freertos_core_dir + '/portable/GCC/RISC-V',
+            freertos_core_dir +
+            'portable/GCC/RISC-V/chip_specific_extensions/RV32I_CLINT_no_extensions'
+        ])
 
 class FreeRTOSLibBsp(FreeRTOSLib):
     platform = ""
@@ -944,6 +953,9 @@ def freertos_libs_init(bld_ctx):
     bld_ctx.env.libs[
         "freertos_libnetwork_transport"] = FreeRTOSLibNetworkTransport(bld_ctx)
 
+def freertos_libs_configure(conf):
+    FreeRTOSLibCore.configure(conf)
+
 def freertos_bsp_configure(conf):
     platform = conf.options.riscv_platform
 
@@ -1327,6 +1339,7 @@ def configure(ctx):
         ctx.define('NDEBUG', 1)
 
     freertos_bsp_configure(ctx)
+    freertos_libs_configure(ctx)
 
     ctx.write_config_header('waf_config.h')
 
