@@ -1001,6 +1001,19 @@ def freertos_init(bld):
 
 ########################### UTILS START #############################
 
+def write_flags_file(ctx, file_name):
+    with open(ctx.env.PREFIX + '/' + file_name, 'w') as f:
+        cflags = " "
+        includes = " -I"
+        defines = " -D"
+
+        f.write("clangs = ")
+        f.write(cflags.join(ctx.env.CFLAGS))
+        f.write("\nincludes = -I")
+        f.write(includes.join(ctx.env.INCLUDES))
+        f.write("\ndefines = -D")
+        f.write(defines.join(ctx.env.DEFINES))
+
 # Size in MiB
 def create_disk_image(ctx, size=5):
 
@@ -1341,6 +1354,11 @@ def configure(ctx):
     freertos_bsp_configure(ctx)
     freertos_libs_configure(ctx)
 
+    # This file contains CFLAGS, DEFINES and INCLUDES that can be used for
+    # building out-of-tree apps standalone (to be dynamically linked later on)
+    write_flags_file(ctx, 'waf_flags.txt')
+
+    # This file contains config macros generated from defines/options in wscripts
     ctx.write_config_header('waf_config.h')
 
 # Copied from https://nachtimwald.com/2019/10/09/python-binary-to-c-header/
