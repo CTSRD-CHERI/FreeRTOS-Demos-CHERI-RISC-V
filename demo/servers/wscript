@@ -102,6 +102,7 @@ def build(bld):
             bld.path.parent.find_resource('SimpleUDPClientAndServer.c'),
             bld.path.parent.find_resource('SimpleTCPEchoServer.c'),
             bld.path.parent.find_resource('main_servers.c'), 'CLI-commands.c',
+            'logging_output.c',
             'Common/FreeRTOS_Plus_FAT_Demos/CreateAndVerifyExampleFiles.c',
             'Common/FreeRTOS_Plus_FAT_Demos/test/ff_stdio_tests_with_cwd.c',
             'Common/FreeRTOS_Plus_CLI_Demos/TCPCommandConsole.c',
