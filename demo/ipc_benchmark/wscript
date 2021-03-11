@@ -49,6 +49,12 @@ def configure(ctx):
         'RUNS                 = 10',
     ])
 
+    if ctx.env.LOG_UDP:
+        ctx.env.append_value('DEFINES', ['log = vLoggingPrintf'])
+    else:
+        ctx.env.append_value('DEFINES', ['log = printf'])
+        ctx.env.append_value('CFLAGS', ['-fno-builtin-printf'])
+
     ctx.env.LIBDL_PROG_START_FILE = "main_ipc_benchmark.c"
 
 def build(bld):
