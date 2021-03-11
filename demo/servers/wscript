@@ -67,14 +67,10 @@ def configure(ctx):
     ctx.define('configGENERATE_RUN_TIME_STATS', 1)
 
     if ctx.env.COMPARTMENTALIZE:
-         ctx.env.append_value(
-            'LIB_DEPS_EMBED_FAT',
-            ['freertos_tcpip', 'freertos_cli'])
-
          ctx.env.append_value('DEFINES', [
-            'mainCONFIG_USE_DYNAMIC_LOADER      = 1',
+            'mainCONFIG_USE_DYNAMIC_LOADER      = 0',
          ])
-         ctx.define('mainCONFIG_USE_DYNAMIC_LOADER', 1)
+         ctx.define('mainCONFIG_USE_DYNAMIC_LOADER', 0)
 
          if not ctx.env.VIRTIO_BLK:
              ctx.env.append_value('LIB_DEPS_EMBED_FAT', ['virtio'])
@@ -95,8 +91,8 @@ def build(bld):
 
     cflags = []
 
-    if bld.env.COMPARTMENTALIZE:
-        cflags = ['-cheri-cap-table-abi=gprel']
+    #if bld.env.COMPARTMENTALIZE:
+    #    cflags = ['-cheri-cap-table-abi=gprel']
 
     bld.stlib(
         features=['c'],
