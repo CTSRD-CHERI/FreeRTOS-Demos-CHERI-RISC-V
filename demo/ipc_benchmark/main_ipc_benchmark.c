@@ -44,7 +44,7 @@
 #include "queue.h"
 
 /* Priorities used by the tasks. */
-#define mainTASK_PRIORITY                  ( tskIDLE_PRIORITY + 2 )
+#define mainTASK_PRIORITY                  ( tskIDLE_PRIORITY + 3 )
 #define mainQUEUE_RECEIVE_TASK_PRIORITY    ( tskIDLE_PRIORITY + 2 )
 #define mainQUEUE_SEND_TASK_PRIORITY       ( tskIDLE_PRIORITY + 1 )
 
@@ -123,6 +123,11 @@ void main_ipc_benchmark( int argc,
 
     /* Raise our priority */
     vTaskPrioritySet( NULL, tskIDLE_PRIORITY + mainTASK_PRIORITY );
+
+    if( xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED )
+    {
+        vTaskStartScheduler();
+    }
 
     if( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED )
     {
