@@ -257,6 +257,9 @@ uint32_t port_get_current_mtime( void )
         vTaskSuspendAll();
         entry(0, NULL);
 
+        if (xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED)
+            xTaskResumeAll();
+
         while( 1 )
         {
         }
