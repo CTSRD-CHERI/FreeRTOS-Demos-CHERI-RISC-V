@@ -122,7 +122,7 @@ void vLoggingInit( BaseType_t xLogToStdout,
                    uint16_t usRemotePort )
 {
     /* Can only be called before the scheduler has started. */
-    configASSERT( xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED );
+    // configASSERT( xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED );
 
     #if ( ( ipconfigHAS_DEBUG_PRINTF == 1 ) || ( ipconfigHAS_PRINTF == 1 ) )
         {
