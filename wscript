@@ -1351,6 +1351,7 @@ def configure(ctx):
         ctx.env.append_value('CFLAGS', ['-g', '-O0'])
         ctx.define('configPORT_ALLOW_APP_EXCEPTION_HANDLERS', 1)
         ctx.define('DEBUG', 1)
+        ctx.define('ipconfigHAS_DEBUG_PRINTF', 1)
     else:
         ctx.env.append_value('CFLAGS', ['-Os'])
         ctx.define('NDEBUG', 1)
