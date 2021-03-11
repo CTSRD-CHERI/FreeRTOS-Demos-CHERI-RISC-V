@@ -71,6 +71,7 @@
 #define FREERTOS_CONFIG_H
 
 #include "stdint.h"
+#include <stdio.h>
 #ifdef __waf__
     #include "waf_config.h"
 #endif
