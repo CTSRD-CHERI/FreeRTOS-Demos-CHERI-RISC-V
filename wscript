@@ -1162,6 +1162,11 @@ def options(ctx):
                    default='10.0.2.2',
                    help='Gateway address for FreeRTOS')
 
+    ctx.add_option('--log_udp',
+                   action='store_true',
+                   default=False,
+                   help='Log output over UDP and not stdout/serial')
+
     # Run options
     ctx.add_option('--run',
                    action='store_true',
@@ -1215,6 +1220,7 @@ def configure(ctx):
     ctx.env.DEBUG = ctx.options.debug
     ctx.env.IP_ADDR = ctx.options.ipaddr
     ctx.env.GATEWAY_ADDR = ctx.options.gateway
+    ctx.env.LOG_UDP = ctx.options.log_udp
 
     ipaddr_freertos_ipconfig(ctx.env.IP_ADDR, ctx.env.GATEWAY_ADDR, ctx)
 
@@ -1262,6 +1268,9 @@ def configure(ctx):
         ctx.load('gas')
     except:
         ctx.fatal("Invalid toolchain")
+
+    if ctx.env.LOG_UDP:
+        ctx.define('configLOG_UDP', 1)
 
     # PURECAP
     if ctx.options.purecap and not ctx.env.PURECAP:
