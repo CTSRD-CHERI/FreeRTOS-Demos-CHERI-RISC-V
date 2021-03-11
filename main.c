@@ -92,7 +92,7 @@
     extern void main_modbus( void );
 #else /* if mainDEMO_TYPE == 1 */
     #ifdef configPROG_ENTRY
-        extern void configPROG_ENTRY( void );
+        extern void configPROG_ENTRY( int argc, char* argv[]);
     #else
         #error "Unsupported demo type"
     #endif
@@ -208,7 +208,7 @@ uint32_t port_get_current_mtime( void )
 
     static void prvLoader( void )
     {
-        typedef void (* prog_entry_t)( void );
+        typedef void (* prog_entry_t)( int argc, char *argv[]);
         prog_entry_t entry = NULL;
 
         #ifndef configFF_FORMATTED_DISK_IMAGE
@@ -255,8 +255,7 @@ uint32_t port_get_current_mtime( void )
         #endif
 
         vTaskSuspendAll();
-        entry();
-        xTaskResumeAll();
+        entry(0, NULL);
 
         while( 1 )
         {
