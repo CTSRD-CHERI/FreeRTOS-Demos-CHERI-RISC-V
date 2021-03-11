@@ -72,8 +72,8 @@ def configure(ctx):
          ])
          ctx.define('mainCONFIG_USE_DYNAMIC_LOADER', 0)
 
-         if not ctx.env.VIRTIO_BLK:
-             ctx.env.append_value('LIB_DEPS_EMBED_FAT', ['virtio'])
+         #if not ctx.env.VIRTIO_BLK:
+         #    ctx.env.append_value('LIB_DEPS_EMBED_FAT', ['virtio'])
 
     ctx.env.append_value('EXPORT_DEFINES', [
         'ipconfigUSE_FAT_LIBDL              = 1'
