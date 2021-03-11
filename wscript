@@ -1401,7 +1401,7 @@ def gen_header_libs(bld):
                 #        str(obj_file).split('/')[-1])
             #print(task.outputs)
         for task in tg.tasks:
-            if not task.hasrun():
+            if not task.hasrun:
                 task.run()
 
     # Create a libdl.conf file that contains the list of libraries
