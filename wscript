@@ -1309,12 +1309,16 @@ def configure(ctx):
         ctx.define('ipconfigUSE_FAT_LIBDL', 1)
         ctx.define('ffconfigMAX_FILENAME', 255)
         ctx.define('mainCONFIG_INIT_FAT_FILESYSTEM', 1)
-        ctx.define('mainCONFIG_USE_DYNAMIC_LOADER', 1)
         ctx.define('configEMBED_LIBS_FAT', 1)
         ctx.define('configLIBDL_LIB_PATH',"/lib/")
         ctx.define('configLIBDL_CONF_PATH', "/etc/")
         ctx.define('configCOMPARTMENTS_NUM', 1024)
         ctx.define('configMAXLEN_COMPNAME', 255)
+
+        if not ctx.is_defined('mainCONFIG_USE_DYNAMIC_LOADER'):
+            ctx.define('mainCONFIG_USE_DYNAMIC_LOADER', 1)
+            ctx.env.append_value('DEFINES', 'mainCONFIG_USE_DYNAMIC_LOADER = 1')
+            ctx.env.DYN_LOAD_APP = True
 
         # Compartmentalizaion requires the dynamic loader/linker lib and a filesystem
         ctx.env.append_value('LIB_DEPS', ['freertos_libdl', 'freertos_fat'])
@@ -1491,8 +1495,9 @@ def build(bld):
 
 
         # Requested-to-be-compartmentalized libraries are in LIB_DEPS_EMBED_FAT
-        # Add the application to them
-        bld.env.LIB_DEPS_EMBED_FAT += [bld.env.PROG]
+        if bld.env.DYN_LOAD_APP:
+            bld.env.LIB_DEPS_EMBED_FAT += [bld.env.PROG]
+
         for embed_lib in bld.env.LIB_DEPS_EMBED_FAT:
             if embed_lib in bld.env.LIB_DEPS:
                 bld.env.LIB_DEPS.remove(embed_lib)
@@ -1520,10 +1525,12 @@ def build(bld):
     bld.env.SHLIB_MARKER = ['-Wl,--no-whole-archive', '-lc', '-Wl,--end-group']
 
     bld.env.append_value('STLIB', main_libs)
-    # Remoeve any lib duplicates
+    # Remove any lib duplicates
     bld.env.STLIB = list(dict.fromkeys(bld.env.STLIB))
-    # Remoeve dynamically loaded libs
-    bld.env.STLIB = [lib for lib in bld.env.STLIB if lib not in bld.env.LIB_DEPS_EMBED_FAT]
+    # Remove dynamically loaded libs
+    bld.env.STLIB = [lib for lib in bld.env.STLIB + bld.env.LIB_DEPS if lib not in bld.env.LIB_DEPS_EMBED_FAT]
+    bld.env.STLIB = list(dict.fromkeys(bld.env.STLIB))
+
     # Make sure all libs are built (manualy dep)
     for lib in bld.env.STLIB:
         tg = bld.get_tgen_by_name(lib)
