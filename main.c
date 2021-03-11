@@ -313,7 +313,12 @@ int demo_main( void )
                              tskIDLE_PRIORITY,
                              NULL );
             #else
-                configPROG_ENTRY();
+                xTaskCreate( configPROG_ENTRY,
+                             "root-app",
+                             configMINIMAL_STACK_SIZE * 2U,
+                             0,
+                             tskIDLE_PRIORITY,
+                             NULL );
             #endif
         #else /* ifdef configPROG_ENTRY */
         #error "Unsupported Demo"
