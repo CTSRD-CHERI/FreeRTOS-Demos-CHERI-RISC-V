@@ -398,6 +398,11 @@ int main_servers( void )
     const uint32_t ulLongTime_ms = 250UL, ulCheckTimerPeriod_ms = 15000UL;
     TimerHandle_t xCheckTimer;
 
+    if( xTaskGetSchedulerState() == taskSCHEDULER_RUNNING )
+    {
+        vTaskSuspendAll();
+    }
+
     /*
      * Instructions for using this project are provided on:
      * http://www.freertos.org/FreeRTOS-Plus/FreeRTOS_Plus_TCP/examples_FreeRTOS_simulator.html
@@ -447,6 +452,11 @@ int main_servers( void )
 
     /* Start the RTOS scheduler. */
     FreeRTOS_debug_printf( ( "vTaskStartScheduler\n" ) );
+    if( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED )
+    {
+        xTaskResumeAll();
+        while ( 1 );
+    }
 }
 /*-----------------------------------------------------------*/
 
