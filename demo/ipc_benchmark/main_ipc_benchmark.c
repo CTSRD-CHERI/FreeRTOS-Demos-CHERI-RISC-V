@@ -36,6 +36,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "logging.h"
+
 /* Kernel includes. */
 #include "FreeRTOS.h"
 #include "task.h"
@@ -87,30 +89,33 @@ void main_ipc_benchmark( int argc,
         IPC_BUFFER_SIZE, IPC_TOTAL_SIZE, NULL
     };
 
-    printf( "Started main_ipc_benchmark: #%d args\n", argc );
-    printf( "./main_ipc_benchmark " );
+    log( "Started main_ipc_benchmark: #%d args\n", argc );
+    log( "./main_ipc_benchmark " );
 
     for( int i = 0; i < argc; i++ )
     {
-        printf( "%s ", argv[ i ] );
+        log( "%s ", argv[ i ] );
 
         if( strcmp( argv[ i ], "-b" ) == 0 )
         {
             params.xBufferSize = strtol( argv[ ++i ], NULL, 10 );
+            log( "%s ", argv[ i ] );
         }
 
         if( strcmp( argv[ i ], "-t" ) == 0 )
         {
             params.xTotalSize = strtol( argv[ ++i ], NULL, 10 );
+            log( "%s ", argv[ i ] );
         }
 
         if( strcmp( argv[ i ], "-n" ) == 0 )
         {
             xIterations = strtol( argv[ ++i ], NULL, 10 );
+            log( "%s ", argv[ i ] );
         }
     }
 
-    printf( "\n" );
+    log( "\n" );
 
     /* Create the queue. */
     params.xQueue = xQueueCreate( mainQUEUE_LENGTH, params.xBufferSize );
@@ -128,7 +133,7 @@ void main_ipc_benchmark( int argc,
     {
         for( int i = 0; i < xIterations + DISCARD_RUNS; i++ )
         {
-            printf( "run #%d: ", i );
+            log( "run #%d: ", i );
             xTaskCreate( queueReceiveTask, "RX", configMINIMAL_STACK_SIZE * 2U, &params, mainQUEUE_RECEIVE_TASK_PRIORITY, &recvTask );
             xTaskCreate( queueSendTask, "TX", configMINIMAL_STACK_SIZE * 2U, &params, mainQUEUE_SEND_TASK_PRIORITY, &sendTask );
 
@@ -139,7 +144,7 @@ void main_ipc_benchmark( int argc,
         }
     }
 
-    printf( "Ended main_ipc_benchmark\n" );
+    log( "Ended main_ipc_benchmark\n" );
 
     /* There are two cases main_ipc_benchmark can execute in:
      * 1) When called from main.c, in which case we're expected to return so that

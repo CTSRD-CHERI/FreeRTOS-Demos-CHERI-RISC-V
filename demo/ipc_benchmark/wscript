@@ -43,6 +43,7 @@ def configure(ctx):
     ctx.env.append_value('DEFINES', [
         'configPROG_ENTRY     = main_ipc_benchmark',
         'IPC_BUFFER_SIZE      = 8',
+        'log = printf ',
         'IPC_TOTAL_SIZE       = 8',
         'DISCARD_RUNS         = 2',
         'RUNS                 = 10',

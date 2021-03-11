@@ -35,6 +35,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "logging.h"
+
 /* Kernel includes. */
 #include "FreeRTOS.h"
 #include "task.h"
@@ -76,14 +78,14 @@ void queueReceiveTask( void * pvParameters )
 
     if( !cnt )
     {
-        printf( "Invalid biffer sizes\n" );
+        log( "Invalid biffer sizes\n" );
     }
 
     char * pReceiveBuffer = pvPortMalloc( xBufferSize );
 
     if( !pReceiveBuffer )
     {
-        printf( "Failed to allocated a receive buffer of size %d\n", xBufferSize );
+        log( "Failed to allocated a receive buffer of size %d\n", xBufferSize );
     }
 
     /* Zero the buffer to warm up the cache */
@@ -107,7 +109,8 @@ void queueReceiveTask( void * pvParameters )
 
     taskEXIT_CRITICAL();
 
-    printf( "Total IPC time (cycles): %llu - buffer size: %llu - total size: %llu\n", xEndTime - xStartTime, xBufferSize, xTotalSize );
+    log( "Total IPC time (cycles): %llu (insts): %llu - buffer size: %llu - total size: %llu\n",
+         xEndTime - xStartTime, xEndInstRet - xStartInstRet, xBufferSize, xTotalSize );
 
     vPortFree( pReceiveBuffer );
     /* Notify main task we are finished */
