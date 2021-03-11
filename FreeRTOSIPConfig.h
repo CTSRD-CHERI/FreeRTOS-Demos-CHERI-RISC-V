@@ -40,14 +40,14 @@
  * console before the network is connected then a UDP port after the network has
  * connected. */
 /*extern void printf( const char *pcFormatString, ... ); */
+#ifdef __waf__
+    #include "waf_config.h"
+#endif
 #include <stdio.h>
 
 /* Set to 1 to print out debug messages.  If ipconfigHAS_DEBUG_PRINTF is set to
  * 1 then FreeRTOS_debug_printf should be defined to the function used to print
  * out the debugging messages. */
-#if ( mainDEMO_TYPE != 0xCB002 )
-    #define ipconfigHAS_DEBUG_PRINTF    0
-#endif
 #if ( ipconfigHAS_DEBUG_PRINTF == 1 )
     #define FreeRTOS_debug_printf( X )    printf X
 #endif
