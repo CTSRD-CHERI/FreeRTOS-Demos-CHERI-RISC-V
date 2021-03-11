@@ -33,6 +33,7 @@
 /* Standard includes. */
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 /* Kernel includes. */
@@ -71,6 +72,8 @@ void main_ipc_benchmark( int argc,
 
 uint64_t xStartTime = 0;
 uint64_t xEndTime = 0;
+uint64_t xStartInstRet = 0;
+uint64_t xEndInstRet = 0;
 static TaskHandle_t sendTask = NULL;
 static TaskHandle_t recvTask = NULL;
 static UBaseType_t xIterations = RUNS;

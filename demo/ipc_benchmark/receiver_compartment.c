@@ -51,6 +51,8 @@ typedef struct taskParams
 
 extern uint64_t xEndTime;
 extern uint64_t xStartTime;
+extern uint64_t xStartInstRet;
+extern uint64_t xEndInstRet;
 /*-----------------------------------------------------------*/
 
 void queueReceiveTask( void * pvParameters );
@@ -101,6 +103,9 @@ void queueReceiveTask( void * pvParameters )
     }
 
     xEndTime = get_cycle_count();
+    asm volatile ("csrr %0, instret":"=r"(xEndInstRet));
+
+    taskEXIT_CRITICAL();
 
     printf( "Total IPC time (cycles): %llu - buffer size: %llu - total size: %llu\n", xEndTime - xStartTime, xBufferSize, xTotalSize );
 

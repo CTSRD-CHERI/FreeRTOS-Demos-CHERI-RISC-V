@@ -49,6 +49,7 @@ typedef struct taskParams
 } IPCTaskParams_t;
 
 extern uint64_t xStartTime;
+extern uint64_t xStartInstRet;
 
 void queueSendTask( void * pvParameters );
 
@@ -86,6 +87,9 @@ void queueSendTask( void * pvParameters )
         configASSERT( xReturned == pdPASS );
     }
 
+    taskENTER_CRITICAL();
+
+    asm volatile ("csrr %0, instret":"=r"(xStartInstRet));
     xStartTime = get_cycle_count();
 
     for( int i = 0; i < cnt; i++ )
