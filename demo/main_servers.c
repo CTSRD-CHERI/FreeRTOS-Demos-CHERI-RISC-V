@@ -82,6 +82,7 @@
 /* FreeRTOS includes. */
 #include <FreeRTOS.h>
 #include <FreeRTOSConfig.h>
+#include <FreeRTOSIPConfig.h>
 #include "task.h"
 #include "timers.h"
 #include "queue.h"
@@ -96,6 +97,8 @@
 /* FreeRTOS+FAT includes. */
 #include "ff_headers.h"
 #include "ff_stdio.h"
+
+#include "logging.h"
 
 #if configHAS_VIRTIO_BLK
     #include "ff_virtioblk_disk.h"
@@ -256,9 +259,13 @@
  * configured as the echo server address (see the configECHO_SERVER_ADDR0
  * definitions in FreeRTOSConfig.h) and the port number set by configPRINT_PORT in
  * FreeRTOSConfig.h. */
-#define mainLOG_TO_STDOUT                             pdTRUE
+#define mainLOG_TO_STDOUT                             pdFALSE
 #define mainLOG_TO_DISK_FILE                          pdFALSE
-#define mainLOG_TO_UDP                                pdFALSE
+#if configLOG_UDP
+    #define mainLOG_TO_UDP                                pdTRUE
+#else
+    #define mainLOG_TO_UDP                                pdFALSE
+#endif /* configLOG_UDP */
 
 /*-----------------------------------------------------------*/
 
@@ -819,11 +826,9 @@ static void prvSRand( UBaseType_t ulSeed )
 static void prvMiscInitialisation( void )
 {
     time_t xTimeNow;
-    uint32_t ulLoggingIPAddress;
 
-    /* Windows specifc logging functions */
-    /*ulLoggingIPAddress = FreeRTOS_inet_addr_quick( configECHO_SERVER_ADDR0, configECHO_SERVER_ADDR1, configECHO_SERVER_ADDR2, configECHO_SERVER_ADDR3 ); */
-    /*vLoggingInit( mainLOG_TO_STDOUT, mainLOG_TO_DISK_FILE, mainLOG_TO_UDP, ulLoggingIPAddress, configPRINT_PORT ); */
+    uint32_t ulLoggingIPAddress = FreeRTOS_inet_addr_quick( configGATEWAY_ADDR0, configGATEWAY_ADDR1, configGATEWAY_ADDR2, configGATEWAY_ADDR3 );
+    vLoggingInit( mainLOG_TO_STDOUT, mainLOG_TO_DISK_FILE, mainLOG_TO_UDP, ulLoggingIPAddress, configPRINT_PORT );
 
     /* Seed the random number generator. */
     time( &xTimeNow );
