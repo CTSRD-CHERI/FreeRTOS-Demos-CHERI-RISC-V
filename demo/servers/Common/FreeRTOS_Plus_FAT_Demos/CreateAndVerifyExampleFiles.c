@@ -285,6 +285,10 @@ static void prvCreateDemoFileUsing_ff_fputc( const char * pcMountPath )
     ff_getcwd( pcRAMBuffer, fsRAM_BUFFER_SIZE );
     FF_PRINTF( "In directory %s\n", pcRAMBuffer );
 
+    iReturn = ff_mkdir( "/lib" );
+    configASSERT( iReturn == pdFREERTOS_ERRNO_NONE );
+    iReturn = ff_mkdir( "/etc" );
+    configASSERT( iReturn == pdFREERTOS_ERRNO_NONE );
     /* Create a sub directory. */
     iReturn = ff_mkdir( pcDirectory1 );
     configASSERT( iReturn == pdFREERTOS_ERRNO_NONE );
