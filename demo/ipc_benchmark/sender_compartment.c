@@ -40,6 +40,8 @@
 #include "task.h"
 #include "queue.h"
 
+#include "portstatcounters.h"
+
 typedef struct taskParams
 {
     UBaseType_t xBufferSize;
@@ -50,6 +52,11 @@ typedef struct taskParams
 
 extern uint64_t xStartTime;
 extern uint64_t xStartInstRet;
+extern uint64_t xStartDCacheLoad;
+extern uint64_t xStartDCacheMiss;
+extern uint64_t xStartICacheLoad;
+extern uint64_t xStartICacheMiss;
+extern uint64_t xStartL2CacheMiss;
 
 void queueSendTask( void * pvParameters );
 
@@ -89,7 +96,13 @@ void queueSendTask( void * pvParameters )
 
     taskENTER_CRITICAL();
 
-    asm volatile ("csrr %0, instret":"=r"(xStartInstRet));
+    xStartDCacheLoad = portCounterGet(COUNTER_DCACHE_LOAD);
+    xStartDCacheMiss = portCounterGet(COUNTER_DCACHE_LOAD_MISS);
+    xStartICacheLoad = portCounterGet(COUNTER_ICACHE_LOAD);
+    xStartICacheMiss = portCounterGet(COUNTER_ICACHE_LOAD_MISS);
+    xStartL2CacheMiss = portCounterGet(COUNTER_LLCACHE_LOAD_MISS);
+
+    xStartInstRet = portCounterGet(COUNTER_INSTRET);
     xStartTime = get_cycle_count();
 
     for( int i = 0; i < cnt; i++ )

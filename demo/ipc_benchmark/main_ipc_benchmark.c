@@ -76,6 +76,17 @@ uint64_t xStartTime = 0;
 uint64_t xEndTime = 0;
 uint64_t xStartInstRet = 0;
 uint64_t xEndInstRet = 0;
+uint64_t xStartDCacheLoad = 0;
+uint64_t xEndDCacheLoad = 0;
+uint64_t xStartDCacheMiss = 0;
+uint64_t xEndDCacheMiss = 0;
+uint64_t xStartICacheLoad = 0;
+uint64_t xEndICacheLoad = 0;
+uint64_t xStartICacheMiss = 0;
+uint64_t xEndICacheMiss = 0;
+uint64_t xStartL2CacheMiss = 0;
+uint64_t xEndL2CacheMiss = 0;
+
 static TaskHandle_t sendTask = NULL;
 static TaskHandle_t recvTask = NULL;
 static UBaseType_t xIterations = RUNS;

@@ -42,6 +42,8 @@
 #include "task.h"
 #include "queue.h"
 
+#include "portstatcounters.h"
+
 typedef struct taskParams
 {
     UBaseType_t xBufferSize;
@@ -51,10 +53,21 @@ typedef struct taskParams
 } IPCTaskParams_t;
 /*-----------------------------------------------------------*/
 
-extern uint64_t xEndTime;
 extern uint64_t xStartTime;
 extern uint64_t xStartInstRet;
+extern uint64_t xStartDCacheLoad;
+extern uint64_t xStartDCacheMiss;
+extern uint64_t xEndDCacheMiss;
+extern uint64_t xStartICacheLoad;
+extern uint64_t xStartICacheMiss;
+extern uint64_t xStartL2CacheMiss;
+extern uint64_t xEndTime;
 extern uint64_t xEndInstRet;
+extern uint64_t xEndDCacheLoad;
+extern uint64_t xEndDCacheMiss;
+extern uint64_t xEndICacheLoad;
+extern uint64_t xEndICacheMiss;
+extern uint64_t xEndL2CacheMiss;
 /*-----------------------------------------------------------*/
 
 void queueReceiveTask( void * pvParameters );
@@ -105,12 +118,33 @@ void queueReceiveTask( void * pvParameters )
     }
 
     xEndTime = get_cycle_count();
-    asm volatile ("csrr %0, instret":"=r"(xEndInstRet));
+    xEndInstRet = portCounterGet(COUNTER_INSTRET);
+
+    xEndDCacheLoad = portCounterGet(COUNTER_DCACHE_LOAD);
+    xEndDCacheMiss = portCounterGet(COUNTER_DCACHE_LOAD_MISS);
+    xEndICacheLoad = portCounterGet(COUNTER_ICACHE_LOAD);
+    xEndICacheMiss = portCounterGet(COUNTER_ICACHE_LOAD_MISS);
+    xEndL2CacheMiss = portCounterGet(COUNTER_LLCACHE_LOAD_MISS);
 
     taskEXIT_CRITICAL();
 
-    log( "Total IPC time (cycles): %llu (insts): %llu - buffer size: %llu - total size: %llu\n",
-         xEndTime - xStartTime, xEndInstRet - xStartInstRet, xBufferSize, xTotalSize );
+    log( "IPC Performance Results for: buffer size: %lu - total size: %lu\n"
+         "\tCYCLE:\t\t%lu\n"
+         "\tINSTRET:\t%lu\n"
+         "\tDCACHE_LOAD:\t%lu\n"
+         "\tDCACHE_LOAD_MISS:\t%lu\n"
+         "\tICACHE_LOAD:\t%lu\n"
+         "\tICACHE_LOAD_MISS:\t%lu\n"
+         "\tLLCACHE_LOAD_MISS:\t%lu\n",
+         xBufferSize, xTotalSize,
+         xEndTime - xStartTime,
+         xEndInstRet - xStartInstRet,
+         xEndDCacheLoad - xStartDCacheLoad,
+         xEndDCacheMiss - xStartDCacheMiss,
+         xEndICacheLoad - xStartICacheLoad,
+         xEndICacheMiss - xStartICacheMiss,
+         xEndL2CacheMiss - xStartL2CacheMiss
+         );
 
     vPortFree( pReceiveBuffer );
     /* Notify main task we are finished */
