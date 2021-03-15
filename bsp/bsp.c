@@ -4,6 +4,8 @@
 #include "bsp.h"
 #include "plic_driver.h"
 
+#include "portstatcounters.h"
+
 #ifdef configUART16550_BASE
     #include "uart16550.h"
 #endif
@@ -182,6 +184,10 @@ void prvSetupHardware( void )
         /* Setup an exception handler for CHERI */
         for (int i = 0; i < 64; i++)
             vPortSetExceptionHandler( i, default_exception_handler );
+    #endif
+
+    #if configPORT_HAS_HPM_COUNTERS
+        portCountersInit();
     #endif
 }
 

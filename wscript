@@ -212,6 +212,8 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
     @staticmethod
     def configure(ctx):
         ctx.define('PLATFORM_GFE', 1)
+        ctx.define('configPORT_HAS_HPM_COUNTERS', 1)
+
         ctx.define('configCLINT_BASE_ADDRESS', 0x10000000)
         ctx.define('CLINT_CTRL_ADDR', 0x10000000)
         ctx.define('configUART16550_BASE', 0x62300000)
