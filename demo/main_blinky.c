@@ -128,16 +128,18 @@ void main_blinky( void )
 
         xTaskCreate( prvQueueSendTask, "TX", configMINIMAL_STACK_SIZE * 2U, NULL, mainQUEUE_SEND_TASK_PRIORITY, NULL );
 
-        /* vTaskStartScheduler is called by main.c after we return */
-        /*vTaskStartScheduler(); */
-    }
+        /* Start the scheduler */
 
-    /* There are two cases main_blinky can execute in:
-     * 1) When called from main.c, in which case we're expected to return so that
-     * main.c calls vTaskStartScheduler.
-     * 2) When it gets dynamically loaded in which case the scheduler has already
-     * been started.
-     * In both cases, we need to return (to main.c or to whoever loaded us). */
+        if( xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED )
+        {
+            vTaskStartScheduler();
+        }
+
+        if( xTaskGetSchedulerState() == taskSCHEDULER_SUSPENDED )
+        {
+            xTaskResumeAll();
+        }
+    }
 }
 /*-----------------------------------------------------------*/
 
