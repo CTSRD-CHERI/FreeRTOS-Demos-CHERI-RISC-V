@@ -434,6 +434,15 @@ void vApplicationTickHook( void )
         }
     #endif
 }
+/*-----------------------------------------------------------*/
+
+void vApplicationTaskExit( void )
+{
+    vTaskDelete( NULL );
+    __builtin_unreachable();
+    while ( 1 );
+}
+/*-----------------------------------------------------------*/
 
 /* configUSE_STATIC_ALLOCATION is set to 1, so the application must provide an
  * implementation of vApplicationGetIdleTaskMemory() to provide the memory that is

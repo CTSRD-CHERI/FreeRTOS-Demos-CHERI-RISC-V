@@ -94,7 +94,7 @@ void queueSendTask( void * pvParameters )
         configASSERT( xReturned == pdPASS );
     }
 
-    taskENTER_CRITICAL();
+    portDISABLE_INTERRUPTS();
 
     xStartDCacheLoad = portCounterGet(COUNTER_DCACHE_LOAD);
     xStartDCacheMiss = portCounterGet(COUNTER_DCACHE_LOAD_MISS);

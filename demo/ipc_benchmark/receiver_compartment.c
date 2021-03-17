@@ -126,7 +126,7 @@ void queueReceiveTask( void * pvParameters )
     xEndICacheMiss = portCounterGet(COUNTER_ICACHE_LOAD_MISS);
     xEndL2CacheMiss = portCounterGet(COUNTER_LLCACHE_LOAD_MISS);
 
-    taskEXIT_CRITICAL();
+    portENABLE_INTERRUPTS();
 
     log( "IPC Performance Results for: buffer size: %lu - total size: %lu\n"
          "\tCYCLE:\t\t%lu\n"

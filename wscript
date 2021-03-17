@@ -1311,6 +1311,9 @@ def configure(ctx):
     # FreeRTOS has itw own non-libc file system
     ctx.define('_STAT_H_', 1)
 
+    # If a task returns, call the application specific exit function
+    ctx.env.append_value('DEFINES', 'configTASK_RETURN_ADDRESS=vApplicationTaskExit')
+
     if ctx.env.COMPARTMENTALIZE:
         # This define is used if FreeRTOS is configured/built with dynamic loading support
         #ctx.define('configLIBDL_PROG_START_OBJ', '/lib/lib'+ctx.env.PROG+'.a:'+ctx.env.LIBDL_PROG_START_FILE+'.1.o')
