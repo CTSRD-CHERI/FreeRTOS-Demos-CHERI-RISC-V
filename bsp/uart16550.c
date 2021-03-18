@@ -9,9 +9,11 @@
 #endif /* __CHERI_PURE_CAPABILITY__ */
 
 #if configUART16550_REGSHIFT == 1
-    volatile uint8_t * uart16550;
+    volatile uint8_t* uart16550;
+    typedef volatile uint8_t* uart_mmio_t;
 #elif configUART16550_REGSHIFT == 2
-    volatile uint32_t * uart16550;
+    volatile uint32_t* uart16550;
+    typedef volatile uint32_t* uart_mmio_t;
 #else
     #error "Unsupported uart reg_shift value"
 #endif
@@ -66,7 +68,7 @@ int uart16550_txbuffer( uint8_t * ptr,
 
 void uart16550_init( unsigned long base )
 {
-    uart16550 = ( void * ) base;
+    uart16550 = ( uart_mmio_t ) base;
 
     uint32_t divisor;
     divisor = configPERIPH_CLOCK_HZ / ( 16 * configUART16550_BAUD );
