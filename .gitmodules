@@ -19,4 +19,4 @@
 	url = https://github.com/CTSRD-CHERI/Lab-Project-coreMQTT-Agent.git
 [submodule "libdl-tools"]
 	path = libdl-tools
-	url = git@github.com:CTSRD-CHERI/rtems-tools.git
+	url = https://github.com/CTSRD-CHERI/rtems-tools.git
