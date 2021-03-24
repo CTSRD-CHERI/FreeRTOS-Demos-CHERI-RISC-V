@@ -114,12 +114,6 @@ class FreeRTOSBsp(Toolchain):
                        default=0x80000000,
                        help='BSP platform RAM start')
 
-    def add_options(self, ctx):
-        ctx.add_option('--uncached-mem-start',
-                       action='store',
-                       default=0xc0000000,
-                       help='BSP platform Uncached RAM start')
-
 
 class FreeRTOSBspQemuVirt(FreeRTOSBsp):
     def __init__(self, ctx):
@@ -1136,10 +1130,16 @@ def options(ctx):
                    action='store',
                    default="qemu_virt",
                    help='RISC-V Platform/Board')
+
     ctx.add_option('--mem-start',
                    action='store',
                    default=0x80000000,
                    help='BSP platform RAM start')
+
+    ctx.add_option('--uncached-mem-start',
+                   action='store',
+                   default=0xc0000000,
+                   help='BSP platform Uncached RAM start')
 
     ctx.add_option('--use-virtio-blk',
                    action='store_true',
@@ -1222,7 +1222,7 @@ def configure(ctx):
     ctx.env.TARGET = ctx.env.ARCH + '-unknown-elf'
     ctx.env.SYSROOT = ctx.options.sysroot
     ctx.env.MEMSTART = ctx.options.mem_start
-    ctx.env.UNCACHED_MEMSTART = ctx.options.mem_start
+    ctx.env.UNCACHED_MEMSTART = ctx.options.uncached_mem_start
     ctx.env.VIRTIO_BLK = ctx.options.use_virtio_blk
     ctx.env.CREATE_DISK_IMAGE = ctx.options.create_disk_image
     ctx.env.PROGRAM_PATH = ctx.options.program_path
