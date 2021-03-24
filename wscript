@@ -33,6 +33,7 @@
 import os
 import subprocess
 import ipaddress
+from os import path
 from waflib.Task import Task
 from waflib.TaskGen import after, before_method, feature
 from waflib.TaskGen import extension
@@ -1568,6 +1569,39 @@ def build(bld):
         ],
     )
 
+    if bld.env.COMPARTMENTALIZE:
+        if not path.exists( bld.env.PREFIX + '/bin/freertos-syms'):
+            rtems_syms = subprocess.Popen(["./waf", 'configure', '--prefix', bld.env.PREFIX , 'build', 'install'], cwd='libdl-tools')
+            rtems_syms.wait()
+
+        cflags = ' '.join(bld.env.CFLAGS)
+
+        bld(
+            rule   = bld.env.PREFIX + '/bin/freertos-syms ' +
+            ' --cc ' + ''.join(bld.env.CC) +
+            ' -c "' + cflags + '"' +
+            ' -e -vvv -k ' +
+            ' -o ${TGT} ' +
+            '${SRC}',
+            source = PROG_NAME,
+            target = PROG_NAME + '.syms.o',
+        )
+
+        bld.program(
+            source=main_sources + [PROG_NAME + '.syms.o'],
+            depens_on=PROG_NAME,
+            target=PROG_NAME + ".syms",
+            features="c",
+            includes=['.'],
+            libpath=['.', bld.env.PROGRAM_PATH],
+            ldflags=bld.env.CFLAGS +
+                ['-T',
+                bld.path.abspath() + '/link.ld', '-nostartfiles', '-nostdlib',
+                '-Wl,--defsym=MEM_START=' + str(bld.env.MEMSTART),
+                '-defsym=_STACK_SIZE=4K'
+            ],
+        )
+
     bld.add_post_fun(post_build)
 
 
@@ -1578,6 +1612,13 @@ def post_build(ctx):
     if ctx.cmd == 'install':
         if ctx.env.VIRTIO_BLK:
             create_disk_image(ctx, 5)
+
+        # Use the image with embedded symbol table
+        if ctx.env.COMPARTMENTALIZE:
+            subprocess.Popen(['mv',
+                ctx.env.PREFIX + '/bin/' + ctx.env.DEMO + "_" + ctx.env.PROG + ".elf.syms",
+                ctx.env.PREFIX + '/bin/' + ctx.env.DEMO + "_" + ctx.env.PROG + ".elf"
+            ])
 
     # TODO
     if ctx.options.run:
