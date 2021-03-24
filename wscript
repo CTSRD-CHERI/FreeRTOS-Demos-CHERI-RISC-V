@@ -114,6 +114,12 @@ class FreeRTOSBsp(Toolchain):
                        default=0x80000000,
                        help='BSP platform RAM start')
 
+    def add_options(self, ctx):
+        ctx.add_option('--uncached-mem-start',
+                       action='store',
+                       default=0xc0000000,
+                       help='BSP platform Uncached RAM start')
+
 
 class FreeRTOSBspQemuVirt(FreeRTOSBsp):
     def __init__(self, ctx):
@@ -360,6 +366,7 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
             ctx.define('MCAUSE_EXTERNAL_INTERRUPT', '0x8000000b', False)
 
         ctx.env.MEMSTART = 0xC0000000
+        ctx.env.UNCACHED_MEMSTART = 0x80000000
 
         ctx.env.append_value('INCLUDES', [
             ctx.path.abspath() + '/../RISC-V_Galois_demo/bsp/xilinx',
@@ -411,6 +418,7 @@ class FreeRTOSBspFett(FreeRTOSBsp):
             ctx.define('configHAS_VIRTIO_BLK', 1)
 
         ctx.env.MEMSTART = 0xC0000000
+        ctx.env.UNCACHED_MEMSTART = 0x80000000
 
 
 ########################### BSPS END ###############################
@@ -1214,6 +1222,7 @@ def configure(ctx):
     ctx.env.TARGET = ctx.env.ARCH + '-unknown-elf'
     ctx.env.SYSROOT = ctx.options.sysroot
     ctx.env.MEMSTART = ctx.options.mem_start
+    ctx.env.UNCACHED_MEMSTART = ctx.options.mem_start
     ctx.env.VIRTIO_BLK = ctx.options.use_virtio_blk
     ctx.env.CREATE_DISK_IMAGE = ctx.options.create_disk_image
     ctx.env.PROGRAM_PATH = ctx.options.program_path
@@ -1565,6 +1574,7 @@ def build(bld):
             ['-T',
             bld.path.abspath() + '/link.ld', '-nostartfiles', '-nostdlib',
             '-Wl,--defsym=MEM_START=' + str(bld.env.MEMSTART),
+            '-Wl,--defsym=UNCACHED_MEM_START=' + str(bld.env.UNCACHED_MEMSTART),
             '-defsym=_STACK_SIZE=4K'
         ],
     )
@@ -1598,6 +1608,7 @@ def build(bld):
                 ['-T',
                 bld.path.abspath() + '/link.ld', '-nostartfiles', '-nostdlib',
                 '-Wl,--defsym=MEM_START=' + str(bld.env.MEMSTART),
+                '-Wl,--defsym=UNCACHED_MEM_START=' + str(bld.env.UNCACHED_MEMSTART),
                 '-defsym=_STACK_SIZE=4K'
             ],
         )

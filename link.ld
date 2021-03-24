@@ -85,7 +85,7 @@ _HEAP_SIZE = 0x4000;
  ****************************************************************************/
 MEMORY {
 	mem : ORIGIN = MEM_START, LENGTH = 0x10000000
-	uncached : ORIGIN = 0xc0000000, LENGTH = 0x0010000
+	uncached : ORIGIN = UNCACHED_MEM_START, LENGTH = 0x0010000
 }
 
 /* Specify the default entry point to the program */
