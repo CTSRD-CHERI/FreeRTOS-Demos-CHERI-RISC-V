@@ -72,14 +72,6 @@
 
 OUTPUT_ARCH( "riscv" )
 
-PHDRS
-{
-  text PT_LOAD FILEHDR PHDRS ;
-  captable PT_LOAD ;
-  symtab PT_LOAD ;
-  strtab PT_LOAD ;
-}
-
 /*
 _STACK_SIZE = DEFINED(_STACK_SIZE) ? _STACK_SIZE : 0x4000;
 _HEAP_SIZE = DEFINED(_HEAP_SIZE) ? _HEAP_SIZE : 0x4000;
@@ -104,8 +96,6 @@ ENTRY(boot)
  * Define the sections, and where they are mapped in memory
  ****************************************************************************/
 SECTIONS {
-
-  . = SIZEOF_HEADERS;
 	.text : {
       . = ALIGN(8);
 	    *boot.o(.text);
@@ -160,17 +150,17 @@ SECTIONS {
        __symtab_start = .;
         *(.symtab)
        __symtab_end = .;
-    } > mem :symtab
+    } > mem
 
     .strtab : {
        __strtab_start = .;
         *(.strtab)
        __strtab_end = .;
-     } > mem :strtab
+     } > mem
 
     .captable : {
        . = ALIGN(16);
-    } > mem :captable
+    } > mem
 
     .bss (NOLOAD) : {
        . = ALIGN(16);
