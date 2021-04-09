@@ -12,6 +12,8 @@
 
 plic_instance_t Plic;
 
+#define CHERI_COMPARTMENT_FAIL (-28)
+
 #ifdef __CHERI_PURE_CAPABILITY__
     #include <stdint.h>
     #include <rtl/rtl-freertos-compartments.h>
@@ -128,6 +130,7 @@ plic_instance_t Plic;
 
                     /* Caller compartment return */
                     *( exception_frame ) = ret;
+                    *( exception_frame + 10) = CHERI_COMPARTMENT_FAIL;
                     return 0;
                 }
             #elif configCHERI_COMPARTMENTALIZATION_MODE == 2
@@ -142,6 +145,7 @@ plic_instance_t Plic;
 
                     /* Caller compartment return */
                     *( exception_frame ) = ret;
+                    *( exception_frame + 10) = CHERI_COMPARTMENT_FAIL;
                     return 0;
                 }
 
