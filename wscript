@@ -1337,7 +1337,7 @@ def configure(ctx):
         ctx.define('configEMBED_LIBS_FAT', 1)
         ctx.define('configLIBDL_LIB_PATH',"/lib/")
         ctx.define('configLIBDL_CONF_PATH', "/etc/")
-        ctx.define('configCOMPARTMENTS_NUM', 1024)
+        ctx.define('configCOMPARTMENTS_NUM', 64)
         ctx.define('configMAXLEN_COMPNAME', 255)
 
         if not ctx.is_defined('mainCONFIG_USE_DYNAMIC_LOADER'):
