@@ -56,10 +56,11 @@ def configure(ctx):
 
     ctx.env.append_value(
         'LIB_DEPS',
-        ['freertos_tcpip', 'virtio', 'freertos_libdl'])
+        ['freertos_tcpip', 'virtio'])
 
     if ctx.env.COMPARTMENTALIZE:
         ctx.env.append_value('LIB_DEPS_EMBED_FAT', ['freertos_tcpip'])
+        ctx.env.append_value('LIB_DEPS', ['freertos_libdl'])
 
     ctx.env.LIBDL_PROG_START_FILE = "main_fett.c"
 
