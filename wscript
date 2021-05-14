@@ -994,6 +994,7 @@ def freertos_bsps_init(bld_ctx):
 def freertos_demos_init(bld):
     bld.env.freertos_demos = {}
     bld.env.freertos_demos["RISC-V-Generic"] = {}
+    bld.env.freertos_demos["RISC-V-Generic"]["riscv32"] = bld.env.freertos_bsps
     bld.env.freertos_demos["RISC-V-Generic"]["riscv64"] = bld.env.freertos_bsps
 
 
