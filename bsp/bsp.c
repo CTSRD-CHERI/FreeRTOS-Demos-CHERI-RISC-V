@@ -102,19 +102,21 @@ plic_instance_t Plic;
             }
             #endif
 
-            for( int i = 0; i < 35; i++ )
-            {
-                printf( "x%i ", i );
-                cheri_print_cap( *( exception_frame + i ) );
-            }
+            #if DEBUG
+                for( int i = 0; i < 35; i++ )
+                {
+                    printf( "x%i ", i );
+                    cheri_print_cap( *( exception_frame + i ) );
+                }
 
-            printf( "mepc = 0x%lx\n", epc );
-            printf( "mepcc -> " );
-            cheri_print_cap( mepcc );
-            printf( "TRAP: CCSR = 0x%lx (cause: %x reg: %u : scr: %u)\n",
-                    ccsr,
-                    cheri_cause,
-                    reg_num, is_scr );
+                printf( "mepc = 0x%lx\n", epc );
+                printf( "mepcc -> " );
+                cheri_print_cap( mepcc );
+                printf( "TRAP: CCSR = 0x%lx (cause: %x reg: %u : scr: %u)\n",
+                        ccsr,
+                        cheri_cause,
+                        reg_num, is_scr );
+            #endif
 
             #if configCHERI_COMPARTMENTALIZATION
                 xCompID = xPortGetCurrentCompartmentID();
