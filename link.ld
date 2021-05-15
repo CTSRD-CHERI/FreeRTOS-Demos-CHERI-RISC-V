@@ -146,6 +146,7 @@ SECTIONS {
        . = ALIGN(16);
     } > mem
 
+    /*
     .symtab : {
        __symtab_start = .;
         *(.symtab)
@@ -157,6 +158,7 @@ SECTIONS {
         *(.strtab)
        __strtab_end = .;
      } > mem
+     */
 
     .captable : {
        . = ALIGN(16);
