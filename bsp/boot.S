@@ -84,7 +84,8 @@
 #endif /* __CHERI_PURE_CAPABILITY__ */
 
 /* Startup code */
-.text
+.section    .boot.text, "wax", @progbits
+.align 3
 .globl boot
 .type boot, @function
 boot:
