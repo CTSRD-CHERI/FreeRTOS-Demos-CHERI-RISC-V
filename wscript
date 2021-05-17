@@ -1501,7 +1501,16 @@ def build(bld):
                   target=bld.env.PROG)
 
     main_sources = ['main.c']
-    main_libs = bld.env.LIB_DEPS + [bld.env.PROG]
+    main_libs = bld.env.LIB_DEPS
+
+    # Add PROG lib to use_libs for its deps (if any) to be resolved when statically
+    # linking the demo
+    use_libs = []
+    if not (bld.env.COMPARTMENTALIZE and bld.env.DYN_LOAD_APP):
+        use_libs = bld.env.PROG
+
+    if bld.env.PROG not in use_libs:
+        main_libs += [bld.env.PROG]
 
     # LIBS - wrap libs in groups for circular deps (mainly for gcc)
     bld.env.STLIB_MARKER = ['-Wl,-Bstatic', '-Wl,--start-group']
@@ -1550,12 +1559,6 @@ def build(bld):
             main_libs += ['freertos_libdl', 'freertos_libdl_headers']
 
     bld.env.SHLIB_MARKER = ['-Wl,--no-whole-archive', '-lc', '-Wl,--end-group']
-
-    # Add PROG lib to use_libs for its deps (if any) to be resolved when statically
-    # linking the demo
-    use_libs = []
-    if not (bld.env.COMPARTMENTALIZE and bld.env.DYN_LOAD_APP):
-        use_libs = bld.env.PROG
 
     bld.env.append_value('STLIB', main_libs)
     # Remove any lib duplicates
