@@ -1551,6 +1551,12 @@ def build(bld):
 
     bld.env.SHLIB_MARKER = ['-Wl,--no-whole-archive', '-lc', '-Wl,--end-group']
 
+    # Add PROG lib to use_libs for its deps (if any) to be resolved when statically
+    # linking the demo
+    use_libs = []
+    if not (bld.env.COMPARTMENTALIZE and bld.env.DYN_LOAD_APP):
+        use_libs = bld.env.PROG
+
     bld.env.append_value('STLIB', main_libs)
     # Remove any lib duplicates
     bld.env.STLIB = list(dict.fromkeys(bld.env.STLIB))
@@ -1572,6 +1578,7 @@ def build(bld):
         features="c",
         includes=['.'],
         libpath=['.', bld.env.PROGRAM_PATH],
+        use=use_libs,
         ldflags=bld.env.CFLAGS +
             ['-T',
             bld.path.abspath() + '/link.ld', '-nostartfiles', '-nostdlib',
@@ -1603,6 +1610,7 @@ def build(bld):
             source=main_sources + [PROG_NAME + '.syms.o'],
             depens_on=PROG_NAME,
             target=PROG_NAME + ".syms",
+            use=use_libs,
             features="c",
             includes=['.'],
             libpath=['.', bld.env.PROGRAM_PATH],
