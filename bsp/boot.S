@@ -89,6 +89,7 @@
 .globl boot
 .type boot, @function
 boot:
+    csrw mcycle, x0
     li t6, 0x1800
     csrw mstatus, t6
 
