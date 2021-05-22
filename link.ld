@@ -98,7 +98,6 @@ ENTRY(boot)
 SECTIONS {
 	.text : {
       . = ALIGN(8);
-	    *boot.o(.text);
 		*(.boot.text);
 		*(.text);
 		*(.text.*);
