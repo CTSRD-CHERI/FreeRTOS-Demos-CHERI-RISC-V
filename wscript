@@ -1331,7 +1331,6 @@ def configure(ctx):
         #ctx.define('configLIBDL_PROG_START_OBJ', '/lib/lib'+ctx.env.PROG+'.a:'+ctx.env.LIBDL_PROG_START_FILE+'.1.o')
         ctx.define('configPORT_ALLOW_APP_EXCEPTION_HANDLERS', 1)
         ctx.define('mainRAM_DISK_NAME', "/")
-        ctx.define('configCHERI_COMPARTMENTALIZATION', 1)
         ctx.define('ipconfigUSE_FAT_LIBDL', 1)
         ctx.define('ffconfigMAX_FILENAME', 255)
         ctx.define('mainCONFIG_INIT_FAT_FILESYSTEM', 1)
@@ -1340,6 +1339,9 @@ def configure(ctx):
         ctx.define('configLIBDL_CONF_PATH', "/etc/")
         ctx.define('configCOMPARTMENTS_NUM', 64)
         ctx.define('configMAXLEN_COMPNAME', 255)
+
+        if ctx.env.PURECAP:
+            ctx.define('configCHERI_COMPARTMENTALIZATION', 1)
 
         if not ctx.is_defined('mainCONFIG_USE_DYNAMIC_LOADER'):
             ctx.define('mainCONFIG_USE_DYNAMIC_LOADER', 1)
