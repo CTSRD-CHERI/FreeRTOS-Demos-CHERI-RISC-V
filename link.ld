@@ -96,8 +96,7 @@ ENTRY(boot)
  * Define the sections, and where they are mapped in memory
  ****************************************************************************/
 SECTIONS {
-	.text : {
-      . = ALIGN(8);
+	.text : ALIGN(8) {
 		*(.boot.text);
 		*(.text);
 		*(.text.*);
@@ -126,7 +125,6 @@ SECTIONS {
      }	> mem
 
 	.data : {
-	   . = ALIGN(16);
 	   __data_start = .;
 	   *(.data)
 	   *(.data.*)
@@ -142,8 +140,8 @@ SECTIONS {
 	   *(.eh_frame)
 	} > mem
 
-    __cap_relocs : {
-       . = ALIGN(16);
+    __cap_relocs :  ALIGN(16) {
+      *(__cap_relocs)
     } > mem
 
     /*
@@ -160,12 +158,11 @@ SECTIONS {
      } > mem
      */
 
-    .captable : {
-       . = ALIGN(16);
+    .captable : ALIGN(16) {
+      *(.cap_relocs)
     } > mem
 
-    .bss (NOLOAD) : {
-       . = ALIGN(16);
+    .bss (NOLOAD) :  ALIGN(16) {
        __bss_start = .;
        *(.bss)
        *(.bss.*)
@@ -184,16 +181,14 @@ SECTIONS {
     } > mem
 
     /* Generate Stack and Heap definitions */
-    .heap (NOLOAD) : {
-       . = ALIGN(16);
+    .heap (NOLOAD) :  ALIGN(16) {
        _heap = .;
        _heap_start = .;
        . += _HEAP_SIZE;
        _heap_end = .;
     } > mem
 
-    .stack (NOLOAD) : {
-       . = ALIGN(16);
+    .stack (NOLOAD) :  ALIGN(16) {
        _stack_end = .;
        . += _STACK_SIZE;
        . = ALIGN(8);
