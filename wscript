@@ -245,6 +245,9 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
             ctx.define('configCPU_CLOCK_HZ', 25000000)
             ctx.define('configPERIPH_CLOCK_HZ', 25000000)
             ctx.define('configMTIME_HZ', 250000)
+        elif 'p1' in ctx.env.PLATFORM:
+            ctx.define('configCPU_CLOCK_HZ', 50000000)
+            ctx.define('configPERIPH_CLOCK_HZ', 50000000)
         else:
             ctx.define('configCPU_CLOCK_HZ', 100000000)
             ctx.define('configPERIPH_CLOCK_HZ', 100000000)
