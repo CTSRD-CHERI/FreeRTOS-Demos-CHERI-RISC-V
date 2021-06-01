@@ -103,7 +103,7 @@ void queueSendTask( void * pvParameters )
     xStartL2CacheMiss = portCounterGet(COUNTER_LLCACHE_LOAD_MISS);
 
     xStartInstRet = portCounterGet(COUNTER_INSTRET);
-    xStartTime = get_cycle_count();
+    xStartTime = portCounterGet(COUNTER_CYCLE);
 
     for( int i = 0; i < cnt; i++ )
     {

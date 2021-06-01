@@ -117,7 +117,7 @@ void queueReceiveTask( void * pvParameters )
         xQueueReceive( xQueue, pReceiveBuffer, portMAX_DELAY );
     }
 
-    xEndTime = get_cycle_count();
+    xEndTime = portCounterGet(COUNTER_CYCLE);
     xEndInstRet = portCounterGet(COUNTER_INSTRET);
 
     xEndDCacheLoad = portCounterGet(COUNTER_DCACHE_LOAD);
