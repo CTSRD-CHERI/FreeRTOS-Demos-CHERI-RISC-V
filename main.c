@@ -146,9 +146,9 @@ uint64_t get_cycle_count( void )
  * and 20 minutes. Probably not a big issue though.
  * At 50HMz clock rate, 1 us = 50 ticks
  */
-uint32_t port_get_current_mtime( void )
+uint64_t port_get_current_mtime( void )
 {
-    return ( uint32_t ) ( get_cycle_count() / ( configCPU_CLOCK_HZ / 1000000 ) );
+    return ( uint64_t ) ( get_cycle_count() / ( configCPU_CLOCK_HZ / 1000000 ) );
 }
 /*-----------------------------------------------------------*/
 
