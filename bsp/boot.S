@@ -90,6 +90,10 @@
 .type boot, @function
 boot:
     csrw mcycle, x0
+#if __riscv_xlen == 32
+    csrw mcycleh, x0
+#endif
+
     li t6, 0x1800
     csrw mstatus, t6
 
