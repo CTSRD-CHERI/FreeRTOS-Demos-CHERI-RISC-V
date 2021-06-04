@@ -1272,6 +1272,8 @@ def configure(ctx):
         ctx.env.append_value('INCLUDES', [ctx.env.SYSROOT + '/include'])
 
     elif ctx.options.toolchain == "gcc":
+        # riscv64 GCC toolchain with multilib should work for both riscv32 and riscv64
+        ctx.env.TARGET = 'riscv64'
         ctx.env.CC = ctx.env.TARGET + '-gcc'
         ctx.env.AS = ctx.env.TARGET + '-gcc'
         ctx.env.LD = ctx.env.TARGET + '-gcc'
