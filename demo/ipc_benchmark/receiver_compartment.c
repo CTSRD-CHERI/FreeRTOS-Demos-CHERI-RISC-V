@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <inttypes.h>
 
 #include "logging.h"
 
@@ -129,13 +130,13 @@ void queueReceiveTask( void * pvParameters )
     portENABLE_INTERRUPTS();
 
     log( "IPC Performance Results for: buffer size: %lu - total size: %lu\n"
-         "\tCYCLE:\t\t%lu\n"
-         "\tINSTRET:\t%lu\n"
-         "\tDCACHE_LOAD:\t%lu\n"
-         "\tDCACHE_LOAD_MISS:\t%lu\n"
-         "\tICACHE_LOAD:\t%lu\n"
-         "\tICACHE_LOAD_MISS:\t%lu\n"
-         "\tLLCACHE_LOAD_MISS:\t%lu\n",
+         "\tCYCLE:\t\t%" PRIu64 "\n"
+         "\tINSTRET:\t%" PRIu64 "\n"
+         "\tDCACHE_LOAD:\t%" PRIu64  "\n"
+         "\tDCACHE_LOAD_MISS:\t%" PRIu64 "\n"
+         "\tICACHE_LOAD:\t%" PRIu64 "\n"
+         "\tICACHE_LOAD_MISS:\t%" PRIu64 "\n"
+         "\tLLCACHE_LOAD_MISS:\t%" PRIu64 "\n",
          xBufferSize, xTotalSize,
          xEndTime - xStartTime,
          xEndInstRet - xStartInstRet,
