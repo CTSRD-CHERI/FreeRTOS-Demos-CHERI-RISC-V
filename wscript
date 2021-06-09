@@ -1577,7 +1577,7 @@ def build(bld):
         if 'freertos_libdl' not in bld.env.LIB_DEPS:
             main_libs += ['freertos_libdl', 'freertos_libdl_headers']
 
-    bld.env.SHLIB_MARKER = ['-Wl,--no-whole-archive', '-lc', '-Wl,--end-group']
+    bld.env.SHLIB_MARKER = ['-Wl,--no-whole-archive', '-lc', '-lm', '-Wl,--end-group']
 
     bld.env.append_value('STLIB', main_libs)
     # Remove any lib duplicates
