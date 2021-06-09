@@ -201,6 +201,14 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
             '../RISC-V_Galois_demo/bsp/xilinx/axidma/xaxidma_selftest.c',
             '../RISC-V_Galois_demo/bsp/xilinx/axidma/xaxidma_g.c',
             '../RISC-V_Galois_demo/bsp/xilinx/axidma/xaxidma_sinit.c',
+            '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic.c',
+            '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic_g.c',
+            '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic_l.c',
+            '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic_sinit.c',
+            '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic_selftest.c',
+            '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic_master.c',
+            '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic_intr.c',
+            '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic_stats.c',
             '../RISC-V_Galois_demo/bsp/xilinx/axiethernet/xaxiethernet.c',
             '../RISC-V_Galois_demo/bsp/xilinx/axiethernet/xaxiethernet_control.c',
             '../RISC-V_Galois_demo/bsp/xilinx/axiethernet/xaxiethernet_g.c',
@@ -318,7 +326,9 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
         ctx.define('XPAR_GPIO_0_IS_DUAL', 0)
 
         # IIC Defines
-        ctx.define('BSP_USE_IIC0', 1)
+        if not any('BSP_USE_IIC0' in define for define in ctx.env.DEFINES):
+            ctx.define('BSP_USE_IIC0', 1)
+
         ctx.define('XPAR_XIIC_NUM_INSTANCES', 1)
         ctx.define('XPAR_IIC_0_DEVICE_ID', 0)
         ctx.define('XPAR_IIC_0_BASEADDR', '0x62310000ULL', False)
@@ -370,6 +380,8 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
             ctx.path.abspath() + '/../RISC-V_Galois_demo/bsp/xilinx/common',
             ctx.path.abspath() + '/../RISC-V_Galois_demo/bsp/xilinx/axidma',
             ctx.path.abspath() + '/../RISC-V_Galois_demo/bsp/xilinx/axiethernet',
+
+            ctx.path.abspath() + '/../RISC-V_Galois_demo/bsp/xilinx/iic'
         ])
 
 class FreeRTOSBspFett(FreeRTOSBsp):
