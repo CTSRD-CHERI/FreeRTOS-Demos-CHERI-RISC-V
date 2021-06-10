@@ -35,6 +35,7 @@ import os
 import subprocess
 import ipaddress
 from os import path
+from pathlib import Path
 from waflib.Task import Task
 from waflib.TaskGen import after, before_method, feature
 from waflib.TaskGen import extension
@@ -1404,6 +1405,9 @@ def configure(ctx):
 
     freertos_bsp_configure(ctx)
     freertos_libs_configure(ctx)
+
+    # Check of --prefix exists and create it if it does not
+    Path(ctx.env.PREFIX).mkdir(parents=True, exist_ok=True)
 
     # This file contains CFLAGS, DEFINES and INCLUDES that can be used for
     # building out-of-tree apps standalone (to be dynamically linked later on)
