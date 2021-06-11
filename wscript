@@ -193,7 +193,7 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
         self.platform = "gfe"
         self.bld_ctx = ctx,
 
-        self.srcs = ['./bsp/uart16550.c']
+        self.srcs = ['./bsp/uart16550.c','./bsp/iic.c']
 
         # Xilinx Drivers
         self.srcs += [
