@@ -274,16 +274,16 @@ void main_fett(void)
         vTaskSuspendAll();
     }
 
-    FreeRTOS_printf(("\n>>>Beginning of Fett<<<\r\n"));
+    FreeRTOS_printf(("\n>>>Beginning of Besspin<<<\r\n"));
     
     startNetwork();
 
     funcReturn = xTaskCreate(prvMainTask, "prvMainTask", MAINTASK_STACK_SIZE, NULL, MAINTASK_PRIORITY, NULL);
 
     if (funcReturn == pdPASS) {
-        FreeRTOS_printf(("%s (Info)~  main_fett: Created prvMainTask successfully.<<<\r\n", getCurrTime()));
+        FreeRTOS_printf(("%s (Info)~  main_besspin: Created prvMainTask successfully.<<<\r\n", getCurrTime()));
     } else {
-        FreeRTOS_printf(("%s (Error)~  main_fett: Failed to create prvMainTask.<<<\r\n", getCurrTime()));
+        FreeRTOS_printf(("%s (Error)~  main_besspin: Failed to create prvMainTask.<<<\r\n", getCurrTime()));
     }
 
     /* Start the RTOS scheduler. */
