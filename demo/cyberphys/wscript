@@ -77,7 +77,7 @@ def build(bld):
         features=['c'],
         cflags=bld.env.CFLAGS + cflags,
         source=[
-            'main_fett.c',
+            'main_besspin.c',
             'cyberphys/canlib.c',
             'cyberphys/j1939.c',
         ],
