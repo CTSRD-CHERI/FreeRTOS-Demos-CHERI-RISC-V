@@ -4,7 +4,7 @@
 #include "bsp.h"
 #include "plic_driver.h"
 
-#if BSP_USE_IIC0
+#if PLATFORM_GFE
     #include "iic.h"
 #endif
 
@@ -188,9 +188,6 @@ void prvSetupHardware( void )
         PLIC_set_priority(&Plic, PLIC_SOURCE_ETH, PLIC_PRIORITY_ETH);
         PLIC_set_priority(&Plic, PLIC_SOURCE_DMA_MM2S, PLIC_PRIORITY_DMA_MM2S);
         PLIC_set_priority(&Plic, PLIC_SOURCE_DMA_S2MM, PLIC_PRIORITY_DMA_S2MM);
-    #endif
-
-    #if BSP_USE_IIC0
         PLIC_set_priority(&Plic, PLIC_SOURCE_IIC0, PLIC_PRIORITY_IIC0);
         iic0_init();
     #endif

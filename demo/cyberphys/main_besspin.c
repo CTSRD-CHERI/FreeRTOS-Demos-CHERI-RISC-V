@@ -60,8 +60,8 @@
 #define THROTTLE_MIN 64
 #define THROTTLE_GAIN 100
 
-#define BRAKE_MAX 510
-#define BRAKE_MIN 456
+#define BRAKE_MAX 270
+#define BRAKE_MIN 50
 #define BRAKE_GAIN 100
 
 #define TEENSY_I2C_ADDRESS 0x30
