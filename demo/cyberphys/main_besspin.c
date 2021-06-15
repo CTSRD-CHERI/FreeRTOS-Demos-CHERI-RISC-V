@@ -500,8 +500,8 @@ static void prvSensorTask(void *pvParameters)
         }
 
         /* Process throttle */
-        // data[2,3] = throttle_raw
-        throttle_raw = (int16_t)(data[3] << 8 | data[2]);
+        // data[0,1] = throttle_raw
+        throttle_raw = (int16_t)(data[1] << 8 | data[0]);
         tmp_throttle = max(throttle_raw - throttle_min, 0); // remove offset
         tmp_throttle = tmp_throttle * throttle_gain / (throttle_max - throttle_min);
         tmp_throttle = min(max(tmp_throttle, 0), 100);
@@ -514,8 +514,8 @@ static void prvSensorTask(void *pvParameters)
         }
 
         /* Request brake */
-        // data[0,1] = brake_raw
-        brake_raw = (int16_t)(data[1] << 8 | data[0]);
+        // data[2,3] = brake_raw
+        brake_raw = (int16_t)(data[3] << 8 | data[2]);
         tmp_brake = max(brake_max - brake_raw, 0); // reverse brake
         tmp_brake = tmp_brake * brake_gain / (brake_max - brake_min);
         tmp_brake = min(max(tmp_brake, 0), 100);
