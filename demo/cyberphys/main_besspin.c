@@ -306,18 +306,6 @@ void prvMainTask (void *pvParameters) {
     uint8_t dummy = 1;
     // Give the sensor time to power up
     vTaskDelay(SENSOR_POWER_UP_DELAY_MS);
-    #if BSP_USE_IIC0
-        int res = iic_transmit(&Iic0, TEENSY_I2C_ADDRESS, &dummy, 1);
-    #else
-        int res = 1;
-    #endif
-    if (res == 1) {
-        FreeRTOS_printf(("%s (Info)~ prvMainTask: iic_transmit OK\r\n", getCurrTime()));
-    } else {
-        FreeRTOS_printf(("%s (Error)~ prvMainTask: iic_transmit failed with %d. Terminating...\r\n", getCurrTime(), res));
-        // Triggers an exception
-        configASSERT(false);
-    }
 
     funcReturn = xTaskNotifyWait(0xffffffffUL, 0xffffffffUL, &recvNotification, pdMS_TO_TICKS(60000)); //it should take less than 15s
     if (funcReturn != pdPASS) {
@@ -328,7 +316,7 @@ void prvMainTask (void *pvParameters) {
         vTaskDelete(NULL);
     } else {
         FreeRTOS_printf(("%s <NTK-READY>\r\n",getCurrTime()));
-        // For compliance with FETT tool
+        // For compliance with BESSPIN tool
         FreeRTOS_printf(("<NTK-READY>\r\n"));
     }
     
@@ -459,7 +447,7 @@ static void prvSensorTask(void *pvParameters)
             #if BSP_USE_IIC0
             if (err_cnt >= IIC_RESET_ERROR_THRESHOLD) {
                 FreeRTOS_printf(("%s (prvSensorTask) err_cnt == %i, resetting!\r\n", getCurrTime(), err_cnt));
-                    iic0_master_reset();
+                iic0_master_reset();
                 err_cnt = 0;
             }
             #endif
@@ -485,7 +473,7 @@ static void prvSensorTask(void *pvParameters)
                 tmp_gear = 'D';
                 break;
             default:
-                //FreeRTOS_printf(("%s (prvSensorTask) unknown gear value: %c\r\n", getCurrTime(), data[4]));
+                FreeRTOS_printf(("%s (prvSensorTask) unknown gear value: %c\r\n", getCurrTime(), data[4]));
                 break;
             }
         } else {
