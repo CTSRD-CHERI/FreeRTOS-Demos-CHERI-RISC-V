@@ -72,7 +72,7 @@ static void prvSensorTask(void *pvParameters);
 static void prvCanRxTask(void *pvParameters);
 static void prvInfoTask(void *pvParameters);
 
-void main_fett(void);
+void main_besspin(void);
 void prvMainTask (void *pvParameters);
 void startNetwork(void);
 char *getCurrTime(void);
@@ -265,7 +265,7 @@ void startNetwork()
     FreeRTOS_printf(("%s ECU: FreeRTOS_IPInit\r\n", getCurrTime()));
 }
 
-void main_fett(void)
+void main_besspin(void)
 {
     BaseType_t funcReturn;
 

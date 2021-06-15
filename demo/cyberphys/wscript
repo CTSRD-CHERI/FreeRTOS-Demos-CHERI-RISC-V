@@ -40,7 +40,7 @@ def configure(ctx):
         ])
 
     ctx.env.append_value('DEFINES', [
-        'configPROG_ENTRY     = main_fett',
+        'configPROG_ENTRY     = main_besspin',
         'FETT_APPS            = 1',
         'FREERTOS             = 1',
         'BSP_USE_IIC0         = 1',
@@ -62,7 +62,7 @@ def configure(ctx):
         ctx.env.append_value('LIB_DEPS_EMBED_FAT', ['freertos_tcpip'])
         ctx.env.append_value('LIB_DEPS', ['freertos_libdl'])
 
-    ctx.env.LIBDL_PROG_START_FILE = "main_fett.c"
+    ctx.env.LIBDL_PROG_START_FILE = "main_besspin.c"
 
 def build(bld):
     name = "cyberphys"
