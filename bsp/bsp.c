@@ -188,8 +188,10 @@ void prvSetupHardware( void )
         PLIC_set_priority(&Plic, PLIC_SOURCE_ETH, PLIC_PRIORITY_ETH);
         PLIC_set_priority(&Plic, PLIC_SOURCE_DMA_MM2S, PLIC_PRIORITY_DMA_MM2S);
         PLIC_set_priority(&Plic, PLIC_SOURCE_DMA_S2MM, PLIC_PRIORITY_DMA_S2MM);
-        PLIC_set_priority(&Plic, PLIC_SOURCE_IIC0, PLIC_PRIORITY_IIC0);
-        iic0_init();
+        #if BSP_USE_IIC0
+            PLIC_set_priority(&Plic, PLIC_SOURCE_IIC0, PLIC_PRIORITY_IIC0);
+            iic0_init();
+        #endif
     #endif
 
     #if ((__CHERI_PURE_CAPABILITY__ && DEBUG) || configCHERI_COMPARTMENTALIZATION)
