@@ -60,8 +60,8 @@
 #define THROTTLE_MIN 64
 #define THROTTLE_GAIN 100
 
-#define BRAKE_MAX 510
-#define BRAKE_MIN 456
+#define BRAKE_MAX 270
+#define BRAKE_MIN 50
 #define BRAKE_GAIN 100
 
 #define TEENSY_I2C_ADDRESS 0x30
@@ -306,18 +306,6 @@ void prvMainTask (void *pvParameters) {
     uint8_t dummy = 1;
     // Give the sensor time to power up
     vTaskDelay(SENSOR_POWER_UP_DELAY_MS);
-    #if BSP_USE_IIC0
-        int res = iic_transmit(&Iic0, TEENSY_I2C_ADDRESS, &dummy, 1);
-    #else
-        int res = 1;
-    #endif
-    if (res == 1) {
-        FreeRTOS_printf(("%s (Info)~ prvMainTask: iic_transmit OK\r\n", getCurrTime()));
-    } else {
-        FreeRTOS_printf(("%s (Error)~ prvMainTask: iic_transmit failed with %d. Terminating...\r\n", getCurrTime(), res));
-        // Triggers an exception
-        configASSERT(false);
-    }
 
     funcReturn = xTaskNotifyWait(0xffffffffUL, 0xffffffffUL, &recvNotification, pdMS_TO_TICKS(60000)); //it should take less than 15s
     if (funcReturn != pdPASS) {
@@ -328,7 +316,7 @@ void prvMainTask (void *pvParameters) {
         vTaskDelete(NULL);
     } else {
         FreeRTOS_printf(("%s <NTK-READY>\r\n",getCurrTime()));
-        // For compliance with FETT tool
+        // For compliance with BESSPIN tool
         FreeRTOS_printf(("<NTK-READY>\r\n"));
     }
     
@@ -459,7 +447,7 @@ static void prvSensorTask(void *pvParameters)
             #if BSP_USE_IIC0
             if (err_cnt >= IIC_RESET_ERROR_THRESHOLD) {
                 FreeRTOS_printf(("%s (prvSensorTask) err_cnt == %i, resetting!\r\n", getCurrTime(), err_cnt));
-                    iic0_master_reset();
+                iic0_master_reset();
                 err_cnt = 0;
             }
             #endif
@@ -485,7 +473,7 @@ static void prvSensorTask(void *pvParameters)
                 tmp_gear = 'D';
                 break;
             default:
-                //FreeRTOS_printf(("%s (prvSensorTask) unknown gear value: %c\r\n", getCurrTime(), data[4]));
+                FreeRTOS_printf(("%s (prvSensorTask) unknown gear value: %c\r\n", getCurrTime(), data[4]));
                 break;
             }
         } else {
@@ -500,8 +488,8 @@ static void prvSensorTask(void *pvParameters)
         }
 
         /* Process throttle */
-        // data[2,3] = throttle_raw
-        throttle_raw = (int16_t)(data[3] << 8 | data[2]);
+        // data[0,1] = throttle_raw
+        throttle_raw = (int16_t)(data[1] << 8 | data[0]);
         tmp_throttle = max(throttle_raw - throttle_min, 0); // remove offset
         tmp_throttle = tmp_throttle * throttle_gain / (throttle_max - throttle_min);
         tmp_throttle = min(max(tmp_throttle, 0), 100);
@@ -514,8 +502,8 @@ static void prvSensorTask(void *pvParameters)
         }
 
         /* Request brake */
-        // data[0,1] = brake_raw
-        brake_raw = (int16_t)(data[1] << 8 | data[0]);
+        // data[2,3] = brake_raw
+        brake_raw = (int16_t)(data[3] << 8 | data[2]);
         tmp_brake = max(brake_max - brake_raw, 0); // reverse brake
         tmp_brake = tmp_brake * brake_gain / (brake_max - brake_min);
         tmp_brake = min(max(tmp_brake, 0), 100);

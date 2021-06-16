@@ -4,6 +4,10 @@
 #include "bsp.h"
 #include "plic_driver.h"
 
+#if PLATFORM_GFE
+    #include "iic.h"
+#endif
+
 #include "portstatcounters.h"
 
 #ifdef configUART16550_BASE
@@ -184,6 +188,8 @@ void prvSetupHardware( void )
         PLIC_set_priority(&Plic, PLIC_SOURCE_ETH, PLIC_PRIORITY_ETH);
         PLIC_set_priority(&Plic, PLIC_SOURCE_DMA_MM2S, PLIC_PRIORITY_DMA_MM2S);
         PLIC_set_priority(&Plic, PLIC_SOURCE_DMA_S2MM, PLIC_PRIORITY_DMA_S2MM);
+        PLIC_set_priority(&Plic, PLIC_SOURCE_IIC0, PLIC_PRIORITY_IIC0);
+        iic0_init();
     #endif
 
     #if ((__CHERI_PURE_CAPABILITY__ && DEBUG) || configCHERI_COMPARTMENTALIZATION)
@@ -197,20 +203,20 @@ void prvSetupHardware( void )
     #endif
 }
 
-    #if !(PLATFORM_QEMU_VIRT || PLATFORM_FETT || PLATFORM_GFE)
-        __attribute__( ( weak ) ) BaseType_t xNetworkInterfaceInitialise( void )
-        {
-            printf( "xNetworkInterfaceInitialise is not implemented, No NIC backend driver\n" );
-            return pdPASS;
-        }
+#if !(PLATFORM_QEMU_VIRT || PLATFORM_FETT || PLATFORM_GFE)
+__attribute__( ( weak ) ) BaseType_t xNetworkInterfaceInitialise( void )
+{
+    printf( "xNetworkInterfaceInitialise is not implemented, No NIC backend driver\n" );
+    return pdPASS;
+}
 
-        __attribute__( ( weak ) )
-        xNetworkInterfaceOutput( void * const pxNetworkBuffer, BaseType_t xReleaseAfterSend )
-        {
-            printf( "xNetworkInterfaceOutput is not implemented, No NIC backend driver\n" );
-            return pdPASS;
-        }
-    #endif
+__attribute__( ( weak ) )
+xNetworkInterfaceOutput( void * const pxNetworkBuffer, BaseType_t xReleaseAfterSend )
+{
+    printf( "xNetworkInterfaceOutput is not implemented, No NIC backend driver\n" );
+    return pdPASS;
+}
+#endif
 
 /**
  * Define an external interrupt handler
