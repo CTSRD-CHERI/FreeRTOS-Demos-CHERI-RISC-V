@@ -32,6 +32,8 @@
 #
 
 import os
+import glob
+import shutil
 import subprocess
 import ipaddress
 from os import path
@@ -1663,10 +1665,35 @@ def post_build(ctx):
 
         # Use the image with embedded symbol table
         if ctx.env.COMPARTMENTALIZE:
-            subprocess.Popen(['mv',
+            mv = subprocess.Popen(['mv',
                 ctx.env.PREFIX + '/bin/' + ctx.env.DEMO + "_" + ctx.env.PROG + ".elf.syms",
                 ctx.env.PREFIX + '/bin/' + ctx.env.DEMO + "_" + ctx.env.PROG + ".elf"
             ])
+            mv.wait()
+
+            # Remove ucHeap symbol for the final ELF as further dynamically loaded
+            # objects that get allocated from the heap (ucHeap) will confuse GDB
+            objcopy = subprocess.Popen(['llvm-objcopy', '-N', 'ucHeap',
+                ctx.env.PREFIX + '/bin/' + ctx.env.DEMO + "_" + ctx.env.PROG + ".elf"
+            ])
+            objcopy.wait()
+
+            # Create a lib directroy if it does not exist
+            Path(ctx.env.PREFIX + '/lib/').mkdir(parents=True, exist_ok=True)
+
+            # Move all .o files to a /lib directory for GDB to use when debugging
+            # shared libs and trying to find .o files for debug info
+            for file_path in glob.glob(os.path.join(str(ctx.bldnode), '**', '*.o'), recursive=True):
+                new_path = os.path.join(ctx.env.PREFIX + '/lib/', os.path.basename(file_path))
+                shutil.copy(file_path, new_path)
+
+            # Write a gdbinit helper script to debug dynamically loaded objects
+            with open(ctx.env.PREFIX + '/share/gdbscript', 'w') as gdbscript:
+                gdbscript.write("set auto-solib-add on\n")
+                gdbscript.write("set stop-on-solib-events 1\n")
+                gdbscript.write("set solib-search-path " + ctx.env.PREFIX + '/lib/' + "\n")
+                gdbscript.write("set architecture riscv\n")
+                gdbscript.write("set osabi RTEMS\n")
 
     # TODO
     if ctx.options.run:
