@@ -69,6 +69,7 @@ plic_instance_t Plic;
 
     static UBaseType_t default_exception_handler( uintptr_t * exception_frame )
     {
+            BaseType_t pxHigherPriorityTaskWoken = 0;
         #ifdef __CHERI_PURE_CAPABILITY__
             size_t cause = 0;
             size_t epc = 0;
@@ -134,6 +135,8 @@ plic_instance_t Plic;
                     printf( "<<<< Fault in Task: %s: Compartment #%d: %s:%s\n", pcTaskGetName( NULL ), xCompID, obj->aname, obj->oname );
                     printf( "\033[0m" );
 
+                    pxHigherPriorityTaskWoken = rtl_cherifreertos_compartment_faultHandler(xCompID);
+
                     /* Caller compartment return */
                     *( exception_frame ) = ret;
                     *( exception_frame + 10) = CHERI_COMPARTMENT_FAIL;
@@ -149,10 +152,12 @@ plic_instance_t Plic;
                     printf( "<<<< Fault in Task: %s: Compartment #%d: %s\n", pcTaskGetName( NULL ), xCompID, archive->name );
                     printf( "\033[0m" );
 
+                    pxHigherPriorityTaskWoken = rtl_cherifreertos_compartment_faultHandler(xCompID);
+
                     /* Caller compartment return */
                     *( exception_frame ) = ret;
                     *( exception_frame + 10) = CHERI_COMPARTMENT_FAIL;
-                    return 0;
+                    return pxHigherPriorityTaskWoken;
                 }
 
             #endif
