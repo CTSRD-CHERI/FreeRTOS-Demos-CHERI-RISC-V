@@ -1691,6 +1691,7 @@ def post_build(ctx):
             with open(ctx.env.PREFIX + '/share/gdbscript', 'w') as gdbscript:
                 gdbscript.write("set auto-solib-add on\n")
                 gdbscript.write("set stop-on-solib-events 1\n")
+                gdbscript.write("set breakpoint pending on\n")
                 gdbscript.write("set solib-search-path " + ctx.env.PREFIX + '/lib/' + "\n")
                 gdbscript.write("set architecture riscv\n")
                 gdbscript.write("set osabi RTEMS\n")
