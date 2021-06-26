@@ -626,6 +626,7 @@ class FreeRTOSLibTCPIP(FreeRTOSLib):
     def __init__(self, ctx):
         self.name = "freertos_tcpip"
         self.driver_srcs = []
+        self.comp_srcs = []
 
         self.includes = [
             self.libtcpip_dir, self.libtcpip_dir + '/include',
@@ -649,7 +650,10 @@ class FreeRTOSLibTCPIP(FreeRTOSLib):
                 '/portable/NetworkInterface/RISC-V/NetworkInterface.c',
             ]
 
-        self.srcs = self.driver_srcs + [
+        if ctx.env.COMPARTMENTALIZE:
+            self.comp_srcs = [self.libtcpip_dir + '/CheriFreeRTOS_FaultHandler.c']
+
+        self.srcs = self.comp_srcs + self.driver_srcs + [
             self.libtcpip_dir + '/FreeRTOS_IP.c', self.libtcpip_dir +
             '/FreeRTOS_ARP.c', self.libtcpip_dir + '/FreeRTOS_DHCP.c',
             self.libtcpip_dir + '/FreeRTOS_DNS.c', self.libtcpip_dir +
