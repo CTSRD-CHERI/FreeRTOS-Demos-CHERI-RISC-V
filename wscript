@@ -1361,6 +1361,10 @@ def configure(ctx):
         ctx.define('configCOMPARTMENTS_NUM', 64)
         ctx.define('configMAXLEN_COMPNAME', 255)
 
+        # libdl will send solib events to GDB while loading objects
+        if ctx.env.DEBUG:
+            ctx.define('configLIBDL_GDB_DEBUG', 1)
+
         if ctx.env.PURECAP:
             ctx.define('configCHERI_COMPARTMENTALIZATION', 1)
 
@@ -1689,12 +1693,14 @@ def post_build(ctx):
 
             # Write a gdbinit helper script to debug dynamically loaded objects
             with open(ctx.env.PREFIX + '/share/gdbscript', 'w') as gdbscript:
-                gdbscript.write("set auto-solib-add on\n")
-                gdbscript.write("set stop-on-solib-events 1\n")
                 gdbscript.write("set breakpoint pending on\n")
                 gdbscript.write("set solib-search-path " + ctx.env.PREFIX + '/lib/' + "\n")
                 gdbscript.write("set architecture riscv\n")
                 gdbscript.write("set osabi RTEMS\n")
+
+                if ctx.env.DEBUG:
+                    gdbscript.write("set auto-solib-add on\n")
+                    gdbscript.write("set stop-on-solib-events 1\n")
 
     # TODO
     if ctx.options.run:
