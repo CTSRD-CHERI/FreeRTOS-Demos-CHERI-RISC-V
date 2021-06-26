@@ -43,9 +43,11 @@
 #define SENSORTASK_STACK_SIZE configMINIMAL_STACK_SIZE * 20U
 #define CAN_TX_STACK_SIZE configMINIMAL_STACK_SIZE * 10U
 #define CAN_RX_STACK_SIZE configMINIMAL_STACK_SIZE * 10U
+#define IP_RESTART_STACK_SIZE configMINIMAL_STACK_SIZE * 2U
 #define INFOTASK_STACK_SIZE configMINIMAL_STACK_SIZE * 10U
 
 #define MAINTASK_PRIORITY tskIDLE_PRIORITY + 5
+#define IP_RESTART_TASK_PRIORITY tskIDLE_PRIORITY + 5
 #define SENSORTASK_PRIORITY tskIDLE_PRIORITY + 4
 #define CAN_RX_TASK_PRIORITY tskIDLE_PRIORITY + 3
 #define INFOTASK_PRIORITY tskIDLE_PRIORITY + 1
@@ -71,6 +73,9 @@
 static void prvSensorTask(void *pvParameters);
 static void prvCanRxTask(void *pvParameters);
 static void prvInfoTask(void *pvParameters);
+static void prvIPRestartHandlerTask(void *pvParameters);
+static void prvSocketCreateSensorIP();
+static void prvSocketCreateCanRx();
 
 void main_besspin(void);
 void prvMainTask (void *pvParameters);
@@ -85,6 +90,14 @@ uint32_t ulApplicationGetNextSequenceNumber(uint32_t ulSourceAddress, uint16_t u
 
 SemaphoreHandle_t data_mutex;
 TaskHandle_t xMainTask = NULL;
+TaskHandle_t xIPRestartHandlerTask = NULL;
+TaskHandle_t xSensorTask = NULL;
+TaskHandle_t xCanTask = NULL;
+
+static volatile Socket_t xCanRxListeningSocket;
+static volatile Socket_t xCanRxClientSocket;
+static volatile struct freertos_sockaddr xDestinationAddress;
+static volatile Socket_t xSensorClientSocket;
 
 /* CAN rx buffer */
 uint8_t j1939_rx_buf[0x100] __attribute__((aligned(64)));
@@ -295,6 +308,20 @@ void main_besspin(void)
     }
 }
 
+/**
+ * Suspended tasks that use sockets, recreate the sockets after a TCP/IP stack
+ * restarts, then resume the tasks.
+ */
+void prvIPRestartHandlerTask(void *pvParameters) {
+    while(1) {
+        ulTaskNotifyTake( pdFALSE, portMAX_DELAY );
+        prvSocketCreateCanRx();
+        prvSocketCreateSensor();
+        vTaskResume(xCanTask);
+        vTaskResume(xSensorTask);
+    }
+}
+
 void prvMainTask (void *pvParameters) {
     (void) pvParameters;
     BaseType_t funcReturn;
@@ -332,8 +359,9 @@ void prvMainTask (void *pvParameters) {
 
     /* Create the tasks */
     funcReturn = xTaskCreate(prvInfoTask, "prvInfoTask", INFOTASK_STACK_SIZE, NULL, INFOTASK_PRIORITY, NULL);
-    funcReturn &= xTaskCreate(prvSensorTask, "prvSensorTask", SENSORTASK_STACK_SIZE, NULL, SENSORTASK_PRIORITY, NULL);
-    funcReturn &= xTaskCreate(prvCanRxTask, "prvCanRxTask", CAN_RX_STACK_SIZE, NULL, CAN_RX_TASK_PRIORITY, NULL);
+    funcReturn &= xTaskCreate(prvSensorTask, "prvSensorTask", SENSORTASK_STACK_SIZE, NULL, SENSORTASK_PRIORITY, &xSensorTask);
+    funcReturn &= xTaskCreate(prvCanRxTask, "prvCanRxTask", CAN_RX_STACK_SIZE, NULL, CAN_RX_TASK_PRIORITY, &xCanTask);
+    funcReturn &= xTaskCreate(prvIPRestartHandlerTask, "prvIPRestartTask", IP_RESTART_STACK_SIZE, NULL, IP_RESTART_TASK_PRIORITY, &xIPRestartHandlerTask);
     if (funcReturn == pdPASS) {
         FreeRTOS_printf (("%s (Info)~  prvMainTask: Created all app tasks successfully.\r\n", getCurrTime()));
     } else {
@@ -385,6 +413,14 @@ static void prvInfoTask(void *pvParameters)
     }
 }
 
+static void prvSocketCreateSensorIP() {
+
+    xSensorClientSocket = FreeRTOS_socket(FREERTOS_AF_INET, FREERTOS_SOCK_DGRAM, FREERTOS_IPPROTO_UDP);
+    configASSERT(xSensorClientSocket != FREERTOS_INVALID_SOCKET);
+
+    FreeRTOS_printf(("%s xSensorClientSocket socket connected\r\n", getCurrTime()));
+}
+
 /**
  * Read and update gear values
  */
@@ -393,7 +429,6 @@ static void prvSensorTask(void *pvParameters)
     (void)pvParameters;
 
     int returnval;
-    Socket_t xClientSocket;
     struct freertos_sockaddr xDestinationAddress;
 
     // Broadcast address
@@ -402,10 +437,8 @@ static void prvSensorTask(void *pvParameters)
 
     FreeRTOS_printf(("%s Starting prvSensorTask\r\n", getCurrTime()));
 
-    xClientSocket = FreeRTOS_socket(FREERTOS_AF_INET, FREERTOS_SOCK_DGRAM, FREERTOS_IPPROTO_UDP);
-    configASSERT(xClientSocket != FREERTOS_INVALID_SOCKET);
-
-    FreeRTOS_printf(("%s (prvSensorTask) socket connected\r\n", getCurrTime()));
+    // Create a socket for the sensor
+    prvSocketCreateSensorIP();
 
     hz_sensor_task = 0;
     uint8_t data[5];
@@ -482,7 +515,7 @@ static void prvSensorTask(void *pvParameters)
         }
 
         /* Send gear */
-        if (send_can_message(xClientSocket, &xDestinationAddress, CAN_ID_GEAR, (void *)&tmp_gear, sizeof(tmp_gear)) != SUCCESS)
+        if (send_can_message(xSensorClientSocket, &xDestinationAddress, CAN_ID_GEAR, (void *)&tmp_gear, sizeof(tmp_gear)) != SUCCESS)
         {
             FreeRTOS_printf(("%s (prvSensorTask) send gear failed\r\n", getCurrTime()));
         }
@@ -496,7 +529,7 @@ static void prvSensorTask(void *pvParameters)
         tmp_var = (uint8_t)tmp_throttle;
 
         /* Send throttle */
-        if (send_can_message(xClientSocket, &xDestinationAddress, CAN_ID_THROTTLE_INPUT, (void *)&tmp_var, sizeof(tmp_var)) != SUCCESS)
+        if (send_can_message(xSensorClientSocket, &xDestinationAddress, CAN_ID_THROTTLE_INPUT, (void *)&tmp_var, sizeof(tmp_var)) != SUCCESS)
         {
             FreeRTOS_printf(("%s (prvSensorTask) send throttle failed\r\n", getCurrTime()));
         }
@@ -510,7 +543,7 @@ static void prvSensorTask(void *pvParameters)
         tmp_var = (uint8_t)tmp_brake;
 
         /* Send brake */
-        if (send_can_message(xClientSocket, &xDestinationAddress, CAN_ID_BRAKE_INPUT, (void *)&tmp_var, sizeof(tmp_var)) != SUCCESS)
+        if (send_can_message(xSensorClientSocket, &xDestinationAddress, CAN_ID_BRAKE_INPUT, (void *)&tmp_var, sizeof(tmp_var)) != SUCCESS)
         {
             FreeRTOS_printf(("%s (prvSensorTask) send brake failed\r\n", getCurrTime()));
         }
@@ -526,7 +559,7 @@ static void prvSensorTask(void *pvParameters)
         if (camera_ok)
         {
             /* Steering assist */
-            if (send_can_message(xClientSocket, &xDestinationAddress, CAN_ID_STEERING_INPUT, (void *)&steering_assist, sizeof(steering_assist)) != SUCCESS)
+            if (send_can_message(xSensorClientSocket, &xDestinationAddress, CAN_ID_STEERING_INPUT, (void *)&steering_assist, sizeof(steering_assist)) != SUCCESS)
             {
                 FreeRTOS_printf(("%s (prvSensorTask) send steering_assist failed\r\n", getCurrTime()));
             }
@@ -536,6 +569,41 @@ static void prvSensorTask(void *pvParameters)
         hz_sensor_task++;
         vTaskDelay(SENSOR_LOOP_DELAY_MS);
     }
+}
+
+
+static void prvSocketCreateCanRx(void) {
+    uint32_t ulIPAddress;
+    struct freertos_sockaddr xBindAddress;
+    char cBuffer[16];
+
+    xDestinationAddress.sin_addr = FreeRTOS_inet_addr(CYBERPHYS_BROADCAST_ADDR);
+    xDestinationAddress.sin_port = FreeRTOS_htons((uint16_t)CAN_PORT);
+    xCanRxClientSocket = FreeRTOS_socket(FREERTOS_AF_INET, FREERTOS_SOCK_DGRAM, FREERTOS_IPPROTO_UDP);
+    configASSERT(xCanRxClientSocket != FREERTOS_INVALID_SOCKET);
+
+    /* Attempt to open the socket. */
+    xCanRxListeningSocket = FreeRTOS_socket(FREERTOS_AF_INET, FREERTOS_SOCK_DGRAM, FREERTOS_IPPROTO_UDP);
+    configASSERT(xCanRxListeningSocket != FREERTOS_INVALID_SOCKET);
+
+    /* Attempt to open the socket. */
+    xCanRxListeningSocket = FreeRTOS_socket(FREERTOS_AF_INET, FREERTOS_SOCK_DGRAM, FREERTOS_IPPROTO_UDP);
+    configASSERT(xCanRxListeningSocket != FREERTOS_INVALID_SOCKET);
+
+    /* This test receives data sent from a different port on the same IP address.
+	Obtain the nodes IP address.  Configure the freertos_sockaddr structure with
+	the address being bound to.  The strange casting is to try and remove
+	compiler warnings on 32 bit machines.  Note that this task is only created
+	after the network is up, so the IP address is valid here. */
+    FreeRTOS_GetAddressConfiguration(&ulIPAddress, NULL, NULL, NULL);
+    xBindAddress.sin_addr = ulIPAddress;
+    xBindAddress.sin_port = FreeRTOS_htons((uint16_t)CAN_PORT);
+
+    /* Bind the socket to the port that the client task will send to. */
+    FreeRTOS_bind(xCanRxListeningSocket, &xBindAddress, sizeof(xBindAddress));
+
+    FreeRTOS_inet_ntoa(xBindAddress.sin_addr, cBuffer);
+    FreeRTOS_printf(("%s xCanRxListeningSocket bound to addr %s:%u\r\n", getCurrTime(), cBuffer, (uint16_t)CAN_PORT));
 }
 
 /* Called by FreeRTOS+TCP when the network connects or disconnects.  Disconnect
@@ -568,10 +636,21 @@ void vApplicationIPNetworkEventHook(eIPCallbackEvent_t eNetworkEvent)
         if (xMainTask == NULL) {
             FreeRTOS_printf(("%s (Error)~  NtkHook: Unable to get the handle of <prvMainTask>.\r\n", getCurrTime()));
         }
-        funcReturn = xTaskNotify( xMainTask, NOTIFY_SUCCESS_NTK ,eSetBits);
-        if (funcReturn != pdPASS) {
-            FreeRTOS_printf(("%s (Error)~  NtkHook: Failed to notify <prvMainTask>!\r\n", getCurrTime()));
+
+        if (xSensorTask && xCanTask) {
+            BaseType_t pxHigherPriorityTaskWoken = pdFALSE;
+            vTaskNotifyGiveFromISR( xIPRestartHandlerTask, &pxHigherPriorityTaskWoken );
+        } else {
+            funcReturn = xTaskNotify( xMainTask, NOTIFY_SUCCESS_NTK ,eSetBits);
+            if (funcReturn != pdPASS) {
+                FreeRTOS_printf(("%s (Error)~  NtkHook: Failed to notify <prvMainTask>!\r\n", getCurrTime()));
+            }
         }
+
+    } else if (eNetworkEvent == eNetworkDown) {
+        vTaskSuspend(xSensorTask);
+        vTaskSuspend(xCanTask);
+        startNetwork();
     }
 }
 /*-----------------------------------------------------------*/
@@ -580,51 +659,24 @@ static void prvCanRxTask(void *pvParameters)
 {
     (void)pvParameters;
     char cBuffer[16];
-    Socket_t xListeningSocket;
-    uint32_t ulIPAddress;
-    struct freertos_sockaddr xBindAddress;
     struct freertos_sockaddr xClient;
     size_t msg_len;
     canid_t can_id;
     uint32_t request_id;
     uint32_t target_id;
 
-    /* Socket for responding to requests */
-    Socket_t xClientSocket;
-    struct freertos_sockaddr xDestinationAddress;
-    xDestinationAddress.sin_addr = FreeRTOS_inet_addr(CYBERPHYS_BROADCAST_ADDR);
-    xDestinationAddress.sin_port = FreeRTOS_htons((uint16_t)CAN_PORT);
-    xClientSocket = FreeRTOS_socket(FREERTOS_AF_INET, FREERTOS_SOCK_DGRAM, FREERTOS_IPPROTO_UDP);
-    configASSERT(xClientSocket != FREERTOS_INVALID_SOCKET);
-    /*  End of the socket for respondnig to requests */
-
     FreeRTOS_printf(("%s Starting prvCanRxTask\r\n", getCurrTime()));
 
-    /* Attempt to open the socket. */
-    xListeningSocket = FreeRTOS_socket(FREERTOS_AF_INET, FREERTOS_SOCK_DGRAM, FREERTOS_IPPROTO_UDP);
-    configASSERT(xListeningSocket != FREERTOS_INVALID_SOCKET);
-
-    /* This test receives data sent from a different port on the same IP address.
-	Obtain the nodes IP address.  Configure the freertos_sockaddr structure with
-	the address being bound to.  The strange casting is to try and remove
-	compiler warnings on 32 bit machines.  Note that this task is only created
-	after the network is up, so the IP address is valid here. */
-    FreeRTOS_GetAddressConfiguration(&ulIPAddress, NULL, NULL, NULL);
-    xBindAddress.sin_addr = ulIPAddress;
-    xBindAddress.sin_port = FreeRTOS_htons((uint16_t)CAN_PORT);
-
-    /* Bind the socket to the port that the client task will send to. */
-    FreeRTOS_bind(xListeningSocket, &xBindAddress, sizeof(xBindAddress));
-
-    FreeRTOS_inet_ntoa(xBindAddress.sin_addr, cBuffer);
-    FreeRTOS_printf(("%s (prvCanRxTask) bound to addr %s:%u\r\n", getCurrTime(), cBuffer, (uint16_t)CAN_PORT));
+    /* Create socket for responding to requests */
+    prvSocketCreateCanRx();
+    /*  End of the socket for respondnig to requests */
 
     /* Set target ID */
     target_id = FreeRTOS_htonl(FreeRTOS_GetIPAddress());
 
     for (;;)
     {
-        uint8_t res = process_j1939(xListeningSocket, &xClient, &msg_len, &can_id, (uint8_t*)&request_id);
+        uint8_t res = process_j1939(xCanRxListeningSocket, &xClient, &msg_len, &can_id, (uint8_t*)&request_id);
         if (res == SUCCESS)
         {
             switch (can_id)
@@ -636,7 +688,7 @@ static void prvCanRxTask(void *pvParameters)
                     memcpy(&cBuffer[0], &target_id, sizeof(uint32_t));
                     /* Copy request ID (already in network byte order) */
                     memcpy(&cBuffer[4], &request_id, sizeof(uint32_t));
-                    res = send_can_message(xClientSocket, &xDestinationAddress, CAN_ID_HEARTBEAT_ACK,
+                    res = send_can_message(xCanRxClientSocket, &xDestinationAddress, CAN_ID_HEARTBEAT_ACK,
                         (void *)cBuffer, BYTE_LENGTH_HEARTBEAT_ACK);
                     if ( res != SUCCESS)
                     {
