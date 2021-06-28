@@ -41,6 +41,8 @@ def configure(ctx):
 
     ctx.env.append_value('DEFINES', [
         'configPROG_ENTRY     = main_besspin',
+        'configCHERI_VERBOSE_FAULT_INFO = 1',
+        'configCHERI_STACK_TRACE = 1',
         'FETT_APPS            = 1',
         'FREERTOS             = 1',
         'BSP_USE_IIC0         = 1',
