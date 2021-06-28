@@ -24,6 +24,57 @@ plic_instance_t Plic;
     #include <cheri/cheri-utility.h>
     #include "portmacro.h"
 
+
+    #if configCHERI_VERBOSE_FAULT_INFO
+        const char* cheri_faults[] = {
+            "None",                                     // 0
+            "Length Violation",                         // 1
+            "Untagged Capability",                      // 2
+            "Sealed",                                   // 3
+            "Type",                                     // 4
+            "Reserved",                                 // 5
+            "Reserved",                                 // 6
+            "Reserved",                                 // 7
+            "SW Permission",                            // 8
+            "Reserved",                                 // 9
+            "Representability",                         // 0xa
+            "Unaligned Base",                           // 0xb
+            "Reserved",                                 // 0xc
+            "Reserved",                                 // 0xd
+            "Reserved",                                 // 0xe
+            "Reserved",                                 // 0xf
+            "Global",                                   // 0x10
+            "Execute Permission",                       // 0x11
+            "Load Permission",                          // 0x12
+            "Store Permission",                         // 0x13
+            "Load Capability Permission",               // 0x14
+            "Store Capability Permission",              // 0x15
+            "Store Local Capability Permission",        // 0x16
+            "Seal Permission",                          // 0x17
+            "Access System Registers Permission",       // 0x18
+            "CInvoke Permission",                       // 0x19
+            "Access CInvoke IDC",                       // 0x1a
+            "Unseal Permission",                        // 0x1b
+            "Set CID Permission",                       // 0x1c
+            "Reserved",                                 // 0x1d
+            "Reserved",                                 // 0x1e
+            "Reserved"                                  // 0x1f
+        };
+    #endif
+
+    #if configCHERI_STACK_TRACE
+        static void backtrace(void* pc, void* sp, void* ra, size_t xCompID) {
+            printf( "\033[0;33m" );
+            printf("<STACK TRACE START>\n");
+            taskENTER_CRITICAL();
+            rtl_cherifreertos_compartment_backtrace(pc, sp, ra, xCompID);
+            printf( "\033[0;33m" );
+            printf("<STACK TRACE END>\n");
+            taskEXIT_CRITICAL();
+            printf( "\033[0m" );
+        }
+    #endif
+
     #if configCHERI_COMPARTMENTALIZATION
         static void inter_compartment_call( uintptr_t * exception_frame,
                                             ptraddr_t mepc )
@@ -131,9 +182,17 @@ plic_instance_t Plic;
                 if( obj != NULL )
                 {
                     void * ret = xPortGetCurrentCompartmentReturn();
-                    printf( "\033[0;31m" );
-                    printf( "<<<< Fault in Task: %s: Compartment #%d: %s:%s\n", pcTaskGetName( NULL ), xCompID, obj->aname, obj->oname );
-                    printf( "\033[0m" );
+                    #if configCHERI_VERBOSE_FAULT_INFO
+                        printf( "\033[0;31m" );
+                        printf( "<<<< %s Fault at 0x%x in Task: %s: Compartment #%d: %s:%s\n", cheri_faults[cheri_cause], (size_t) mepcc, pcTaskGetName( NULL ), xCompID, obj->aname, obj->oname );
+                        printf( "\033[0m" );
+                    #endif
+
+                    #if configCHERI_STACK_TRACE
+                        void* sp = *( exception_frame + 2 );
+                        void* ra = *( exception_frame + 1 );
+                        backtrace(mepcc, sp, ra, xCompID);
+                    #endif
 
                     pxHigherPriorityTaskWoken = rtl_cherifreertos_compartment_faultHandler(xCompID);
 
@@ -148,9 +207,12 @@ plic_instance_t Plic;
                 if( archive != NULL )
                 {
                     void * ret = xPortGetCurrentCompartmentReturn();
-                    printf( "\033[0;31m" );
-                    printf( "<<<< Fault in Task: %s: Compartment #%d: %s\n", pcTaskGetName( NULL ), xCompID, archive->name );
-                    printf( "\033[0m" );
+
+                    #if configCHERI_VERBOSE_FAULT_INFO
+                        printf( "\033[0;31m" );
+                        printf( "<<<< %s Fault in Task: %s: Compartment #%d: %s\n", cheri_faults[cheri_cause], pcTaskGetName( NULL ), xCompID, archive->name );
+                        printf( "\033[0m" );
+                    #endif
 
                     pxHigherPriorityTaskWoken = rtl_cherifreertos_compartment_faultHandler(xCompID);
 
