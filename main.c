@@ -217,7 +217,10 @@ uint64_t port_get_current_mtime( void )
         #endif
 
         #if DEBUG
-            rtems_rtl_trace_set_mask( RTEMS_RTL_TRACE_UNRESOLVED | \
+
+            rtems_rtl_trace_set_mask( RTEMS_RTL_TRACE_UNRESOLVED );
+
+            /* rtems_rtl_trace_set_mask( RTEMS_RTL_TRACE_UNRESOLVED | \
                     RTEMS_RTL_TRACE_WARNING | \
                     RTEMS_RTL_TRACE_LOAD | \
                     RTEMS_RTL_TRACE_DETAIL | \
@@ -231,7 +234,7 @@ uint64_t port_get_current_mtime( void )
                     RTEMS_RTL_TRACE_CACHE | \
                     RTEMS_RTL_TRACE_CHERI | \
                     RTEMS_RTL_TRACE_LOAD_SECT | \
-                    RTEMS_RTL_TRACE_DEPENDENCY);
+                    RTEMS_RTL_TRACE_DEPENDENCY); */
             printf("main.c: Loading %s\n", configLIBDL_PROG_START_OBJ);
         #endif
 
