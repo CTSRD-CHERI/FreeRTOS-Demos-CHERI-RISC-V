@@ -66,11 +66,9 @@ plic_instance_t Plic;
         static void backtrace(void* pc, void* sp, void* ra, size_t xCompID) {
             printf( "\033[0;33m" );
             printf("<STACK TRACE START>\n");
-            taskENTER_CRITICAL();
             rtl_cherifreertos_compartment_backtrace(pc, sp, ra, xCompID);
             printf( "\033[0;33m" );
             printf("<STACK TRACE END>\n");
-            taskEXIT_CRITICAL();
             printf( "\033[0m" );
         }
     #endif
