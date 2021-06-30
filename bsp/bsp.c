@@ -158,7 +158,7 @@ plic_instance_t Plic;
             }
             #endif
 
-            #if DEBUG
+            #if (DEBUG || configCHERI_VERBOSE_FAULT_INFO)
                 for( int i = 0; i < 35; i++ )
                 {
                     printf( "x%i ", i );
