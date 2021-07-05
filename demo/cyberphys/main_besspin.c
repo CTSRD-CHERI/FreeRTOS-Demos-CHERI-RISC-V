@@ -316,7 +316,7 @@ void prvIPRestartHandlerTask(void *pvParameters) {
     while(1) {
         ulTaskNotifyTake( pdFALSE, portMAX_DELAY );
         prvSocketCreateCanRx();
-        prvSocketCreateSensor();
+        prvSocketCreateSensorIP();
         vTaskResume(xCanTask);
         vTaskResume(xSensorTask);
     }
