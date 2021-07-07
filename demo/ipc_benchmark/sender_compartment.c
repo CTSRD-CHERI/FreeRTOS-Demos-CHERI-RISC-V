@@ -50,13 +50,7 @@ typedef struct taskParams
     TaskHandle_t mainTask;
 } IPCTaskParams_t;
 
-extern uint64_t xStartTime;
-extern uint64_t xStartInstRet;
-extern uint64_t xStartDCacheLoad;
-extern uint64_t xStartDCacheMiss;
-extern uint64_t xStartICacheLoad;
-extern uint64_t xStartICacheMiss;
-extern uint64_t xStartL2CacheMiss;
+extern cheri_riscv_hpms start_hpms;
 
 void queueSendTask( void * pvParameters );
 
@@ -96,14 +90,7 @@ void queueSendTask( void * pvParameters )
 
     portDISABLE_INTERRUPTS();
 
-    xStartDCacheLoad = portCounterGet(COUNTER_DCACHE_LOAD);
-    xStartDCacheMiss = portCounterGet(COUNTER_DCACHE_LOAD_MISS);
-    xStartICacheLoad = portCounterGet(COUNTER_ICACHE_LOAD);
-    xStartICacheMiss = portCounterGet(COUNTER_ICACHE_LOAD_MISS);
-    xStartL2CacheMiss = portCounterGet(COUNTER_LLCACHE_LOAD_MISS);
-
-    xStartInstRet = portCounterGet(COUNTER_INSTRET);
-    xStartTime = portCounterGet(COUNTER_CYCLE);
+    PortStatCounters_ReadAll(&start_hpms);
 
     for( int i = 0; i < cnt; i++ )
     {

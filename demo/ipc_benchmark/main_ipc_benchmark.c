@@ -43,6 +43,8 @@
 #include "task.h"
 #include "queue.h"
 
+#include "portstatcounters.h"
+
 /* Priorities used by the tasks. */
 #define mainTASK_PRIORITY                  ( tskIDLE_PRIORITY + 3 )
 #define mainQUEUE_RECEIVE_TASK_PRIORITY    ( tskIDLE_PRIORITY + 2 )
@@ -72,20 +74,8 @@ void main_ipc_benchmark( int argc,
                          char ** argv );
 /*-----------------------------------------------------------*/
 
-uint64_t xStartTime = 0;
-uint64_t xEndTime = 0;
-uint64_t xStartInstRet = 0;
-uint64_t xEndInstRet = 0;
-uint64_t xStartDCacheLoad = 0;
-uint64_t xEndDCacheLoad = 0;
-uint64_t xStartDCacheMiss = 0;
-uint64_t xEndDCacheMiss = 0;
-uint64_t xStartICacheLoad = 0;
-uint64_t xEndICacheLoad = 0;
-uint64_t xStartICacheMiss = 0;
-uint64_t xEndICacheMiss = 0;
-uint64_t xStartL2CacheMiss = 0;
-uint64_t xEndL2CacheMiss = 0;
+cheri_riscv_hpms start_hpms;
+cheri_riscv_hpms end_hpms;
 
 static TaskHandle_t sendTask = NULL;
 static TaskHandle_t recvTask = NULL;

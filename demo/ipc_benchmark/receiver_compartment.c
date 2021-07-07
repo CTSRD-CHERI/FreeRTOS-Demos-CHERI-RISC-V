@@ -54,21 +54,8 @@ typedef struct taskParams
 } IPCTaskParams_t;
 /*-----------------------------------------------------------*/
 
-extern uint64_t xStartTime;
-extern uint64_t xStartInstRet;
-extern uint64_t xStartDCacheLoad;
-extern uint64_t xStartDCacheMiss;
-extern uint64_t xEndDCacheMiss;
-extern uint64_t xStartICacheLoad;
-extern uint64_t xStartICacheMiss;
-extern uint64_t xStartL2CacheMiss;
-extern uint64_t xEndTime;
-extern uint64_t xEndInstRet;
-extern uint64_t xEndDCacheLoad;
-extern uint64_t xEndDCacheMiss;
-extern uint64_t xEndICacheLoad;
-extern uint64_t xEndICacheMiss;
-extern uint64_t xEndL2CacheMiss;
+extern cheri_riscv_hpms start_hpms;
+extern cheri_riscv_hpms end_hpms;
 /*-----------------------------------------------------------*/
 
 void queueReceiveTask( void * pvParameters );
@@ -118,34 +105,18 @@ void queueReceiveTask( void * pvParameters )
         xQueueReceive( xQueue, pReceiveBuffer, portMAX_DELAY );
     }
 
-    xEndTime = portCounterGet(COUNTER_CYCLE);
-    xEndInstRet = portCounterGet(COUNTER_INSTRET);
-
-    xEndDCacheLoad = portCounterGet(COUNTER_DCACHE_LOAD);
-    xEndDCacheMiss = portCounterGet(COUNTER_DCACHE_LOAD_MISS);
-    xEndICacheLoad = portCounterGet(COUNTER_ICACHE_LOAD);
-    xEndICacheMiss = portCounterGet(COUNTER_ICACHE_LOAD_MISS);
-    xEndL2CacheMiss = portCounterGet(COUNTER_LLCACHE_LOAD_MISS);
+    PortStatCounters_ReadAll(&end_hpms);
+    PortStatCounters_DiffAll(&start_hpms, &end_hpms, &end_hpms);
 
     portENABLE_INTERRUPTS();
 
-    log( "IPC Performance Results for: buffer size: %lu - total size: %lu\n"
-         "\tCYCLE:\t\t%" PRIu64 "\n"
-         "\tINSTRET:\t%" PRIu64 "\n"
-         "\tDCACHE_LOAD:\t%" PRIu64  "\n"
-         "\tDCACHE_LOAD_MISS:\t%" PRIu64 "\n"
-         "\tICACHE_LOAD:\t%" PRIu64 "\n"
-         "\tICACHE_LOAD_MISS:\t%" PRIu64 "\n"
-         "\tLLCACHE_LOAD_MISS:\t%" PRIu64 "\n",
-         xBufferSize, xTotalSize,
-         xEndTime - xStartTime,
-         xEndInstRet - xStartInstRet,
-         xEndDCacheLoad - xStartDCacheLoad,
-         xEndDCacheMiss - xStartDCacheMiss,
-         xEndICacheLoad - xStartICacheLoad,
-         xEndICacheMiss - xStartICacheMiss,
-         xEndL2CacheMiss - xStartL2CacheMiss
+    log( "IPC Performance Results for: buffer size: %lu - total size: %lu\n",
+         xBufferSize, xTotalSize
          );
+
+    for (int i = 0; i < COUNTERS_NUM; i++) {
+        log("HPM %s: %" PRIu64 "\n", hpm_names[i], end_hpms.counters[i]);
+    }
 
     vPortFree( pReceiveBuffer );
     /* Notify main task we are finished */
