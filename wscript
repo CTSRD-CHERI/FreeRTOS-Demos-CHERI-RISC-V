@@ -1274,6 +1274,7 @@ def configure(ctx):
     if ctx.options.toolchain == "llvm":
         ctx.env.CC = 'clang'
         ctx.env.AS = 'clang'
+        ctx.env.OBJCOPY = 'llvm-objcopy'
         ctx.env.ASM_NAME = 'clang'
         ctx.env.AS_TGT_F = ['-c', '-o']
         ctx.env.ASLNK_TGT_F = ['-o']
@@ -1297,6 +1298,7 @@ def configure(ctx):
         ctx.env.CC = ctx.env.TARGET + '-gcc'
         ctx.env.AS = ctx.env.TARGET + '-gcc'
         ctx.env.LD = ctx.env.TARGET + '-gcc'
+        ctx.env.OBJCOPY = ctx.env.TARGET + '-objcopy'
         ctx.env.append_value('LIB', ['gcc'])
         ctx.env.append_value('CFLAGS', '-mcmodel=medany')
     else:
@@ -1683,7 +1685,7 @@ def post_build(ctx):
 
             # Remove ucHeap symbol for the final ELF as further dynamically loaded
             # objects that get allocated from the heap (ucHeap) will confuse GDB
-            objcopy = subprocess.Popen(['llvm-objcopy', '-N', 'ucHeap',
+            objcopy = subprocess.Popen([ctx.env.OBJCOPY, '-N', 'ucHeap',
                 ctx.env.PREFIX + '/bin/' + ctx.env.DEMO + "_" + ctx.env.PROG + ".elf"
             ])
             objcopy.wait()
