@@ -1516,7 +1516,7 @@ def build(bld):
 
     # LIBS - Build required libs
     for lib in bld.env.LIB_DEPS:
-        if lib in bld.env.LIB_DEPS_EMBED_FAT:
+        if lib in bld.env.LIB_DEPS_EMBED_FAT and bld.env.PURECAP:
             bld.env.libs[lib].is_compartment = True
         bld.env.libs[lib].build(bld)
 
@@ -1532,7 +1532,8 @@ def build(bld):
         # Just for legacy compatibility where simple programs with one file are assumed
         # to have main_xxx.c files under demo/ and don't define their own wscript.
         bld.stlib(source=['./demo/' + bld.env.PROG + '.c'],
-                  cflags = ['-cheri-cap-table-abi=gprel'] if bld.env.COMPARTMENTALIZE else [],
+                  cflags = ['-cheri-cap-table-abi=gprel'] if bld.env.COMPARTMENTALIZE
+                    and bld.env.PURECAP else [],
                   target=bld.env.PROG)
 
     main_sources = ['main.c']
