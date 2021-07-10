@@ -1372,6 +1372,13 @@ def configure(ctx):
         if ctx.env.PURECAP:
             ctx.define('configCHERI_COMPARTMENTALIZATION', 1)
 
+            if ctx.env.COMP_MODE == "objs":
+                ctx.define('configCHERI_COMPARTMENTALIZATION_MODE', 1)
+            elif ctx.env.COMP_MODE == "libs":
+                ctx.define('configCHERI_COMPARTMENTALIZATION_MODE', 2)
+            else:
+                ctx.fatal('Invalid compartmentalization mode: either objs or libs are supported')
+
         if not ctx.is_defined('mainCONFIG_USE_DYNAMIC_LOADER'):
             ctx.define('mainCONFIG_USE_DYNAMIC_LOADER', 1)
             ctx.env.append_value('DEFINES', 'mainCONFIG_USE_DYNAMIC_LOADER = 1')
@@ -1380,12 +1387,6 @@ def configure(ctx):
         # Compartmentalizaion requires the dynamic loader/linker lib and a filesystem
         ctx.env.append_value('LIB_DEPS', ['freertos_libdl', 'freertos_fat'])
 
-        if ctx.env.COMP_MODE == "objs":
-            ctx.define('configCHERI_COMPARTMENTALIZATION_MODE', 1)
-        elif ctx.env.COMP_MODE == "libs":
-            ctx.define('configCHERI_COMPARTMENTALIZATION_MODE', 2)
-        else:
-            ctx.fatal('Invalid compartmentalization mode: either objs or libs are supported')
     else:
         ctx.define('configCOMPARTMENTS_NUM', 0)
         ctx.define('configMAXLEN_COMPNAME', 0)
