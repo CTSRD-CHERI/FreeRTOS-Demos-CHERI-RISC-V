@@ -1559,7 +1559,7 @@ def build(bld):
         tg.post()
         for task in tg.tasks:
             for obj_file in task.outputs:
-                if bld.env.PROG in str(obj_file) and \
+                if bld.env.LIBDL_PROG_START_FILE in str(obj_file) and \
                 not any('configLIBDL_PROG_START_OBJ' in define for define in bld.env.DEFINES):
                     print(str(obj_file).split('/')[-1])
                     bld.env.append_value(
