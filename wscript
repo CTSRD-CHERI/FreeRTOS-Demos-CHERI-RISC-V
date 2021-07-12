@@ -1482,6 +1482,7 @@ typedef struct LIBFILE_TO_COPY {
     for lib in LIBS_TO_EMBED:
         lib_path = str(bld.path.get_bld().ant_glob('**/' + lib, quiet=True)[0])
         lib = lib.replace('.', '_')
+        lib = lib.replace('-', '_')
         with open(lib_path, 'rb') as f:
             data = f.read()
             header_content += (bin2header(data, lib)) + '\n'
@@ -1495,7 +1496,7 @@ const xLibFileToCopy_t xLibFilesToCopy[] = {
 
     for lib in LIBS_TO_EMBED:
         header_content += '{ "/lib/' + lib + '", sizeof(' + lib.replace(
-            '.', '_') + '), ' + lib.replace('.', '_') + ' },\n'
+            '.', '_').replace('-', '_') + '), ' + lib.replace('.', '_').replace('-', '_') + ' },\n'
 
     header_content += '{ "/etc/libdl.conf", sizeof(libdl_conf), libdl_conf} '
     header_content += '};'
