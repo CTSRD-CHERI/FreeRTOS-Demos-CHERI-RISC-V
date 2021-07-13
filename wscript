@@ -1090,6 +1090,7 @@ def create_disk_image(ctx, size=5):
         # Create a libdl.conf file that contains the list of libraries, read by libdl
         with open(libdl_config_path, 'wb') as libdlconf:
             libdl_config = '\n'.join(['/lib/' + lib for lib in LIBS_TO_EMBED])
+            # TODO Add libc, libm, and compiler-rt
             libdl_config += '\n'
             libdlconf.write(str.encode(libdl_config))
             subprocess.Popen(["mcd", "/etc/"])
@@ -1236,6 +1237,7 @@ def configure(ctx):
         ctx.options.riscv_platform, ctx.options.riscv_arch,
         ctx.options.riscv_abi
     ])
+    ctx.env.TOOLCHAIN = ctx.options.toolchain
     ctx.env.DEMO = ctx.options.demo
     ctx.env.PROG = ctx.options.program
     ctx.env.PLATFORM = ctx.options.riscv_platform
@@ -1478,9 +1480,36 @@ typedef struct LIBFILE_TO_COPY {
   const uint8_t *pucFileData;
 } xLibFileToCopy_t;
                       """
+
+    c_builtins_libs = []
+    if bld.env.PURECAP:
+        compiler_rt = 'libclang_rt.builtins-' + bld.env.ARCH + '-gprel.a'
+        libdl_config += '\n' + '/lib/' + compiler_rt
+        libdl_config += '\n' + '/lib/' + 'libc-gprel.a'
+        libdl_config += '\n' + '/lib/' + 'libm-gprel.a'
+        LIBS_TO_EMBED += [compiler_rt, 'libc-gprel.a', 'libm-gprel.a']
+        c_builtins_libs += [compiler_rt, 'libc-gprel.a', 'libm-gprel.a']
+    else:
+        if bld.env.TOOLCHAIN == llvm:
+            compiler_rt = 'libclang_rt.builtins-' + bld.env.ARCH + '.a'
+        else:
+            compiler_rt = 'libgcc.a'
+
+        libdl_config += '\n' + '/lib/' + compiler_rt
+        libdl_config += '\n' + '/lib/' + 'libc.a'
+        libdl_config += '\n' + '/lib/' + 'libm.a'
+        LIBS_TO_EMBED += [compiler_rt, 'libc.a', 'libm.a']
+        c_builtins_libs += [compiler_rt, 'libc.a', 'libm.a']
+
     # Convert files to hex arrays
     for lib in LIBS_TO_EMBED:
-        lib_path = str(bld.path.get_bld().ant_glob('**/' + lib, quiet=True)[0])
+        lib_path = ""
+
+        if lib in c_builtins_libs:
+            lib_path = bld.env.SYSROOT + '/lib/' + lib
+        else:
+            lib_path = str(bld.path.get_bld().ant_glob('**/' + lib, quiet=True)[0])
+
         lib = lib.replace('.', '_')
         lib = lib.replace('-', '_')
         with open(lib_path, 'rb') as f:
