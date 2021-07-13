@@ -1490,7 +1490,7 @@ typedef struct LIBFILE_TO_COPY {
         LIBS_TO_EMBED += [compiler_rt, 'libc-gprel.a', 'libm-gprel.a']
         c_builtins_libs += [compiler_rt, 'libc-gprel.a', 'libm-gprel.a']
     else:
-        if bld.env.TOOLCHAIN == llvm:
+        if bld.env.TOOLCHAIN == "llvm":
             compiler_rt = 'libclang_rt.builtins-' + bld.env.ARCH + '.a'
         else:
             compiler_rt = 'libgcc.a'
