@@ -53,10 +53,12 @@ void queueSendTask( void * pvParameters )
     BaseType_t xReturned;
     UBaseType_t xTotalSize = IPC_TOTAL_SIZE;
     UBaseType_t xBufferSize = IPC_BUFFER_SIZE;
-    QueueHandle_t xQueue = NULL;
+    QueueHandle_t* xQueue = NULL;
     IPCType_t xIPCMode = IPC_MODE;
 
     IPCTaskParams_t * params = ( IPCTaskParams_t * ) pvParameters;
+
+    portDISABLE_INTERRUPTS();
 
     if( params != NULL )
     {
@@ -66,21 +68,21 @@ void queueSendTask( void * pvParameters )
         xIPCMode = params->xIPCMode;
     }
 
-    if (  xIPCMode == NOTIFICATIONS ) {
+    if (  xIPCMode == NOTIFICATIONS  || xIPCMode == ALL ) {
 
         for( int i = 0; i < DISCARD_RUNS; i++ )
         {
             xTaskNotifyGive( params->receiverTask );
         }
 
-        portDISABLE_INTERRUPTS();
-
         PortStatCounters_ReadAll(&start_hpms);
 
         xTaskNotifyGive( params->receiverTask );
 
-        vTaskDelete( NULL );
-        while(1);
+        if ( xIPCMode == NOTIFICATIONS ) {
+            vTaskDelete( NULL );
+            while(1);
+        }
     }
 
     // ---------------------------------------------------------------------- //
@@ -95,28 +97,48 @@ void queueSendTask( void * pvParameters )
         log( "Failed to allocated a send buffer of size %d\n", xBufferSize );
     }
 
-    /* Zero the buffer to warm up the cache */
-    memset( pBufferToSend, 0, xBufferSize );
+    /* Warm up the cache */
+    memset( pBufferToSend, 0x6a, xBufferSize );
 
-    for( int i = 0; i < DISCARD_RUNS; i++ )
-    {
-        xReturned = xQueueSend( xQueue, pBufferToSend, 0U );
-        configASSERT( xReturned == pdPASS );
-    }
+    #if VARY_QUEUE_SIZES
+        for( int i = 0; i < DISCARD_RUNS; i++ )
+        {
+            for ( int y = 0; y <= log2 ( params->xTotalSize ); y++ ) {
+                xReturned = xQueueSend( xQueue[y], pBufferToSend, 0U );
+                configASSERT( xReturned == pdPASS );
+            }
+        }
 
-    portDISABLE_INTERRUPTS();
-
-    PortStatCounters_ReadAll(&start_hpms);
-
-    for( int i = 0; i < cnt; i++ )
-    {
         /* Send to the queue - causing the queue receive task to unblock
          * 0 is used as the block time so the sending operation
          * will not block - it shouldn't need to block as the queue should always
          * be empty at this point in the code. */
-        xReturned = xQueueSend( xQueue, pBufferToSend, 0U );
-        configASSERT( xReturned == pdPASS );
-    }
+        for ( int y = 0; y <= log2 ( params->xTotalSize ); y++ ) {
+
+            PortStatCounters_ReadAll(&start_hpms);
+
+            xReturned = xQueueSend( xQueue[y], pBufferToSend, 0U );
+            configASSERT( xReturned == pdPASS );
+        }
+    #else
+        for( int i = 0; i < DISCARD_RUNS; i++ )
+        {
+            xReturned = xQueueSend( xQueue[0], pBufferToSend, 0U );
+            configASSERT( xReturned == pdPASS );
+        }
+
+        PortStatCounters_ReadAll(&start_hpms);
+
+        for( int i = 0; i < cnt; i++ )
+        {
+            /* Send to the queue - causing the queue receive task to unblock
+             * 0 is used as the block time so the sending operation
+             * will not block - it shouldn't need to block as the queue should always
+             * be empty at this point in the code. */
+            xReturned = xQueueSend( xQueue[0], pBufferToSend, 0U );
+            configASSERT( xReturned == pdPASS );
+        }
+    #endif
 
     vPortFree( pBufferToSend );
     vTaskDelete( NULL );

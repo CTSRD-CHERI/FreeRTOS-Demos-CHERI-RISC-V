@@ -57,7 +57,7 @@ void queueReceiveTask( void * pvParameters )
 {
     UBaseType_t xTotalSize = IPC_TOTAL_SIZE;
     UBaseType_t xBufferSize = IPC_BUFFER_SIZE;
-    QueueHandle_t xQueue = NULL;
+    QueueHandle_t* xQueue = NULL;
     IPCType_t xIPCMode = IPC_MODE;
 
     IPCTaskParams_t * params = ( IPCTaskParams_t * ) pvParameters;
@@ -70,7 +70,7 @@ void queueReceiveTask( void * pvParameters )
         xIPCMode = params->xIPCMode;
     }
 
-    if (  xIPCMode == NOTIFICATIONS ) {
+    if (  xIPCMode == NOTIFICATIONS || xIPCMode == ALL ) {
 
         for( int i = 0; i < DISCARD_RUNS; i++ )
         {
@@ -82,18 +82,20 @@ void queueReceiveTask( void * pvParameters )
         PortStatCounters_ReadAll(&end_hpms);
         PortStatCounters_DiffAll(&start_hpms, &end_hpms, &end_hpms);
 
-        portENABLE_INTERRUPTS();
-        log( "IPC Performance Results for task notifications\n" );
+        log( "IPC Performance Results for: task notifications\n" );
 
         for (int i = 0; i < COUNTERS_NUM; i++) {
             log("HPM %s: %" PRIu64 "\n", hpm_names[i], end_hpms.counters[i]);
         }
 
-        /* Notify main task we are finished */
-        xTaskNotifyGive( params->mainTask );
 
-        vTaskDelete( NULL );
-        while(1);
+        if ( xIPCMode == NOTIFICATIONS ) {
+            /* Notify main task we are finished */
+            xTaskNotifyGive( params->mainTask );
+
+            vTaskDelete( NULL );
+            while(1);
+        }
     }
 
     // ---------------------------------------------------------------------- //
@@ -114,33 +116,58 @@ void queueReceiveTask( void * pvParameters )
     }
 
     /* Zero the buffer to warm up the cache */
-    memset( pReceiveBuffer, 0, xBufferSize );
+    memset( pReceiveBuffer, 0xa6, xBufferSize );
 
-    for( int i = 0; i < DISCARD_RUNS; i++ )
-    {
-        xQueueReceive( xQueue, pReceiveBuffer, portMAX_DELAY );
-    }
+    #if VARY_QUEUE_SIZES
+        for( int i = 0; i < DISCARD_RUNS; i++ )
+        {
+            for ( int y = 0; y <= log2 ( params->xTotalSize ); y++ )
+                xQueueReceive( xQueue[y], pReceiveBuffer, portMAX_DELAY );
+        }
 
-    for( int i = 0; i < cnt; i++ )
-    {
-        /* Wait until something arrives in the queue - this task will block
-         * indefinitely provided INCLUDE_vTaskSuspend is set to 1 in
-         * FreeRTOSConfig.h. */
-        xQueueReceive( xQueue, pReceiveBuffer, portMAX_DELAY );
-    }
+        for ( int y = 0; y <= log2 ( params->xTotalSize ); y++ )
+        {
+            /* Wait until something arrives in the queue - this task will block
+             * indefinitely provided INCLUDE_vTaskSuspend is set to 1 in
+             * FreeRTOSConfig.h. */
+            xQueueReceive( xQueue[y], pReceiveBuffer, portMAX_DELAY );
 
-    PortStatCounters_ReadAll(&end_hpms);
-    PortStatCounters_DiffAll(&start_hpms, &end_hpms, &end_hpms);
+            PortStatCounters_ReadAll(&end_hpms);
+            PortStatCounters_DiffAll(&start_hpms, &end_hpms, &end_hpms);
 
-    portENABLE_INTERRUPTS();
+            log( "IPC Performance Results for: queues: queue size: %lu\n", ( unsigned ) exp2( y ) );
 
-    log( "IPC Performance Results for: buffer size: %lu - total size: %lu\n",
-         xBufferSize, xTotalSize
-         );
+            for (int i = 0; i < COUNTERS_NUM; i++) {
+                log("HPM %s: %" PRIu64 "\n", hpm_names[i], end_hpms.counters[i]);
+        }
 
-    for (int i = 0; i < COUNTERS_NUM; i++) {
-        log("HPM %s: %" PRIu64 "\n", hpm_names[i], end_hpms.counters[i]);
-    }
+        }
+
+    #else
+        for( int i = 0; i < DISCARD_RUNS; i++ )
+        {
+            xQueueReceive( xQueue[0], pReceiveBuffer, portMAX_DELAY );
+        }
+
+        for( int i = 0; i < cnt; i++ )
+        {
+            /* Wait until something arrives in the queue - this task will block
+             * indefinitely provided INCLUDE_vTaskSuspend is set to 1 in
+             * FreeRTOSConfig.h. */
+            xQueueReceive( xQueue[0], pReceiveBuffer, portMAX_DELAY );
+        }
+
+        PortStatCounters_ReadAll(&end_hpms);
+        PortStatCounters_DiffAll(&start_hpms, &end_hpms, &end_hpms);
+
+        log( "IPC Performance Results for: queues: buffer size: %lu: total size: %lu\n",
+             xBufferSize, xTotalSize
+             );
+
+        for (int i = 0; i < COUNTERS_NUM; i++) {
+            log("HPM %s: %" PRIu64 "\n", hpm_names[i], end_hpms.counters[i]);
+        }
+    #endif
 
     vPortFree( pReceiveBuffer );
     /* Notify main task we are finished */

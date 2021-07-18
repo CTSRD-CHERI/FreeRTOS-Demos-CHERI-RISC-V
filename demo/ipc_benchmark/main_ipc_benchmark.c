@@ -121,8 +121,25 @@ void main_ipc_benchmark( int argc,
     log( "\n" );
 
     /* Create the queue. */
-    if ( xIPCMode == QUEUES )
-        params.xQueue = xQueueCreate( mainQUEUE_LENGTH, params.xBufferSize );
+    if ( xIPCMode == QUEUES || xIPCMode == ALL ) {
+        #if VARY_QUEUE_SIZES
+            params.xQueue = pvPortMalloc( sizeof( QueueHandle_t ) * ( log2 ( params.xTotalSize ) + 1 ) );
+            if ( params.xQueue == NULL ) {
+                log ( "Failed to allocate queues table\n");
+            }
+
+            for ( int i = 0; i <= log2 ( params.xTotalSize ); i++ ) {
+                log( "Creating queue[%d] of size %d\n", i , (int) exp2 (i) );
+                params.xQueue[i] = xQueueCreate( mainQUEUE_LENGTH, (int) exp2 (i) );
+                if ( params.xQueue[i] == NULL ) {
+                    log( "Failed to allocate a queue of size %d\n", (int) exp2 (i) );
+                }
+            }
+        #else
+            params.xQueue = pvPortMalloc( sizeof( QueueHandle_t ) );
+            params.xQueue[0] = xQueueCreate( mainQUEUE_LENGTH, params.xBufferSize );
+        #endif
+    }
 
     params.mainTask = xTaskGetCurrentTaskHandle();
     params.xIPCMode = xIPCMode;
@@ -140,11 +157,10 @@ void main_ipc_benchmark( int argc,
         xTaskResumeAll();
     }
 
-    if( params.xQueue != NULL  || xIPCMode == NOTIFICATIONS )
+    if( params.xQueue != NULL  || xIPCMode == NOTIFICATIONS || xIPCMode == ALL )
     {
-        for( int i = 0; i < xIterations + DISCARD_RUNS; i++ )
+        for( int i = 0; i < xIterations; i++ )
         {
-            log( "run #%d: ", i );
             xTaskCreate( queueReceiveTask, "RX", configMINIMAL_STACK_SIZE * 2U, &params, mainQUEUE_RECEIVE_TASK_PRIORITY, &recvTask );
             params.receiverTask = recvTask;
             xTaskCreate( queueSendTask, "TX", configMINIMAL_STACK_SIZE * 2U, &params, mainQUEUE_SEND_TASK_PRIORITY, &sendTask );
