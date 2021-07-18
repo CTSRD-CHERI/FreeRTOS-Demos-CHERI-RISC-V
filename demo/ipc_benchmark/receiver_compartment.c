@@ -119,14 +119,14 @@ void queueReceiveTask( void * pvParameters )
     memset( pReceiveBuffer, 0xa6, xBufferSize );
 
     #if VARY_QUEUE_SIZES
-        for( int i = 0; i < DISCARD_RUNS; i++ )
-        {
-            for ( int y = 0; y <= log2 ( params->xTotalSize ); y++ )
-                xQueueReceive( xQueue[y], pReceiveBuffer, portMAX_DELAY );
-        }
-
         for ( int y = 0; y <= log2 ( params->xTotalSize ); y++ )
         {
+
+            for( int i = 0; i < DISCARD_RUNS; i++ )
+            {
+                xQueueReceive( xQueue[y], pReceiveBuffer, portMAX_DELAY );
+            }
+
             /* Wait until something arrives in the queue - this task will block
              * indefinitely provided INCLUDE_vTaskSuspend is set to 1 in
              * FreeRTOSConfig.h. */
