@@ -135,10 +135,10 @@ print(json_object)
 
 with open(args.output_csv,'w') as f:
     w = csv.writer(f)
-    w.writerows(hpm_counters.items())
+    w.writerows(IPC_RESULTS.items())
 
 with open(args.output_json, 'w') as outfile:
-    json.dump(hpm_counters, outfile, indent = 4)
+    json.dump(IPC_RESULTS, outfile, indent = 4)
 
 with open(args.output_html,'w') as f:
     output_html = json2html.convert(json = json_object)
