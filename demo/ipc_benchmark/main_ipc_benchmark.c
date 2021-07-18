@@ -43,6 +43,8 @@
 #include "task.h"
 #include "queue.h"
 
+#include "types.h"
+
 #include "portstatcounters.h"
 
 /* Priorities used by the tasks. */
@@ -59,15 +61,6 @@
 #define mainQUEUE_LENGTH                   ( 1 )
 /*-----------------------------------------------------------*/
 
-typedef struct taskParams
-{
-    UBaseType_t xBufferSize;
-    UBaseType_t xTotalSize;
-    QueueHandle_t xQueue;
-    TaskHandle_t mainTask;
-} IPCTaskParams_t;
-/*-----------------------------------------------------------*/
-
 void queueReceiveTask( void * pvParameters );
 void queueSendTask( void * pvParameters );
 void main_ipc_benchmark( int argc,
@@ -80,6 +73,7 @@ cheri_riscv_hpms end_hpms;
 static TaskHandle_t sendTask = NULL;
 static TaskHandle_t recvTask = NULL;
 static UBaseType_t xIterations = RUNS;
+static IPCType_t xIPCMode = IPC_MODE;
 static IPCTaskParams_t params;
 /*-----------------------------------------------------------*/
 
@@ -87,7 +81,9 @@ void main_ipc_benchmark( int argc,
                          char ** argv )
 {
     params = ( IPCTaskParams_t ) {
-        IPC_BUFFER_SIZE, IPC_TOTAL_SIZE, NULL
+        .xBufferSize = IPC_BUFFER_SIZE,
+        .xTotalSize = IPC_TOTAL_SIZE,
+        .xQueue = NULL
     };
 
     log( "Started main_ipc_benchmark: #%d args\n", argc );
@@ -114,13 +110,22 @@ void main_ipc_benchmark( int argc,
             xIterations = strtol( argv[ ++i ], NULL, 10 );
             log( "%s ", argv[ i ] );
         }
+
+        if( strcmp( argv[ i ], "-m" ) == 0 )
+        {
+            xIPCMode = strtol( argv[ ++i ], NULL, 10 );
+            log( "%s ", argv[ i ] );
+        }
     }
 
     log( "\n" );
 
     /* Create the queue. */
-    params.xQueue = xQueueCreate( mainQUEUE_LENGTH, params.xBufferSize );
+    if ( xIPCMode == QUEUES )
+        params.xQueue = xQueueCreate( mainQUEUE_LENGTH, params.xBufferSize );
+
     params.mainTask = xTaskGetCurrentTaskHandle();
+    params.xIPCMode = xIPCMode;
 
     /* Raise our priority */
     vTaskPrioritySet( NULL, tskIDLE_PRIORITY + mainTASK_PRIORITY );
@@ -135,13 +140,15 @@ void main_ipc_benchmark( int argc,
         xTaskResumeAll();
     }
 
-    if( params.xQueue != NULL )
+    if( params.xQueue != NULL  || xIPCMode == NOTIFICATIONS )
     {
         for( int i = 0; i < xIterations + DISCARD_RUNS; i++ )
         {
             log( "run #%d: ", i );
             xTaskCreate( queueReceiveTask, "RX", configMINIMAL_STACK_SIZE * 2U, &params, mainQUEUE_RECEIVE_TASK_PRIORITY, &recvTask );
+            params.receiverTask = recvTask;
             xTaskCreate( queueSendTask, "TX", configMINIMAL_STACK_SIZE * 2U, &params, mainQUEUE_SEND_TASK_PRIORITY, &sendTask );
+            params.senderTask = sendTask;
 
             /* Wait for the receive task to notify us all is done */
             ulTaskNotifyTake( pdFALSE, portMAX_DELAY );

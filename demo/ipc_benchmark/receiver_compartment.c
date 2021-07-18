@@ -43,16 +43,9 @@
 #include "task.h"
 #include "queue.h"
 
-#include "portstatcounters.h"
+#include "types.h"
 
-typedef struct taskParams
-{
-    UBaseType_t xBufferSize;
-    UBaseType_t xTotalSize;
-    QueueHandle_t xQueue;
-    TaskHandle_t mainTask;
-} IPCTaskParams_t;
-/*-----------------------------------------------------------*/
+#include "portstatcounters.h"
 
 extern cheri_riscv_hpms start_hpms;
 extern cheri_riscv_hpms end_hpms;
@@ -65,6 +58,7 @@ void queueReceiveTask( void * pvParameters )
     UBaseType_t xTotalSize = IPC_TOTAL_SIZE;
     UBaseType_t xBufferSize = IPC_BUFFER_SIZE;
     QueueHandle_t xQueue = NULL;
+    IPCType_t xIPCMode = IPC_MODE;
 
     IPCTaskParams_t * params = ( IPCTaskParams_t * ) pvParameters;
 
@@ -73,7 +67,37 @@ void queueReceiveTask( void * pvParameters )
         xBufferSize = params->xBufferSize;
         xTotalSize = params->xTotalSize;
         xQueue = params->xQueue;
+        xIPCMode = params->xIPCMode;
     }
+
+    if (  xIPCMode == NOTIFICATIONS ) {
+
+        for( int i = 0; i < DISCARD_RUNS; i++ )
+        {
+            ulTaskNotifyTake( pdFALSE, portMAX_DELAY );
+        }
+
+        ulTaskNotifyTake( pdFALSE, portMAX_DELAY );
+
+        PortStatCounters_ReadAll(&end_hpms);
+        PortStatCounters_DiffAll(&start_hpms, &end_hpms, &end_hpms);
+
+        portENABLE_INTERRUPTS();
+        log( "IPC Performance Results for task notifications\n" );
+
+        for (int i = 0; i < COUNTERS_NUM; i++) {
+            log("HPM %s: %" PRIu64 "\n", hpm_names[i], end_hpms.counters[i]);
+        }
+
+        /* Notify main task we are finished */
+        xTaskNotifyGive( params->mainTask );
+
+        vTaskDelete( NULL );
+        while(1);
+    }
+
+    // ---------------------------------------------------------------------- //
+    // xIPCMode == QUEUES
 
     unsigned int cnt = xTotalSize / xBufferSize;
 

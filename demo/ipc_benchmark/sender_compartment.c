@@ -40,15 +40,9 @@
 #include "task.h"
 #include "queue.h"
 
-#include "portstatcounters.h"
+#include "types.h"
 
-typedef struct taskParams
-{
-    UBaseType_t xBufferSize;
-    UBaseType_t xTotalSize;
-    QueueHandle_t xQueue;
-    TaskHandle_t mainTask;
-} IPCTaskParams_t;
+#include "portstatcounters.h"
 
 extern cheri_riscv_hpms start_hpms;
 
@@ -60,6 +54,7 @@ void queueSendTask( void * pvParameters )
     UBaseType_t xTotalSize = IPC_TOTAL_SIZE;
     UBaseType_t xBufferSize = IPC_BUFFER_SIZE;
     QueueHandle_t xQueue = NULL;
+    IPCType_t xIPCMode = IPC_MODE;
 
     IPCTaskParams_t * params = ( IPCTaskParams_t * ) pvParameters;
 
@@ -68,7 +63,28 @@ void queueSendTask( void * pvParameters )
         xBufferSize = params->xBufferSize;
         xTotalSize = params->xTotalSize;
         xQueue = params->xQueue;
+        xIPCMode = params->xIPCMode;
     }
+
+    if (  xIPCMode == NOTIFICATIONS ) {
+
+        for( int i = 0; i < DISCARD_RUNS; i++ )
+        {
+            xTaskNotifyGive( params->receiverTask );
+        }
+
+        portDISABLE_INTERRUPTS();
+
+        PortStatCounters_ReadAll(&start_hpms);
+
+        xTaskNotifyGive( params->receiverTask );
+
+        vTaskDelete( NULL );
+        while(1);
+    }
+
+    // ---------------------------------------------------------------------- //
+    // xIPCMode == QUEUES
 
     unsigned int cnt = xTotalSize / xBufferSize;
 
@@ -76,7 +92,7 @@ void queueSendTask( void * pvParameters )
 
     if( !pBufferToSend )
     {
-        printf( "Failed to allocated a send buffer of size %d\n", xBufferSize );
+        log( "Failed to allocated a send buffer of size %d\n", xBufferSize );
     }
 
     /* Zero the buffer to warm up the cache */

@@ -47,6 +47,7 @@ def configure(ctx):
         'IPC_TOTAL_SIZE       = 8',
         'DISCARD_RUNS         = 2',
         'RUNS                 = 10',
+        'IPC_MODE             = 1'
     ])
 
     if ctx.env.LOG_UDP:
