@@ -101,7 +101,7 @@ for qsize in QUEUES_SIZES:
         lines = [line.rstrip('\n') for line in f]
         for line_idx in range(len(lines)):
             line = lines[line_idx]
-            if "queue size: " + str(qsize) in line:
+            if "IPC Performance Results for: queues: queue size: " + str(qsize)  == line:
                 line_idx = line_idx + 1
                 line = lines[line_idx]
                 for counter in hpm_counters:
