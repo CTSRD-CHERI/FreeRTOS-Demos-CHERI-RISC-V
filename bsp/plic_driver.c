@@ -137,7 +137,9 @@ plic_source PLIC_register_interrupt_handler( plic_instance_t * this_plic,
     if( ( source_id >= 1 ) && ( source_id < PLIC_NUM_INTERRUPTS ) )
     {
         /* check if we have a handle registered */
+        #if !configCHERI_COMPARTMENTALIZATION
         if( this_plic->HandlerTable[ source_id ].Handler == NULL )
+        #endif
         {
             /* register new handler a callback reference */
             this_plic->HandlerTable[ source_id ].Handler = handler;
