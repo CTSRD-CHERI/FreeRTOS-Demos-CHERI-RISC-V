@@ -1188,6 +1188,11 @@ def options(ctx):
                    default="objs",
                    help='Comparmentalization mode (either objs or libs)')
 
+    ctx.add_option('--compartmentalize_stdlibs',
+                   action='store_true',
+                   default=False,
+                   help='Comparmentalization and dynamically load libc and builtins')
+
     # IP options
     ctx.add_option('--ipaddr',
                    action='store',
@@ -1256,6 +1261,7 @@ def configure(ctx):
     ctx.env.PROGRAM_ENTRY = ctx.env.PROG
     ctx.env.COMPARTMENTALIZE = ctx.options.compartmentalize
     ctx.env.COMP_MODE = ctx.options.compartmentalization_mode
+    ctx.env.COMP_STDLIBS = ctx.options.compartmentalize_stdlibs
     ctx.env.DEBUG = ctx.options.debug
     ctx.env.IP_ADDR = ctx.options.ipaddr
     ctx.env.GATEWAY_ADDR = ctx.options.gateway
@@ -1481,31 +1487,32 @@ typedef struct LIBFILE_TO_COPY {
 } xLibFileToCopy_t;
                       """
 
-    c_builtins_libs = []
-    if bld.env.PURECAP:
-        compiler_rt = 'libclang_rt.builtins-' + bld.env.ARCH + '-gprel.a'
-        libdl_config += '\n' + '/lib/' + compiler_rt
-        libdl_config += '\n' + '/lib/' + 'libc-gprel.a'
-        libdl_config += '\n' + '/lib/' + 'libm-gprel.a'
-        LIBS_TO_EMBED += [compiler_rt, 'libc-gprel.a', 'libm-gprel.a']
-        c_builtins_libs += [compiler_rt, 'libc-gprel.a', 'libm-gprel.a']
-    else:
-        if bld.env.TOOLCHAIN == "llvm":
-            compiler_rt = 'libclang_rt.builtins-' + bld.env.ARCH + '.a'
+    stdlibs = []
+    if bld.env.COMP_STDLIBS:
+        if bld.env.PURECAP:
+            compiler_rt = 'libclang_rt.builtins-' + bld.env.ARCH + '-gprel.a'
+            libdl_config += '\n' + '/lib/' + compiler_rt
+            libdl_config += '\n' + '/lib/' + 'libc-gprel.a'
+            libdl_config += '\n' + '/lib/' + 'libm-gprel.a'
+            LIBS_TO_EMBED += [compiler_rt, 'libc-gprel.a', 'libm-gprel.a']
+            stdlibs += [compiler_rt, 'libc-gprel.a', 'libm-gprel.a']
         else:
-            compiler_rt = 'libgcc.a'
+            if bld.env.TOOLCHAIN == "llvm":
+                compiler_rt = 'libclang_rt.builtins-' + bld.env.ARCH + '.a'
+            else:
+                compiler_rt = 'libgcc.a'
 
-        libdl_config += '\n' + '/lib/' + compiler_rt
-        libdl_config += '\n' + '/lib/' + 'libc.a'
-        libdl_config += '\n' + '/lib/' + 'libm.a'
-        LIBS_TO_EMBED += [compiler_rt, 'libc.a', 'libm.a']
-        c_builtins_libs += [compiler_rt, 'libc.a', 'libm.a']
+            libdl_config += '\n' + '/lib/' + compiler_rt
+            libdl_config += '\n' + '/lib/' + 'libc.a'
+            libdl_config += '\n' + '/lib/' + 'libm.a'
+            LIBS_TO_EMBED += [compiler_rt, 'libc.a', 'libm.a']
+            stdlibs += [compiler_rt, 'libc.a', 'libm.a']
 
     # Convert files to hex arrays
     for lib in LIBS_TO_EMBED:
         lib_path = ""
 
-        if lib in c_builtins_libs:
+        if lib in stdlibs:
             lib_path = bld.env.SYSROOT + '/lib/' + lib
         else:
             lib_path = str(bld.path.get_bld().ant_glob('**/' + lib, quiet=True)[0])
