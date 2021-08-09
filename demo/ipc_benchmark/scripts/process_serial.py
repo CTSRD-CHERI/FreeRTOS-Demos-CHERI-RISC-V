@@ -87,7 +87,7 @@ hpm_counters = {
 }
 
 CYCLE_INSTRET = ["CYCLE", "INSTRET"]
-IPC_TYPES = ["ECALL", "LOCAL", "LCOMP", "COMPSWITCH" "TSKNOTIF", "QUEUES"]
+IPC_TYPES = ["ECALL", "LOCAL", "LCOMP", "COMPSWITCH", "TSKNOTIF", "QUEUES"]
 QUEUES_SIZES = [pow(2, size) for size in range(11)]
 QUEUES_DICT = dict.fromkeys(QUEUES_SIZES, [])
 NOTIF_DICT = dict.fromkeys(hpm_counters, [])
