@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <inttypes.h>
 
 /* Kernel includes. */
 #include "FreeRTOS.h"
@@ -45,8 +46,105 @@
 #include "portstatcounters.h"
 
 extern cheri_riscv_hpms start_hpms;
+extern cheri_riscv_hpms end_hpms;
+
+uint64_t start_instret = 0;
+uint64_t end_instret = 0;
+uint64_t start_cycle = 0;
+uint64_t end_cycle = 0;
 
 void queueSendTask( void * pvParameters );
+
+static void local( void * pvParameters );
+void localFunc( void * pvParameters );
+void externFunc( void * pvParameters );
+
+void ecall( void );
+void callLocal( void * pvParameters );
+void callSameCompartment( void * pvParameters );
+void callExternalCompartment( void * pvParameters );
+
+static void local( void * pvParameters ) {
+    end_instret = portCounterGet(COUNTER_INSTRET);
+    end_cycle = portCounterGet(COUNTER_CYCLE);
+}
+
+void localFunc( void * pvParameters ) {
+    end_instret = portCounterGet(COUNTER_INSTRET);
+    end_cycle = portCounterGet(COUNTER_CYCLE);
+}
+
+void ecall( void ) {
+
+    for( int i = 0; i < DISCARD_RUNS; i++ ) {
+        PortStatCounters_ReadAll(&start_hpms);
+        start_cycle = portCounterGet(COUNTER_CYCLE);
+        start_instret = portCounterGet(COUNTER_INSTRET);
+        asm volatile("ecall");
+        end_instret = portCounterGet(COUNTER_INSTRET);
+        end_cycle = portCounterGet(COUNTER_CYCLE);
+    }
+
+    start_cycle = portCounterGet(COUNTER_CYCLE);
+    start_instret = portCounterGet(COUNTER_INSTRET);
+    asm volatile("ecall");
+    end_instret = portCounterGet(COUNTER_INSTRET);
+    end_cycle = portCounterGet(COUNTER_CYCLE);
+
+    log( "IPC Performance Results for: ecall\n");
+    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_CYCLE], end_cycle - start_cycle);
+    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_INSTRET], end_instret - start_instret);
+}
+
+void callLocal( void * pvParameters ) {
+    for( int i = 0; i < DISCARD_RUNS; i++ ) {
+        start_cycle = portCounterGet(COUNTER_CYCLE);
+        start_instret = portCounterGet(COUNTER_INSTRET);
+        local(pvParameters);
+    }
+
+    start_cycle = portCounterGet(COUNTER_CYCLE);
+    start_instret = portCounterGet(COUNTER_INSTRET);
+    local(pvParameters);
+
+    log( "IPC Performance Results for: local function call\n" );
+    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_CYCLE], end_cycle - start_cycle);
+    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_INSTRET], end_instret - start_instret);
+}
+
+void callSameCompartment( void * pvParameters ) {
+
+    for( int i = 0; i < DISCARD_RUNS; i++ ) {
+        start_cycle = portCounterGet(COUNTER_CYCLE);
+        start_instret = portCounterGet(COUNTER_INSTRET);
+        localFunc(pvParameters);
+    }
+
+    start_cycle = portCounterGet(COUNTER_CYCLE);
+    start_instret = portCounterGet(COUNTER_INSTRET);
+    externFunc(pvParameters);
+
+    log( "IPC Performance Results for: same compartment call\n" );
+    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_CYCLE], end_cycle - start_cycle);
+    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_INSTRET], end_instret - start_instret);
+}
+
+void callExternalCompartment( void * pvParameters ) {
+
+    for( int i = 0; i < DISCARD_RUNS; i++ ) {
+        start_cycle = portCounterGet(COUNTER_CYCLE);
+        start_instret = portCounterGet(COUNTER_INSTRET);
+        externFunc(pvParameters);
+    }
+
+    start_cycle = portCounterGet(COUNTER_CYCLE);
+    start_instret = portCounterGet(COUNTER_INSTRET);
+    externFunc(pvParameters);
+
+    log( "IPC Performance Results for: compartment switch call\n" );
+    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_CYCLE], end_cycle - start_cycle);
+    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_INSTRET], end_instret - start_instret);
+}
 
 void queueSendTask( void * pvParameters )
 {
@@ -67,6 +165,12 @@ void queueSendTask( void * pvParameters )
         xQueue = params->xQueue;
         xIPCMode = params->xIPCMode;
     }
+
+    // Microbenchmarks
+    ecall();
+    callLocal(pvParameters);
+    callSameCompartment(pvParameters);
+    callExternalCompartment(pvParameters);
 
     if (  xIPCMode == NOTIFICATIONS  || xIPCMode == ALL ) {
 
