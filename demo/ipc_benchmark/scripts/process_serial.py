@@ -86,11 +86,17 @@ hpm_counters = {
   "TAGCACHE_EVICT": 0.0
 }
 
-IPC_TYPES = ["TSKNOTIF", "QUEUES"]
+CYCLE_INSTRET = ["CYCLE", "INSTRET"]
+IPC_TYPES = ["ECALL", "LOCAL", "LCOMP", "COMPSWITCH" "TSKNOTIF", "QUEUES"]
 QUEUES_SIZES = [pow(2, size) for size in range(11)]
 QUEUES_DICT = dict.fromkeys(QUEUES_SIZES, [])
 NOTIF_DICT = dict.fromkeys(hpm_counters, [])
 IPC_RESULTS = dict.fromkeys(IPC_TYPES, [])
+
+ECALL_DICT = dict.fromkeys(CYCLE_INSTRET, [])
+LOCALCALL_DICT = dict.fromkeys(CYCLE_INSTRET, [])
+LOCALCOMPCALL_DICT = dict.fromkeys(CYCLE_INSTRET, [])
+COMP_SWITCH_DICT = dict.fromkeys(CYCLE_INSTRET, [])
 
 print(QUEUES_SIZES)
 
@@ -125,10 +131,62 @@ for qsize in QUEUES_SIZES:
                     if counter+':' in line:
                         NOTIF_DICT[counter] = float(line.split(':')[1])
                         line_idx = line_idx + 1
+            elif "ecall" in line:
+                line_idx = line_idx + 1
+                line = lines[line_idx]
+                for counter in ["CYCLE", "INSTRET"]:
+                    ECALL_DICT[counter] = float(0)
+                    line = lines[line_idx]
+                    while "HPM" not in line:
+                        line_idx = line_idx + 1
+                        line = lines[line_idx]
+                    if counter+':' in line:
+                        ECALL_DICT[counter] = float(line.split(':')[1])
+                        line_idx = line_idx + 1
+            elif "local function call" in line:
+                line_idx = line_idx + 1
+                line = lines[line_idx]
+                for counter in ["CYCLE", "INSTRET"]:
+                    LOCALCALL_DICT[counter] = float(0)
+                    line = lines[line_idx]
+                    while "HPM" not in line:
+                        line_idx = line_idx + 1
+                        line = lines[line_idx]
+                    if counter+':' in line:
+                        LOCALCALL_DICT[counter] = float(line.split(':')[1])
+                        line_idx = line_idx + 1
+            elif "same compartment call" in line:
+                line_idx = line_idx + 1
+                line = lines[line_idx]
+                for counter in ["CYCLE", "INSTRET"]:
+                    LOCALCOMPCALL_DICT[counter] = float(0)
+                    line = lines[line_idx]
+                    while "HPM" not in line:
+                        line_idx = line_idx + 1
+                        line = lines[line_idx]
+                    if counter+':' in line:
+                        LOCALCOMPCALL_DICT[counter] = float(line.split(':')[1])
+                        line_idx = line_idx + 1
+            elif "compartment switch call" in line:
+                line_idx = line_idx + 1
+                line = lines[line_idx]
+                for counter in ["CYCLE", "INSTRET"]:
+                    COMP_SWITCH_DICT[counter] = float(0)
+                    line = lines[line_idx]
+                    while "HPM" not in line:
+                        line_idx = line_idx + 1
+                        line = lines[line_idx]
+                    if counter+':' in line:
+                        COMP_SWITCH_DICT[counter] = float(line.split(':')[1])
+                        line_idx = line_idx + 1
             line_idx = line_idx + 1
 
 IPC_RESULTS["QUEUES"] = QUEUES_DICT
 IPC_RESULTS["TSKNOTIF"] = NOTIF_DICT
+IPC_RESULTS["ECALL"] = ECALL_DICT
+IPC_RESULTS["LOCAL"] = LOCALCALL_DICT
+IPC_RESULTS["LCOMP"] = LOCALCOMPCALL_DICT
+IPC_RESULTS["COMPSWITCH"] = COMP_SWITCH_DICT
 
 json_object = json.dumps(IPC_RESULTS, indent = 4)
 print(json_object)
