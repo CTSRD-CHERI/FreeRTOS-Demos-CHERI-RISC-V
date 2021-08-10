@@ -55,9 +55,9 @@ uint64_t end_cycle = 0;
 
 void queueSendTask( void * pvParameters );
 
-static void local( void * pvParameters );
-void localFunc( void * pvParameters );
-void externFunc( void * pvParameters );
+static void __attribute__ ((noinline)) local( void * pvParameters );
+void __attribute__ ((noinline)) localFunc( void * pvParameters );
+void __attribute__ ((noinline)) externFunc( void * pvParameters );
 
 void ecall( void );
 void callLocal( void * pvParameters );

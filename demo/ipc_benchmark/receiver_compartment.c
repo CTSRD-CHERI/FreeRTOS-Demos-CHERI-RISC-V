@@ -54,7 +54,7 @@ extern uint64_t end_cycle;
 /*-----------------------------------------------------------*/
 
 void queueReceiveTask( void * pvParameters );
-void externFunc( void * pvParameters );
+void __attribute__ ((noinline)) externFunc( void * pvParameters );
 
 void externFunc( void * pvParameters ) {
     end_instret = portCounterGet(COUNTER_INSTRET);
