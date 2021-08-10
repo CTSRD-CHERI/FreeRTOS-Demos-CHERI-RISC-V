@@ -49,6 +49,8 @@
 
 extern cheri_riscv_hpms start_hpms;
 extern cheri_riscv_hpms end_hpms;
+extern uint64_t start_instret;
+extern uint64_t start_cycle;
 extern uint64_t end_instret;
 extern uint64_t end_cycle;
 /*-----------------------------------------------------------*/
@@ -59,6 +61,12 @@ void __attribute__ ((noinline)) externFunc( void * pvParameters );
 void externFunc( void * pvParameters ) {
     end_instret = portCounterGet(COUNTER_INSTRET);
     end_cycle = portCounterGet(COUNTER_CYCLE);
+}
+
+void externFault( void * pvParameters ) {
+    start_instret = portCounterGet(COUNTER_INSTRET);
+    start_cycle = portCounterGet(COUNTER_CYCLE);
+    *((int *) 0) = 0;
 }
 
 void queueReceiveTask( void * pvParameters )

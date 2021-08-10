@@ -58,9 +58,11 @@ void queueSendTask( void * pvParameters );
 static void __attribute__ ((noinline)) local( void * pvParameters );
 void __attribute__ ((noinline)) localFunc( void * pvParameters );
 void __attribute__ ((noinline)) externFunc( void * pvParameters );
+void __attribute__ ((noinline)) externFault( void * pvParameters );
 
 void ecall( void );
 void callLocal( void * pvParameters );
+void callFault( void * pvParameters );
 void callSameCompartment( void * pvParameters );
 void callExternalCompartment( void * pvParameters );
 
@@ -74,10 +76,25 @@ void localFunc( void * pvParameters ) {
     end_cycle = portCounterGet(COUNTER_CYCLE);
 }
 
+void callFault( void * pvParameters ) {
+    for( int i = 0; i < DISCARD_RUNS; i++ ) {
+        externFault(pvParameters);
+        end_instret = portCounterGet(COUNTER_INSTRET);
+        end_cycle = portCounterGet(COUNTER_CYCLE);
+    }
+
+    externFault(pvParameters);
+    end_instret = portCounterGet(COUNTER_INSTRET);
+    end_cycle = portCounterGet(COUNTER_CYCLE);
+
+    log( "IPC Performance Results for: compartment faults\n");
+    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_CYCLE], end_cycle - start_cycle);
+    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_INSTRET], end_instret - start_instret);
+}
+
 void ecall( void ) {
 
     for( int i = 0; i < DISCARD_RUNS; i++ ) {
-        PortStatCounters_ReadAll(&start_hpms);
         start_cycle = portCounterGet(COUNTER_CYCLE);
         start_instret = portCounterGet(COUNTER_INSTRET);
         asm volatile("ecall");
@@ -168,6 +185,9 @@ void queueSendTask( void * pvParameters )
 
     // Microbenchmarks
     ecall();
+    #if configCHERI_COMPARTMENTALIZATION
+        callFault(pvParameters);
+    #endif
     callLocal(pvParameters);
     callSameCompartment(pvParameters);
     callExternalCompartment(pvParameters);
