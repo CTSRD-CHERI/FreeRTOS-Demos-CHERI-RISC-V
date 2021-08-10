@@ -185,7 +185,7 @@ void queueSendTask( void * pvParameters )
 
     // Microbenchmarks
     ecall();
-    #if configCHERI_COMPARTMENTALIZATION
+    #if configCHERI_COMPARTMENTALIZATION && configCHERI_COMPARTMENTALIZATION_MODE == 1
         callFault(pvParameters);
     #endif
     callLocal(pvParameters);
