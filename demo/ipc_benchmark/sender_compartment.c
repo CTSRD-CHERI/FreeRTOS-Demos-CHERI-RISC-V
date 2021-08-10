@@ -122,7 +122,7 @@ void callSameCompartment( void * pvParameters ) {
 
     start_cycle = portCounterGet(COUNTER_CYCLE);
     start_instret = portCounterGet(COUNTER_INSTRET);
-    externFunc(pvParameters);
+    localFunc(pvParameters);
 
     log( "IPC Performance Results for: same compartment call\n" );
     log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_CYCLE], end_cycle - start_cycle);
