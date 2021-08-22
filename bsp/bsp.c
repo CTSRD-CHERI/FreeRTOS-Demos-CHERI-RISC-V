@@ -166,7 +166,7 @@ plic_instance_t Plic;
                 printf( "mepc = 0x%lx\n", epc );
                 printf( "mepcc -> " );
                 cheri_print_cap( mepcc );
-                printf( "TRAP: CCSR = 0x%lx (cause: %x reg: %u : scr: %u)\n",
+                printf( "TRAP: MTVAL = 0x%lx (cause: 0x%x reg: %u : scr: %u)\n",
                         ccsr,
                         cheri_cause,
                         reg_num, is_scr );
