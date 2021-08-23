@@ -61,7 +61,7 @@ def configure(ctx):
         ['freertos_tcpip', 'virtio'])
 
     if ctx.env.COMPARTMENTALIZE:
-        ctx.env.append_value('LIB_DEPS_EMBED_FAT', ['freertos_tcpip'])
+        ctx.env.append_value('LIB_DEPS_EMBED_FAT', ['freertos_tcpip', 'j1939', 'canlib'])
         ctx.env.append_value('LIB_DEPS', ['freertos_libdl'])
 
     ctx.env.LIBDL_PROG_START_FILE = "main_besspin.c"
@@ -79,11 +79,30 @@ def build(bld):
         features=['c'],
         cflags=bld.env.CFLAGS + cflags,
         source=[
-            'main_besspin.c',
-            'cyberphys/canlib.c',
             'cyberphys/j1939.c',
         ],
         use=[
+            "freertos_core_headers", "freertos_bsp_headers", "freertos_tcpip_headers"],
+        target='j1939')
+
+    bld.stlib(
+        features=['c'],
+        cflags=bld.env.CFLAGS + cflags,
+        source=[
+            'cyberphys/canlib.c',
+        ],
+        use=[
+            "freertos_core_headers", "freertos_bsp_headers", "freertos_tcpip_headers"],
+        target='canlib')
+
+    bld.stlib(
+        features=['c'],
+        cflags=bld.env.CFLAGS + cflags,
+        source=[
+            'main_besspin.c',
+        ],
+        use=[
             "freertos_core_headers", "freertos_bsp_headers", "freertos_tcpip_headers",
+            "j1939", "canlib"
         ],
         target=name)
