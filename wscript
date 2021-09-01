@@ -1386,7 +1386,7 @@ def configure(ctx):
         ctx.define('configEMBED_LIBS_FAT', 1)
         ctx.define('configLIBDL_LIB_PATH',"/lib/")
         ctx.define('configLIBDL_CONF_PATH', "/etc/")
-        ctx.define('configCOMPARTMENTS_NUM', 64)
+        ctx.define('configCOMPARTMENTS_NUM', 128)
         ctx.define('configMAXLEN_COMPNAME', 255)
 
         # libdl will send solib events to GDB while loading objects
