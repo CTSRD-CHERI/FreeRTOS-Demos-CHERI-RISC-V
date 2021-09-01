@@ -1,6 +1,3 @@
-[submodule "coreMQTT-Agent"]
-	path = coreMQTT-Agent
-	url = https://github.com/CTSRD-CHERI/Lab-Project-coreMQTT-Agent.git
 [submodule "libdl-tools"]
 	path = libdl-tools
 	url = https://github.com/CTSRD-CHERI/rtems-tools.git
