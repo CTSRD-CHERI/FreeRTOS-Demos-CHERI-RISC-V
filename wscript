@@ -37,10 +37,12 @@ import shutil
 import subprocess
 import ipaddress
 from os import path
+from subprocess import check_output
 from pathlib import Path
 from waflib.Task import Task
 from waflib.TaskGen import after, before_method, feature
 from waflib.TaskGen import extension
+import graphviz
 
 top = '.'
 out = 'build'
@@ -1193,6 +1195,16 @@ def options(ctx):
                    default=False,
                    help='Comparmentalization and dynamically load libc and builtins')
 
+    ctx.add_option('--plot_compartments',
+                   action='store_true',
+                   default=False,
+                   help='Plot compartments deps graph using graphviz')
+
+    ctx.add_option('--loc_stats',
+                   action='store_true',
+                   default=False,
+                   help='Calculate detailed LoC stats for the built system')
+
     # IP options
     ctx.add_option('--ipaddr',
                    action='store',
@@ -1262,6 +1274,8 @@ def configure(ctx):
     ctx.env.COMPARTMENTALIZE = ctx.options.compartmentalize
     ctx.env.COMP_MODE = ctx.options.compartmentalization_mode
     ctx.env.COMP_STDLIBS = ctx.options.compartmentalize_stdlibs
+    ctx.env.PLOT_COMPARTMENTS = ctx.options.plot_compartments
+    ctx.env.LOC_STATS = ctx.options.loc_stats
     ctx.env.DEBUG = ctx.options.debug
     ctx.env.IP_ADDR = ctx.options.ipaddr
     ctx.env.GATEWAY_ADDR = ctx.options.gateway
@@ -1633,6 +1647,8 @@ def build(bld):
         if 'freertos_libdl' not in bld.env.LIB_DEPS:
             main_libs += ['freertos_libdl', 'freertos_libdl_headers']
 
+    bld.env.MAIN_SRCS = main_sources
+
     bld.env.SHLIB_MARKER = ['-Wl,--no-whole-archive', '-lc', '-lm', '-Wl,--end-group']
 
     bld.env.append_value('STLIB', main_libs)
@@ -1703,6 +1719,232 @@ def build(bld):
 
     bld.add_post_fun(post_build)
 
+class Compartment:
+  name = ""
+  path = ""
+  defined_symbols = []
+  external_symbols = []
+  creates_threads = False
+
+  def __init__(self, name, path):
+      self.name = name
+      self.path = path
+      self.creates_threads = False
+
+  def add_externs(self, externs):
+      self.external_symbols = externs
+
+  def add_defs(self, defs):
+      self.defined_symbols = defs
+
+def get_all_functions(ctx):
+    print(ctx.env.LIB_DEPS_EMBED_FAT)
+    functions = []
+
+    PROG = ctx.env.PREFIX + '/bin/' + ctx.env.DEMO + "_" + ctx.env.PROG + ".elf"
+    if not path.exists(PROG):
+        return
+
+    COMPARTMENTS = ctx.env.LIB_DEPS_EMBED_FAT
+    LIBS_PATHS = []
+
+    for comp in COMPARTMENTS:
+        lib_path = glob.glob(os.path.join(str(ctx.bldnode), '**', 'lib' + comp + '.a'), recursive=True)
+        if lib_path:
+            LIBS_PATHS += lib_path
+
+            output = check_output(["readelf", "--syms", lib_path[0]], universal_newlines=True).split("\n")
+            for line in output:
+                if "FUNC" in line:
+                    split = line.split(" ")
+                    functions.append(split[-1])
+
+def plot_compartments(ctx):
+    print(ctx.env.LIB_DEPS_EMBED_FAT)
+
+    dot = graphviz.Digraph(comment='Compartments Graph', strict=False, format='pdf')
+    dot.attr(rankdir='TB')
+
+    # Cluster libraries
+    freertos_kernel = graphviz.Digraph(name='clusterFreeRTOS-Kernel', node_attr={'shape': 'box'})
+    freertos_kernel.attr(label="FreeRTOS-Kernel");
+    freertos_plus = graphviz.Digraph(name='clusterFreeRTOS-Plus Libs', node_attr={'shape': 'box'})
+    freertos_plus.attr(label="Core FreeRTOS Libs");
+    freertos_labs = graphviz.Digraph(name='clusterFreeRTOS-Labs Libs', node_attr={'shape': 'box'})
+    freertos_labs.attr(label="Experimental FreeRTOS Libs");
+    freertos_thirdparty = graphviz.Digraph(name='clusterThirdParty Libs', node_attr={'shape': 'box'})
+    freertos_thirdparty.attr(label="ThirdParty Libs");
+    freertos_apps = graphviz.Digraph(name='clusterApplication Libs', node_attr={'shape': 'box'})
+    freertos_apps.attr(label="Application Libs");
+
+    freertos_plus_libs = ["freertos_tcpip", "freertos_libcoremqtt", "freertos_libcorejson"]
+    freertos_thirdparty_libs = ["freertos_libmbedtls", "freertos_libota", "freertos_libcorejson",
+                                "libtinycbor", "virtio", "freertos_network_transport"]
+    freertos_labs_libs = ["freertos_libdl", "freertos_fat"]
+
+    PROG = ctx.env.PREFIX + '/bin/' + ctx.env.DEMO + "_" + ctx.env.PROG + ".elf"
+
+    if not path.exists(PROG):
+        return
+
+    COMPARTMENTS = ctx.env.LIB_DEPS_EMBED_FAT
+    LIBS_PATHS = []
+    COMPS = {}
+
+    # Get kernel's globals
+    cherifreertos_defines = check_output(["nm", "-g", "--defined-only", PROG], universal_newlines=True).split("\n")
+    cherifreertos_globals = []
+    COMPS["cherifreertos"] = Compartment("cherifreertos", PROG)
+    for line in cherifreertos_defines:
+        split = line.split(" ")
+        if len(split) > 1:
+            cherifreertos_globals.append(split[-1])
+    COMPS["cherifreertos"].add_defs(cherifreertos_globals)
+
+    # Populate each compartment with its external/defined symbols
+    for comp in COMPARTMENTS:
+        lib_path = glob.glob(os.path.join(str(ctx.bldnode), '**', 'lib' + comp + '.a'), recursive=True)
+        if lib_path:
+            LIBS_PATHS += lib_path
+            new_comp = Compartment(comp, lib_path[0])
+
+            externs = []
+            defines = []
+
+            undefined = check_output(["nm", "--undefined-only", new_comp.path], universal_newlines=True).split("\n")
+            for line in undefined:
+                split = line.split(" ")
+                if len(split) > 1:
+                    externs.append(split[-1])
+
+            defined = check_output(["nm", "-g", "--defined-only", new_comp.path], universal_newlines=True).split("\n")
+            for line in defined:
+                split = line.split(" ")
+                if len(split) > 1:
+                    defines.append(split[-1])
+
+            new_comp.add_externs(externs)
+            new_comp.add_defs(defines)
+            COMPS[comp] = new_comp
+
+
+    # Add CheriFreeRTOS compartment to the graph
+    COMPARTMENTS.append("cherifreertos")
+    freertos_kernel.node("cherifreertos", "cherifreertos", color='lightblue', shape='box3d')
+    freertos_apps.node(ctx.env.PROG, ctx.env.PROG, color='green', shape='house')
+
+    # Build compartments deps graph using external/defined symbols
+    for comp in COMPARTMENTS:
+        externs = COMPS[comp].external_symbols
+        comp_resources = ""
+        for comp2 in COMPARTMENTS:
+            # Skip loopbak edges
+            if comp == comp2:
+                continue
+            num_externs = 0
+            for extern in externs:
+                if extern in COMPS[comp2].defined_symbols:
+                    num_externs += 1
+
+                # Check if a compartment creates tasks
+                if "xTaskCreate" in extern:
+                    COMPS[comp].creates_threads = True
+
+            if num_externs > 0:
+                # Mark calls into TCB/CheriFreeRTOS (sentries) as dashed
+                if comp2 == "cherifreertos":
+                    dot.edge(comp, comp2, label=str(num_externs), style="dashed")
+                else:
+                    dot.edge(comp, comp2, label=str(num_externs))
+
+        # Add a threading symbol to the name of the compartment
+        if COMPS[comp].creates_threads:
+            comp_resources += "⌇⌇"
+
+        if comp == "cherifreertos":
+            break
+
+        # Create graph nodes
+        if comp in freertos_plus_libs:
+            freertos_plus.node(comp, comp + " " + comp_resources, shape='component')
+        elif comp in freertos_labs_libs:
+            freertos_labs.node(comp, comp + " " + comp_resources, shape='component')
+        elif comp in freertos_thirdparty_libs:
+            freertos_labs.node(comp, comp + " " + comp_resources, shape='component')
+        else:
+            freertos_apps.node(comp, comp + " " + comp_resources, shape='component')
+
+    # Create an edge for the very first applicatio entry
+    dot.edge("cherifreertos", ctx.env.PROG, label=str("Application Entry"), color='blue')
+
+    # Plot subgraphs
+    dot.subgraph(freertos_plus)
+    dot.subgraph(freertos_labs)
+    dot.subgraph(freertos_thirdparty)
+    dot.subgraph(freertos_apps)
+    dot.subgraph(freertos_kernel)
+
+    # Render/save the graph
+    dot.render(ctx.env.PREFIX + '/share/' + ctx.env.PROG + '-compartment-graph.gv', view=False)
+
+def loc_add(ctx, comp_name, src_list):
+    loc_comp = 0
+    if shutil.which("cloc"):
+        with open(ctx.env.PREFIX + '/share/' + ctx.env.DEMO + "_" + ctx.env.PROG + '.loc', 'a') as loc:
+            loc.write("######### " + comp_name + " #########\n")
+            for src in src_list:
+                output = subprocess.check_output(['cloc', src], universal_newlines=True).split("\n")
+                for line in output:
+                    splitted = line.split()
+                    if len(line) > 1 and splitted[0] == 'C':
+                        loc_comp += int(splitted[-1])
+                        loc.write("{0:32}\t{1:80}\n".format(src.split('/')[-1], line))
+            loc.write(f"Total LoC for {comp_name} ={loc_comp}\n")
+
+def total_loc(ctx):
+
+    open(ctx.env.PREFIX + '/share/' + ctx.env.DEMO + "_" + ctx.env.PROG + '.loc', 'w').close()
+
+    tg = ctx.get_tgen_by_name(ctx.env.PROG)
+    print(tg.source)
+    loc_add(ctx, ctx.env.PROG, [str(s) for s in tg.source])
+    app_libs = [ctx.env.PROG]
+    for task in tg.tasks:
+        if task.dep_nodes:
+            for dep in task.dep_nodes:
+                dep = str(dep).split('/')[-1].split('.')[0][3:]
+                dep_tg = ctx.get_tgen_by_name(dep)
+                #print(dep_tg.source)
+                app_libs.append(dep)
+                loc_add(ctx, dep, [str(s) for s in dep_tg.source])
+                #for task_dep in dep_tg.tasks:
+                #    print(tg.source)
+
+    loc_add(ctx, "main", ctx.env.MAIN_SRCS)
+    all_libs = ctx.env.LIB_DEPS + list(set(ctx.env.LIB_DEPS_EMBED_FAT) - set(ctx.env.LIB_DEPS))
+    all_libs = list(dict.fromkeys(all_libs))
+    print(all_libs)
+    print(app_libs)
+    if "cherifreertos" in all_libs:
+        all_libs.remove("cherifreertos")
+
+    for app_lib in app_libs:
+        if app_lib in all_libs:
+            print("Removing, ", app_lib)
+            all_libs.remove(app_lib)
+    for lib in all_libs:
+        loc_add(ctx, lib, ctx.env.libs[lib].srcs)
+
+    total = 0
+    with open(ctx.env.PREFIX + '/share/' + ctx.env.DEMO + "_" + ctx.env.PROG + '.loc', 'r') as loc:
+        for line in loc.readlines():
+            if "Total LoC" in line:
+                total += int(line.split('=')[-1])
+
+    with open(ctx.env.PREFIX + '/share/' + ctx.env.DEMO + "_" + ctx.env.PROG + '.loc', 'a+') as loc:
+        loc.write('#################\n')
+        loc.write(f"Total LoC = {total}\n")
+        loc.write('#################\n')
 
 def post_build(ctx):
 
@@ -1746,6 +1988,14 @@ def post_build(ctx):
                 if ctx.env.DEBUG:
                     gdbscript.write("set auto-solib-add on\n")
                     gdbscript.write("set stop-on-solib-events 1\n")
+
+            if ctx.env.PLOT_COMPARTMENTS:
+                plot_compartments(ctx)
+
+            #get_all_functions(ctx)
+
+    if ctx.env.LOC_STATS:
+        total_loc(ctx)
 
     # TODO
     if ctx.options.run:
