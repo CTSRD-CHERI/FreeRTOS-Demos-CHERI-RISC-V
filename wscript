@@ -1435,7 +1435,7 @@ def configure(ctx):
         ctx.define('DEBUG', 1)
         ctx.define('ipconfigHAS_DEBUG_PRINTF', 1)
     else:
-        ctx.env.append_value('CFLAGS', ['-O2'])
+        ctx.env.append_value('CFLAGS', ['-O2', '-g'])
         ctx.define('NDEBUG', 1)
 
     freertos_bsp_configure(ctx)
