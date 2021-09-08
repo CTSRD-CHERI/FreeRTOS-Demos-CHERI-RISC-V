@@ -1684,7 +1684,10 @@ def build(bld):
 
     if bld.env.COMPARTMENTALIZE:
         if not path.exists( bld.env.PREFIX + '/bin/freertos-syms'):
-            rtems_syms = subprocess.Popen(["./waf", 'configure', '--prefix', bld.env.PREFIX , 'build', 'install'], cwd='libdl-tools')
+            # freertos-syms is a tool that builds on the host. Pop CFLAGS env if it is passed
+            # by cheribuild as it contains cross-compilation flags.
+            os.environ.pop("CFLAGS")
+            rtems_syms = subprocess.Popen(["./waf", 'configure', '--prefix', bld.env.PREFIX , 'build', 'install'], cwd='libdl-tools', shell=True)
             rtems_syms.wait()
 
         cflags = ' '.join(bld.env.CFLAGS)
