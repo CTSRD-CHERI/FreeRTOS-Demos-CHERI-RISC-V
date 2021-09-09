@@ -1,4 +1,3 @@
-#! /usr/bin/env python3
 #-
 # SPDX-License-Identifier: BSD-2-Clause
 #
@@ -1901,7 +1900,7 @@ def loc_add(ctx, comp_name, src_list):
                     if len(line) > 1 and splitted[0] == 'C':
                         loc_comp += int(splitted[-1])
                         loc.write("{0:32}\t{1:80}\n".format(src.split('/')[-1], line))
-            loc.write(f"Total LoC for {comp_name} ={loc_comp}\n")
+            loc.write("Total LoC for {} ={}\n".format(comp_name, loc_comp))
 
 def total_loc(ctx):
 
@@ -1945,7 +1944,7 @@ def total_loc(ctx):
 
     with open(ctx.env.PREFIX + '/share/' + ctx.env.DEMO + "_" + ctx.env.PROG + '.loc', 'a+') as loc:
         loc.write('#################\n')
-        loc.write(f"Total LoC = {total}\n")
+        loc.write("Total LoC = {}\n".format(total))
         loc.write('#################\n')
 
 def post_build(ctx):
