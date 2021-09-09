@@ -41,7 +41,6 @@ from pathlib import Path
 from waflib.Task import Task
 from waflib.TaskGen import after, before_method, feature
 from waflib.TaskGen import extension
-import graphviz
 
 top = '.'
 out = 'build'
@@ -1761,6 +1760,8 @@ def get_all_functions(ctx):
                     functions.append(split[-1])
 
 def plot_compartments(ctx):
+    import graphviz
+
     print(ctx.env.LIB_DEPS_EMBED_FAT)
 
     dot = graphviz.Digraph(comment='Compartments Graph', strict=False, format='pdf')
