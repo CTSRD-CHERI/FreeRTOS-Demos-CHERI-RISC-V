@@ -34,6 +34,7 @@ import os
 import glob
 import shutil
 import subprocess
+import sys
 import ipaddress
 from os import path
 from subprocess import check_output
@@ -1451,13 +1452,23 @@ def configure(ctx):
     # This file contains config macros generated from defines/options in wscripts
     ctx.write_config_header('waf_config.h')
 
+
+if sys.version_info[0] == 2:
+    import struct
+    def bs_elem_to_int(e):
+        return struct.unpack('B', e)[0]
+else:
+    def bs_elem_to_int(e):
+        return e
+
+
 # Copied from https://nachtimwald.com/2019/10/09/python-binary-to-c-header/
 def bin2header(data, var_name='var'):
     out = []
     out.append('unsigned char {var_name}[] = {{'.format(var_name=var_name))
     l = [data[i:i + 12] for i in range(0, len(data), 12)]
     for i, x in enumerate(l):
-        line = ', '.join(['0x{val:02x}'.format(val=ord(chr(c))) for c in x])
+        line = ', '.join(['0x{val:02x}'.format(val=bs_elem_to_int(c)) for c in x])
         out.append('  {line}{end_comma}'.format(
             line=line, end_comma=',' if i < len(l) - 1 else ''))
     out.append('};')
