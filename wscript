@@ -1242,8 +1242,8 @@ def ipaddr_freertos_ipconfig(ip, gateway, ctx):
             ctx.define('configNET_MASK'+str(index), int(netmask_arr[index]))
         for index in range(len(gateway_arr)):
             ctx.define('configGATEWAY_ADDR'+str(index), int(gateway_arr[index]))
-    except:
-        ctx.fatal('Invalid IP address')
+    except ValueError as e:
+        ctx.fatal('Invalid IP address: ' + str(e))
 
 def configure(ctx):
 
