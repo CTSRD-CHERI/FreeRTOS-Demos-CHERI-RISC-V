@@ -99,7 +99,7 @@ class FreeRTOSArchRiscv(FreeRTOSArch, Toolchain):
         ctx.add_option('--purecap',
                        action='store_true',
                        default=False,
-                       help='RISC-V CHER Purecap mode')
+                       help='RISC-V CHERI Purecap mode')
 
 
 ########################### ARCHs END ################################
