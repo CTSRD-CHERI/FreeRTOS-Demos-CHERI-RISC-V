@@ -31,6 +31,7 @@
 #
 
 import os
+import fnmatch
 import glob
 import shutil
 import subprocess
@@ -1997,9 +1998,11 @@ def post_build(ctx):
 
             # Move all .o files to a /lib directory for GDB to use when debugging
             # shared libs and trying to find .o files for debug info
-            for file_path in glob.glob(os.path.join(str(ctx.bldnode), '**', '*.o'), recursive=True):
-                new_path = os.path.join(ctx.env.PREFIX + '/lib/', os.path.basename(file_path))
-                shutil.copy(file_path, new_path)
+            for root, dirnames, filenames in os.walk(str(ctx.bldnode)):
+                for filename in fnmatch.filter(filenames, '*.o'):
+                    file_path = os.path.join(root, filename)
+                    new_path = os.path.join(ctx.env.PREFIX + '/lib/', os.path.basename(file_path))
+                    shutil.copy(file_path, new_path)
 
             # Write a gdbinit helper script to debug dynamically loaded objects
             with open(ctx.env.PREFIX + '/share/gdbscript', 'w') as gdbscript:
