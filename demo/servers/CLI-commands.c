@@ -376,11 +376,7 @@ void vRegisterCLICommands( void )
             }
         #endif
 
-        #ifdef PLATFORM_QEMU_VIRT
-            {
-                FreeRTOS_CLIRegisterCommand( &xShutDown );
-            }
-        #endif
+            FreeRTOS_CLIRegisterCommand( &xShutDown );
 
         #ifdef ipconfigUSE_FAT_LIBDL
             FreeRTOS_CLIRegisterCommand( &xDlOpen );
