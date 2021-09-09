@@ -145,6 +145,8 @@ int _gettimeofday( struct timeval * tv,
 
 void _exit( int x )
 {
+    portDISABLE_INTERRUPTS();
+
     do
     {
         #if PLATFORM_QEMU_VIRT || PLATFORM_SPIKE || PLATFORM_SAIL || PLATFORM_FETT

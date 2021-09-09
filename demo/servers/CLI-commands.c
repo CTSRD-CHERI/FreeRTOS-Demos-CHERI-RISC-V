@@ -297,8 +297,6 @@ static const CLI_Command_Definition_t xParameterEcho =
     };
 #endif /* configINCLUDE_TRACE_RELATED_CLI_COMMANDS */
 
-#ifdef PLATFORM_QEMU_VIRT
-
 /* Structure that defines the "shutdown" command line command */
     static const CLI_Command_Definition_t xShutDown =
     {
@@ -307,7 +305,6 @@ static const CLI_Command_Definition_t xParameterEcho =
         prvShutDownCommand, /* The function to run. */
         0                   /* No parameters are expected. */
     };
-#endif /* PLATFORM_QEMU_VIRT */
 /*-----------------------------------------------------------*/
 
 #ifdef ipconfigUSE_FAT_LIBDL
@@ -847,7 +844,6 @@ static BaseType_t prvDisplayIPConfig( char * pcWriteBuffer,
 
 #endif /* configINCLUDE_TRACE_RELATED_CLI_COMMANDS */
 
-#ifdef PLATFORM_QEMU_VIRT
     static BaseType_t prvShutDownCommand( char * pcWriteBuffer,
                                           size_t xWriteBufferLen,
                                           const char * pcCommandString )
@@ -856,8 +852,6 @@ static BaseType_t prvDisplayIPConfig( char * pcWriteBuffer,
         return pdTRUE;
     }
     /*-----------------------------------------------------------*/
-
-#endif /* PLATFORM_QEMU_VIRT */
 
 #ifdef ipconfigUSE_FAT_LIBDL
     static BaseType_t prvDlOpenCommand( char * pcWriteBuffer,
