@@ -529,10 +529,10 @@ class FreeRTOSLibBsp(FreeRTOSLib):
         self.name = "freertos_bsp"
 
         self.platform = ctx.env.PLATFORM
-        self.arch = ctx.env.ARCH
+        self.arch = ctx.env.RVARCH
 
         self.freertos_platform = ctx.env.freertos_demos[ctx.env.DEMO][
-            ctx.env.ARCH][ctx.env.PLATFORM.split('-')[0]]
+            ctx.env.RVARCH][ctx.env.PLATFORM.split('-')[0]]
 
         #self.defines = self.freertos_platform.defines
 
@@ -1259,10 +1259,10 @@ def configure(ctx):
     ctx.env.PLATFORM = ctx.options.riscv_platform
     ctx.env.RISCV_XLEN = ctx.options.riscv_arch[2:4]
     ctx.env.PURECAP = True if 'cheri' in ctx.options.riscv_arch else False
-    ctx.env.ARCH = 'riscv' + ctx.env.RISCV_XLEN
+    ctx.env.RVARCH = 'riscv' + ctx.env.RISCV_XLEN
     ctx.env.MARCH = ctx.options.riscv_arch
     ctx.env.MABI = ctx.options.riscv_abi
-    ctx.env.TARGET = ctx.env.ARCH + '-unknown-elf'
+    ctx.env.TARGET = ctx.env.RVARCH + '-unknown-elf'
     ctx.env.SYSROOT = ctx.options.sysroot
     ctx.env.MEMSTART = ctx.options.mem_start
     ctx.env.UNCACHED_MEMSTART = ctx.options.uncached_mem_start
@@ -1305,7 +1305,7 @@ def configure(ctx):
         ctx.env.append_value('CFLAGS', '-mcmodel=medium')
 
         ctx.env.append_value('STLIBPATH', [])
-        ctx.env.append_value('LIB', 'clang_rt.builtins-' + ctx.env.ARCH)
+        ctx.env.append_value('LIB', 'clang_rt.builtins-' + ctx.env.RVARCH)
         ctx.env.append_value('STLIBPATH', [ctx.env.SYSROOT + '/lib'])
         ctx.env.append_value('LINKFLAGS', ['-L' + ctx.env.SYSROOT + '/lib'])
 
@@ -1515,7 +1515,7 @@ typedef struct LIBFILE_TO_COPY {
     stdlibs = []
     if bld.env.COMP_STDLIBS:
         if bld.env.PURECAP:
-            compiler_rt = 'libclang_rt.builtins-' + bld.env.ARCH + '-gprel.a'
+            compiler_rt = 'libclang_rt.builtins-' + bld.env.RVARCH + '-gprel.a'
             libdl_config += '\n' + '/lib/' + compiler_rt
             libdl_config += '\n' + '/lib/' + 'libc-gprel.a'
             libdl_config += '\n' + '/lib/' + 'libm-gprel.a'
@@ -1523,7 +1523,7 @@ typedef struct LIBFILE_TO_COPY {
             stdlibs += [compiler_rt, 'libc-gprel.a', 'libm-gprel.a']
         else:
             if bld.env.TOOLCHAIN == "llvm":
-                compiler_rt = 'libclang_rt.builtins-' + bld.env.ARCH + '.a'
+                compiler_rt = 'libclang_rt.builtins-' + bld.env.RVARCH + '.a'
             else:
                 compiler_rt = 'libgcc.a'
 
