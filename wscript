@@ -1440,7 +1440,9 @@ def configure(ctx):
     freertos_libs_configure(ctx)
 
     # Check of --prefix exists and create it if it does not
-    Path(ctx.env.PREFIX).mkdir(parents=True, exist_ok=True)
+    prefixdir = Path(ctx.env.PREFIX)
+    if not prefixdir.exists():
+        prefixdir.mkdir(parents=True)
 
     # This file contains CFLAGS, DEFINES and INCLUDES that can be used for
     # building out-of-tree apps standalone (to be dynamically linked later on)
@@ -1972,7 +1974,9 @@ def post_build(ctx):
             objcopy.wait()
 
             # Create a lib directroy if it does not exist
-            Path(ctx.env.PREFIX + '/lib/').mkdir(parents=True, exist_ok=True)
+            libdir = Path(ctx.env.PREFIX + '/lib/')
+            if not libdir.exists():
+                libdir.mkdir(parents=True)
 
             # Move all .o files to a /lib directory for GDB to use when debugging
             # shared libs and trying to find .o files for debug info
