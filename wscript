@@ -1698,7 +1698,9 @@ def build(bld):
             # freertos-syms is a tool that builds on the host. Pop CFLAGS env if it is passed
             # by cheribuild as it contains cross-compilation flags.
             rtems_syms = subprocess.Popen("CFLAGS= ./waf configure --prefix " + bld.env.PREFIX + " install", cwd='libdl-tools', shell=True)
-            rtems_syms.wait()
+            ret = rtems_syms.wait()
+            if ret != 0:
+                bld.fatal("Failed to configure libdl-tools: exit code " + str(ret))
 
         cflags = ' '.join(bld.env.CFLAGS)
 
