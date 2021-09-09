@@ -1695,9 +1695,13 @@ def build(bld):
 
     if bld.env.COMPARTMENTALIZE:
         if not path.exists( bld.env.PREFIX + '/bin/freertos-syms'):
-            # freertos-syms is a tool that builds on the host. Pop CFLAGS env if it is passed
-            # by cheribuild as it contains cross-compilation flags.
-            rtems_syms = subprocess.Popen("CFLAGS= ./waf configure --prefix " + bld.env.PREFIX + " install", cwd='libdl-tools', shell=True)
+            # freertos-syms is a tool that builds on the host. Must not use any
+            # cross-compilation environment variables. Note that on macOS waf
+            # will try to look for clang in PATH by default, which somewhat
+            # bogusly contains the SDK dir when building with cheribuild, so
+            # force cc/c++ to get the system ones as no such symlinks exist in
+            # our CHERI-LLVM SDK dir.
+            rtems_syms = subprocess.Popen("CC=cc CXX=c++ CFLAGS= LDFLAGS= ./waf configure --prefix " + bld.env.PREFIX + " install", cwd='libdl-tools', shell=True)
             ret = rtems_syms.wait()
             if ret != 0:
                 bld.fatal("Failed to configure libdl-tools: exit code " + str(ret))
