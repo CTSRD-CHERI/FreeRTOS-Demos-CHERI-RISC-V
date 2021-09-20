@@ -116,7 +116,7 @@ plic_instance_t Plic;
 
     #endif /* ifdef __CHERI_PURE_CAPABILITY__ */
 
-    static UBaseType_t default_exception_handler( uintptr_t * exception_frame )
+    static UBaseType_t default_exception_handler( uintptr_t * exception_frame ) __attribute__((section(".text.fast")))
     {
             BaseType_t pxHigherPriorityTaskWoken = 0;
         #ifdef __CHERI_PURE_CAPABILITY__
@@ -289,7 +289,7 @@ xNetworkInterfaceOutput( void * const pxNetworkBuffer, BaseType_t xReleaseAfterS
  * Define an external interrupt handler
  * cause = 0x8...000000b == Machine external interrupt
  */
-BaseType_t external_interrupt_handler( UBaseType_t cause )
+BaseType_t external_interrupt_handler( UBaseType_t cause ) __attribute__((section(".text.fast")))
 {
     BaseType_t pxHigherPriorityTaskWoken = 0;
 

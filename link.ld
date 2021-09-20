@@ -77,14 +77,15 @@ _STACK_SIZE = DEFINED(_STACK_SIZE) ? _STACK_SIZE : 0x4000;
 _HEAP_SIZE = DEFINED(_HEAP_SIZE) ? _HEAP_SIZE : 0x4000;
 */
 
-_STACK_SIZE = 0x8000;
+_STACK_SIZE = 0x2000;
 _HEAP_SIZE = 0x4000;
 
 /*****************************************************************************
  * Define memory layout
  ****************************************************************************/
 MEMORY {
-	mem : ORIGIN = MEM_START, LENGTH = 0x10000000
+    fastmem : ORIGIN = configFAST_MEM_START, LENGTH = configFAST_MEM_SIZE
+    slowmem : ORIGIN = configSLOW_MEM_START, LENGTH = configSLOW_MEM_SIZE
 	uncached : ORIGIN = UNCACHED_MEM_START, LENGTH = 0x0010000
 }
 
@@ -96,19 +97,24 @@ ENTRY(boot)
  * Define the sections, and where they are mapped in memory
  ****************************************************************************/
 SECTIONS {
-	.text : ALIGN(8) {
+	.text.fast : ALIGN(8) {
 		*(.boot.text);
-		*(.text);
-		*(.text.*);
-	} > mem
+		*(.text.fast);
+        *libfreertos_core.a:*(.*)
+	} > fastmem
 
 	.init : {
 	   KEEP (*(.init))
-	} > mem
+	} > fastmem
 
     .fini : {
        KEEP (*(.fini))
-    } > mem
+    } > fastmem
+
+	.text : ALIGN(8) {
+		*(.text);
+		*(.text.*);
+	} > slowmem
 
     .rodata : {
        __rodata_start = .;
@@ -116,13 +122,13 @@ SECTIONS {
        *(.rodata.*)
        *(.gnu.linkonce.r.*)
        __rodata_end = .;
-	} > mem
+	} > fastmem
 
     .sdata : {
         _gp = . + 0x800;
         *(.srodata.cst16) *(.srodata.cst8) *(.srodata.cst4) *(.srodata.cst2) *(.srodata*)
         *(.sdata .sdata.* .gnu.linkonce.s.*)
-     }	> mem
+     }	> fastmem
 
 	.data : {
 	   __data_start = .;
@@ -130,37 +136,37 @@ SECTIONS {
 	   *(.data.*)
 	   *(.gnu.linkonce.d.*)
 	   __data_end = .;
-	} > mem
+	} > fastmem
 
 	.htif (NOLOAD) : {
 	   *(.htif)
-	} > mem
+	} > slowmem
 
 	.eh_frame : {
 	   *(.eh_frame)
-	} > mem
+	} > slowmem
 
     __cap_relocs :  ALIGN(16) {
       *(__cap_relocs)
-    } > mem
-
-    /*
-    .symtab : {
-       __symtab_start = .;
-        *(.symtab)
-       __symtab_end = .;
-    } > mem
-
-    .strtab : {
-       __strtab_start = .;
-        *(.strtab)
-       __strtab_end = .;
-     } > mem
-     */
+    } > slowmem
 
     .captable : ALIGN(16) {
-      *(.cap_relocs)
-    } > mem
+      *(.captable)
+    } > fastmem
+
+    .slowpath : ALIGN(16) {
+        *libfreertos_libdl.a:*(.text .text.*)
+        *libfreertos_fat.a:*(.text .text.*)
+        *libfreertos_bsp.a:*(.text .text.*)
+    } > slowmem
+
+    .rom : ALIGN(16) {
+      *.syms.o:*(.rodata)
+    } > slowmem
+
+    .ramdisk (NOLOAD) :  ALIGN(16) {
+      *(.ramdisk)
+    } > slowmem
 
     .bss (NOLOAD) :  ALIGN(16) {
        __bss_start = .;
@@ -170,7 +176,7 @@ SECTIONS {
        *(COMMON)
        . = ALIGN(16);
        __bss_end = .;
-    } > mem
+    } > fastmem
 
     .sbss (NOLOAD) : {
        __sbss_start = .;
@@ -178,24 +184,15 @@ SECTIONS {
        *(.sbss.*)
        *(.gnu.linkonce.sb.*)
        __sbss_end = .;
-    } > mem
-
-    /* Generate Stack and Heap definitions */
-    .heap (NOLOAD) :  ALIGN(16) {
-       _heap = .;
-       _heap_start = .;
-       . += _HEAP_SIZE;
-       _heap_end = .;
-    } > mem
+    } > fastmem
 
     .stack (NOLOAD) :  ALIGN(16) {
        _stack_end = .;
        . += _STACK_SIZE;
-       . = ALIGN(8);
        _stack = .;
        __stack = _stack;
        __freertos_irq_stack_top = .;
-    } > mem
+    } > fastmem
 
     .uncached (NOLOAD) : {
        *(.uncached)

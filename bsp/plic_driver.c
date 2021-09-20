@@ -112,7 +112,7 @@ void PLIC_set_priority( plic_instance_t * this_plic,
     }
 }
 
-plic_source PLIC_claim_interrupt( plic_instance_t * this_plic )
+plic_source PLIC_claim_interrupt( plic_instance_t * this_plic ) __attribute__((section(".text.fast")))
 {
     volatile plic_source * claim_addr = ( volatile plic_source * ) ( this_plic->base_addr +
                                                                      PLIC_CLAIM_OFFSET );
@@ -121,7 +121,7 @@ plic_source PLIC_claim_interrupt( plic_instance_t * this_plic )
 }
 
 void PLIC_complete_interrupt( plic_instance_t * this_plic,
-                              plic_source source )
+                              plic_source source ) __attribute__((section(".text.fast")))
 {
     volatile plic_source * claim_addr = ( volatile plic_source * ) ( this_plic->base_addr +
                                                                      PLIC_CLAIM_OFFSET );

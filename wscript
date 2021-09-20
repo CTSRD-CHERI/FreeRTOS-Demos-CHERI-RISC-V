@@ -262,9 +262,25 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
         elif 'p1' in ctx.env.PLATFORM:
             ctx.define('configCPU_CLOCK_HZ', 50000000)
             ctx.define('configPERIPH_CLOCK_HZ', 50000000)
+        elif 'p2-embedded' in ctx.env.PLATFORM:
+            ctx.define('configCPU_CLOCK_HZ', 50000000)
+            ctx.define('configPERIPH_CLOCK_HZ', 50000000)
+            ctx.define('configCUSTOM_HEAP_SIZE', 300) # 300 KiB
+
+            ctx.env.configFAST_MEM_START = 0xC0000000
+            ctx.env.configFAST_MEM_SIZE = 512 * 1024  # 512 KiB
+            ctx.env.configSLOW_MEM_START = 0xc0080000
+            ctx.env.configSLOW_MEM_SIZE = 0x02000000 # 32 MiB
+            ctx.env.UNCACHED_MEMSTART = 0x80000000
         else:
-            ctx.define('configCPU_CLOCK_HZ', 100000000)
-            ctx.define('configPERIPH_CLOCK_HZ', 100000000)
+            ctx.define('configCPU_CLOCK_HZ', 50000000)
+            ctx.define('configPERIPH_CLOCK_HZ', 50000000)
+
+            ctx.env.configFAST_MEM_START = 0xC0000000
+            ctx.env.configFAST_MEM_SIZE = 0x02000000 # 32 MiB
+            ctx.env.configSLOW_MEM_START = 0xC2000000
+            ctx.env.configSLOW_MEM_SIZE = 0x02000000 # 32 MiB
+            ctx.env.UNCACHED_MEMSTART = 0x80000000
 
         # Galois/Xilinx defines
 
@@ -433,6 +449,10 @@ class FreeRTOSBspFett(FreeRTOSBsp):
         if ctx.env.VIRTIO_BLK:
             ctx.define('configHAS_VIRTIO_BLK', 1)
 
+        ctx.env.configFAST_MEM_START = 0xC0000000
+        ctx.env.configFAST_MEM_SIZE = 0x02000000 # 32 MiB
+        ctx.env.configSLOW_MEM_START = 0xC2000000
+        ctx.env.configSLOW_MEM_SIZE = 0x02000000 # 32 MiB
         ctx.env.MEMSTART = 0xC0000000
         ctx.env.UNCACHED_MEMSTART = 0x80000000
 
@@ -1336,6 +1356,15 @@ def configure(ctx):
     if ctx.env.LOG_UDP:
         ctx.define('configLOG_UDP', 1)
 
+    # Depending on the platform, could be SRAM, TCM, cached DRAM, etc
+    # Expected to be pre-defined elsewhere for custom paltforms/demos, but if not, pick up the
+    # the followi/ng defaults
+    ctx.env.configFAST_MEM_START = 0x80000000
+    ctx.env.configFAST_MEM_SIZE = 0x02000000 # 32 MiB
+    ctx.env.configSLOW_MEM_START = 0x82000000
+    ctx.env.configSLOW_MEM_SIZE = 0x02000000 # 32 MiB
+    ctx.define('configTOTAL_RTL_HEAP_SIZE', 16 * 1024 * 1024) # 16 MiB
+
     # PURECAP
     if ctx.options.purecap and not ctx.env.PURECAP:
 
@@ -1389,8 +1418,6 @@ def configure(ctx):
         ctx.define('configLIBDL_CONF_PATH', "/etc/")
         if not ctx.is_defined('configCOMPARTMENTS_NUM'):
             ctx.define('configCOMPARTMENTS_NUM', 128)
-        if not ctx.is_defined('configTOTAL_RTL_HEAP_SIZE'):
-            ctx.define('configTOTAL_RTL_HEAP_SIZE', 32 * 1024 * 1024) # 32 MiB
         ctx.define('configMAXLEN_COMPNAME', 255)
 
         # libdl will send solib events to GDB while loading objects
@@ -1470,14 +1497,14 @@ else:
 # Copied from https://nachtimwald.com/2019/10/09/python-binary-to-c-header/
 def bin2header(data, var_name='var'):
     out = []
-    out.append('unsigned char {var_name}[] = {{'.format(var_name=var_name))
+    out.append('unsigned char {var_name}[] __attribute__((section(".rom"))) = {{'.format(var_name=var_name))
     l = [data[i:i + 12] for i in range(0, len(data), 12)]
     for i, x in enumerate(l):
         line = ', '.join(['0x{val:02x}'.format(val=bs_elem_to_int(c)) for c in x])
         out.append('  {line}{end_comma}'.format(
             line=line, end_comma=',' if i < len(l) - 1 else ''))
     out.append('};')
-    out.append('unsigned int {var_name}_len = {data_len};'.format(
+    out.append('unsigned int {var_name}_len __attribute__((section(".rom"))) = {data_len};'.format(
         var_name=var_name, data_len=len(data)))
     return '\n'.join(out)
 
@@ -1557,7 +1584,7 @@ typedef struct LIBFILE_TO_COPY {
     header_content += bin2header(str.encode(libdl_config), 'libdl_conf') + '\n'
 
     header_content += """
-const xLibFileToCopy_t xLibFilesToCopy[] = {
+xLibFileToCopy_t xLibFilesToCopy[] __attribute__((section(".rom"))) = {
     """
 
     for lib in LIBS_TO_EMBED:
@@ -1692,7 +1719,10 @@ def build(bld):
         ldflags=bld.env.CFLAGS +
             ['-T',
             bld.path.abspath() + '/link.ld', '-nostartfiles', '-nostdlib',
-            '-Wl,--defsym=MEM_START=' + str(bld.env.MEMSTART),
+            '-Wl,--defsym=configFAST_MEM_START=' + str(bld.env.configFAST_MEM_START),
+            '-Wl,--defsym=configFAST_MEM_SIZE=' + str(bld.env.configFAST_MEM_SIZE),
+            '-Wl,--defsym=configSLOW_MEM_START=' + str(bld.env.configSLOW_MEM_START),
+            '-Wl,--defsym=configSLOW_MEM_SIZE=' + str(bld.env.configSLOW_MEM_SIZE),
             '-Wl,--defsym=UNCACHED_MEM_START=' + str(bld.env.UNCACHED_MEMSTART),
             '-defsym=_STACK_SIZE=4K'
         ],
@@ -1735,7 +1765,10 @@ def build(bld):
             ldflags=bld.env.CFLAGS +
                 ['-T',
                 bld.path.abspath() + '/link.ld', '-nostartfiles', '-nostdlib',
-                '-Wl,--defsym=MEM_START=' + str(bld.env.MEMSTART),
+                '-Wl,--defsym=configFAST_MEM_START=' + str(bld.env.configFAST_MEM_START),
+                '-Wl,--defsym=configFAST_MEM_SIZE=' + str(bld.env.configFAST_MEM_SIZE),
+                '-Wl,--defsym=configSLOW_MEM_START=' + str(bld.env.configSLOW_MEM_START),
+                '-Wl,--defsym=configSLOW_MEM_SIZE=' + str(bld.env.configSLOW_MEM_SIZE),
                 '-Wl,--defsym=UNCACHED_MEM_START=' + str(bld.env.UNCACHED_MEMSTART),
                 '-defsym=_STACK_SIZE=4K'
             ],
