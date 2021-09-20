@@ -244,9 +244,10 @@ init_stack:
 #else
     /* set stack pointer */
     la	sp, _stack
-#endif /* __CHERI_PURE_CAPABILITY__ */
 
-	j	demo_main
+	la	t0, demo_main
+	jr	t0
+#endif /* __CHERI_PURE_CAPABILITY__ */
 
 /* Fills memory blocks */
 fill_block:
