@@ -42,12 +42,13 @@ def configure(ctx):
 
     ctx.env.append_value('DEFINES', [
         'configPROG_ENTRY     = main_ipc_benchmark',
-        'IPC_BUFFER_SIZE      = 1024',
+        'IPC_BUFFER_SIZE      = 8',
         'log = printf ',
-        'IPC_TOTAL_SIZE       = 1024',
-        'DISCARD_RUNS         = 2',
+        'IPC_TOTAL_SIZE       = 8',
+        'configCOMPARTMENTS_NUM= 8',
+        'DISCARD_RUNS         = 0',
         'RUNS                 = 1',
-        'VARY_QUEUE_SIZES     = 1',
+        'VARY_QUEUE_SIZES     = 0',
         'IPC_MODE             = 2'
     ])
 
