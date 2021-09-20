@@ -224,7 +224,7 @@
  * directories, or with files that have a similar name.
  *
  * Set to 0 not to calculate a HASH value. */
-#define ffconfigHASH_CACHE                   1
+#define ffconfigHASH_CACHE                   0
 
 /* Only used if ffconfigHASH_CACHE is set to 1
  *

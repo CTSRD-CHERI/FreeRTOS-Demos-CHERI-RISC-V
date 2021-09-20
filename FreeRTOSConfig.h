@@ -104,7 +104,7 @@
 #define configMINIMAL_STACK_SIZE                   ( ( uint32_t ) 4096 ) /* Can be as low as 60 but some of the demo tasks that use this constant require it to be higher. */
 #define configSTACK_DEPTH_TYPE                     uint32_t              /*the default ifndef is uint16_t */
 #ifdef configCUSTOM_HEAP_SIZE
-    #define configTOTAL_HEAP_SIZE                  ( ( size_t ) ( configCUSTOM_HEAP_SIZE * 1024 * 1024 ) )
+    #define configTOTAL_HEAP_SIZE                  ( ( size_t ) ( configCUSTOM_HEAP_SIZE * 1024 ) )
 #else
     #define configTOTAL_HEAP_SIZE                  ( ( size_t ) ( 1024 * 1024 * 16 ) )
 #endif
