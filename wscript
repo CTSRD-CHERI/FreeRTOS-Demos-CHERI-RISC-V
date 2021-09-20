@@ -573,6 +573,7 @@ class FreeRTOSLibDL(FreeRTOSLib):
            self.libdl_dir + 'libdl/dlfcn.c',
            self.libdl_dir + 'libdl/fastlz.c',
            self.libdl_dir + 'libdl/rtl-alloc-heap.c',
+           self.libdl_dir + 'libdl/rtl-heap_4.c',
            self.libdl_dir + 'libdl/rtl-allocator.c',
            self.libdl_dir + 'libdl/rtl-alloc-lock.c',
            self.libdl_dir + 'libdl/rtl-archive.c',
@@ -1386,7 +1387,10 @@ def configure(ctx):
         ctx.define('configEMBED_LIBS_FAT', 1)
         ctx.define('configLIBDL_LIB_PATH',"/lib/")
         ctx.define('configLIBDL_CONF_PATH', "/etc/")
-        ctx.define('configCOMPARTMENTS_NUM', 128)
+        if not ctx.is_defined('configCOMPARTMENTS_NUM'):
+            ctx.define('configCOMPARTMENTS_NUM', 128)
+        if not ctx.is_defined('configTOTAL_RTL_HEAP_SIZE'):
+            ctx.define('configTOTAL_RTL_HEAP_SIZE', 32 * 1024 * 1024) # 32 MiB
         ctx.define('configMAXLEN_COMPNAME', 255)
 
         # libdl will send solib events to GDB while loading objects
