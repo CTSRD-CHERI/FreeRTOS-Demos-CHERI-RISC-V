@@ -95,7 +95,7 @@ plic_instance_t Plic;
             if( ( *instruction & cjalr_match ) != cjalr_match )
             {
                 printf( "Instruction does not match cjalr\n" );
-                _exit( -1 );
+                exit( -1 );
             }
 
             /* Get the callee CompID (its otype) */
@@ -103,20 +103,20 @@ plic_instance_t Plic;
 
             void ** captable = rtl_cherifreertos_compartment_get_captable( otype );
 
-            xCOMPARTMENT_RET ret = xTaskRunCompartment( cheri_unseal_cap( *( exception_frame + code_reg_num ) ),
+            xCOMPARTMENT_RET ret = xTaskRunCompartment( cheri_unseal_cap( ( void * ) *( exception_frame + code_reg_num ) ),
                                                         captable,
-                                                        exception_frame + 10,
+                                                        ( xCOMPARTMENT_ARGS * ) (exception_frame + 10),
                                                         otype );
 
             /* Save the return registers in the context. */
             /* FIXME: Some checks might be done here to check of the compartment traps and */
             /* accordingly take some different action rather than just returning */
-            *( exception_frame + 10 ) = ret.ca0;
+            *( exception_frame + 10 ) = ( uintptr_t ) ret.ca0;
         }
 
     #endif /* ifdef __CHERI_PURE_CAPABILITY__ */
 
-    static UBaseType_t default_exception_handler( uintptr_t * exception_frame ) __attribute__((section(".text.fast")))
+    __attribute__((section(".text.fast"))) static uint32_t default_exception_handler( uintptr_t * exception_frame )
     {
             BaseType_t pxHigherPriorityTaskWoken = 0;
         #ifdef __CHERI_PURE_CAPABILITY__
@@ -187,16 +187,16 @@ plic_instance_t Plic;
                     #endif
 
                     #if configCHERI_STACK_TRACE
-                        void* sp = *( exception_frame + 2 );
-                        void* ra = *( exception_frame + 1 );
+                        void* sp = ( void * ) *( exception_frame + 2 );
+                        void* ra = ( void * ) *( exception_frame + 1 );
                         backtrace(mepcc, sp, ra, xCompID);
                     #endif
 
                     pxHigherPriorityTaskWoken = rtl_cherifreertos_compartment_faultHandler(xCompID);
 
                     /* Caller compartment return */
-                    *( exception_frame ) = ret;
-                    *( exception_frame + 10) = CHERI_COMPARTMENT_FAIL;
+                    *( exception_frame ) = ( uintptr_t ) ret;
+                    *( exception_frame + 10) = ( uintptr_t ) CHERI_COMPARTMENT_FAIL;
                     return 0;
                 }
             #elif configCHERI_COMPARTMENTALIZATION_MODE == 2
@@ -215,8 +215,8 @@ plic_instance_t Plic;
                     pxHigherPriorityTaskWoken = rtl_cherifreertos_compartment_faultHandler(xCompID);
 
                     /* Caller compartment return */
-                    *( exception_frame ) = ret;
-                    *( exception_frame + 10) = CHERI_COMPARTMENT_FAIL;
+                    *( exception_frame ) = ( uintptr_t ) ret;
+                    *( exception_frame + 10) = ( uintptr_t ) CHERI_COMPARTMENT_FAIL;
                     return pxHigherPriorityTaskWoken;
                 }
 
@@ -289,7 +289,7 @@ xNetworkInterfaceOutput( void * const pxNetworkBuffer, BaseType_t xReleaseAfterS
  * Define an external interrupt handler
  * cause = 0x8...000000b == Machine external interrupt
  */
-BaseType_t external_interrupt_handler( UBaseType_t cause ) __attribute__((section(".text.fast")))
+__attribute__((section(".text.fast"))) BaseType_t external_interrupt_handler( UBaseType_t cause )
 {
     BaseType_t pxHigherPriorityTaskWoken = 0;
 

@@ -18,6 +18,6 @@ void uart16550_putchar( uint8_t ch );
 int uart16550_getchar( void );
 int uart16550_txbuffer( uint8_t * ptr,
                         int len );
-void uart16550_init( unsigned long base );
+void uart16550_init( intptr_t base );
 
 #endif /* ifndef _RISCV_16550_H */

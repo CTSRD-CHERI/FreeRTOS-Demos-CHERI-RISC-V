@@ -5,7 +5,7 @@
 #include "uart16550.h"
 
 #ifdef __CHERI_PURE_CAPABILITY__
-    #include <cheric.h>
+#include <cheri/cheri-utility.h>
 #endif /* __CHERI_PURE_CAPABILITY__ */
 
 #if configUART16550_REGSHIFT == 1
@@ -66,16 +66,18 @@ int uart16550_txbuffer( uint8_t * ptr,
     return len;
 }
 
-void uart16550_init( unsigned long base )
+void uart16550_init( intptr_t base )
 {
     uart16550 = ( uart_mmio_t ) base;
 
     uint32_t divisor;
     divisor = configPERIPH_CLOCK_HZ / ( 16 * configUART16550_BAUD );
     #ifdef __CHERI_PURE_CAPABILITY__
-        extern void * pvAlmightyDataCap;
-        uart16550 = ( uintptr_t ) cheri_setoffset( pvAlmightyDataCap, ( size_t ) base );
-        uart16550 = cheri_csetbounds( uart16550, 0x1000 );
+        uart16550 =
+            ( uart_mmio_t ) cheri_build_data_cap((ptraddr_t) base,
+                0x1000,
+                __CHERI_CAP_PERMISSION_PERMIT_LOAD__ |
+                __CHERI_CAP_PERMISSION_PERMIT_STORE__);
     #endif /* __CHERI_PURE_CAPABILITY__ */
 
     /* http://wiki.osdev.org/Serial_Ports */

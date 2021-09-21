@@ -42,8 +42,7 @@
 #endif
 
 #ifdef __CHERI_PURE_CAPABILITY__
-    #include <cheric.h>
-    extern void * pvAlmightyDataCap;
+    #include <cheri/cheri-utility.h>
 #endif
 
 #ifndef SIFIVE_TEST_BASE
@@ -59,8 +58,10 @@ void vTerminate( int32_t lExitCode )
     uint32_t test_command = TEST_PASS;
 
     #ifdef __CHERI_PURE_CAPABILITY__
-        sifive_test = cheri_setoffset( pvAlmightyDataCap, ( ptraddr_t ) sifive_test );
-        sifive_test = cheri_csetbounds( ( void * ) sifive_test, sizeof( uint32_t ) );
+        sifive_test = ( volatile uint32_t * ) cheri_build_data_cap((ptraddr_t) sifive_test,
+                sizeof( uint32_t ),
+                __CHERI_CAP_PERMISSION_PERMIT_LOAD__ |
+                __CHERI_CAP_PERMISSION_PERMIT_STORE__);
     #endif
 
     if( lExitCode != 0 )

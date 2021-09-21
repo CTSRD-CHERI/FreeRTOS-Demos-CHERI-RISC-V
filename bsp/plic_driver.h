@@ -51,7 +51,7 @@ typedef struct
 
 typedef struct __plic_instance_t
 {
-    uintptr_t base_addr;
+    void* base_addr;
 
     uint32_t num_sources;
     uint32_t num_priorities;

@@ -6,20 +6,20 @@
 #include "FreeRTOSConfig.h"
 
 #ifdef __CHERI_PURE_CAPABILITY__
-#include <cheri/cheri-utility.h>
+    #include <cheri/cheri-utility.h>
 #endif /* __CHERI_PURE_CAPABILITY__ */
 
 /* Note that there are no assertions or bounds checking on these */
 /* parameter values. */
-static void volatile_memzero( uint8_t * base,
+static void volatile_memzero( intptr_t base,
                               unsigned int size );
 
-static void volatile_memzero( uint8_t * base,
+static void volatile_memzero( intptr_t base,
                               unsigned int size )
 {
-    volatile uint32_t * ptr;
+    volatile uint32_t* ptr;
 
-    for( ptr = base; ptr < ( base + size ) && ptr != PLIC_BASE_ADDR; ptr++ )
+    for( ptr = ( volatile uint32_t * ) base; ( intptr_t ) ptr < ( base + size ) && ( intptr_t ) ptr != ( intptr_t ) PLIC_BASE_ADDR; ptr++ )
     {
         *ptr = 0;
     }
@@ -30,7 +30,7 @@ void PLIC_init( plic_instance_t * this_plic,
                 uint32_t num_sources,
                 uint32_t num_priorities )
 {
-    this_plic->base_addr = base_addr;
+    this_plic->base_addr = (void *) base_addr;
 
     #ifdef __CHERI_PURE_CAPABILITY__
         this_plic->base_addr =
@@ -50,12 +50,12 @@ void PLIC_init( plic_instance_t * this_plic,
     }
 
     /* Disable all interrupts (don't assume that these registers are reset). */
-    volatile_memzero( ( uint8_t * ) ( this_plic->base_addr +
+    volatile_memzero( ( intptr_t ) ( this_plic->base_addr +
                                       PLIC_ENABLE_OFFSET ),
                       ( num_sources + 8 ) / 8 );
 
     /* Set all priorities to 0 (equal priority -- don't assume that these are reset). */
-    volatile_memzero( ( uint8_t * ) ( this_plic->base_addr +
+    volatile_memzero( ( intptr_t ) ( this_plic->base_addr +
                                       PLIC_PRIORITY_OFFSET ),
                       ( num_sources + 1 ) << PLIC_PRIORITY_SHIFT_PER_SOURCE );
 
@@ -112,7 +112,7 @@ void PLIC_set_priority( plic_instance_t * this_plic,
     }
 }
 
-plic_source PLIC_claim_interrupt( plic_instance_t * this_plic ) __attribute__((section(".text.fast")))
+__attribute__((section(".text.fast"))) plic_source PLIC_claim_interrupt( plic_instance_t * this_plic )
 {
     volatile plic_source * claim_addr = ( volatile plic_source * ) ( this_plic->base_addr +
                                                                      PLIC_CLAIM_OFFSET );
@@ -120,8 +120,8 @@ plic_source PLIC_claim_interrupt( plic_instance_t * this_plic ) __attribute__((s
     return *claim_addr;
 }
 
-void PLIC_complete_interrupt( plic_instance_t * this_plic,
-                              plic_source source ) __attribute__((section(".text.fast")))
+__attribute__((section(".text.fast"))) void PLIC_complete_interrupt( plic_instance_t * this_plic,
+                              plic_source source )
 {
     volatile plic_source * claim_addr = ( volatile plic_source * ) ( this_plic->base_addr +
                                                                      PLIC_CLAIM_OFFSET );
