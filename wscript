@@ -1399,9 +1399,6 @@ def configure(ctx):
         ctx.env.append_value('DEFINES', ['configPROG_ENTRY=' + ctx.env.PROG])
         ctx.env.LIBDL_PROG_START_FILE = ctx.env.PROG + '.c'
 
-    # FreeRTOS has itw own non-libc file system
-    ctx.define('_STAT_H_', 1)
-
     # If a task returns, call the application specific exit function
     ctx.env.append_value('DEFINES', 'configTASK_RETURN_ADDRESS=vApplicationTaskExit')
 
