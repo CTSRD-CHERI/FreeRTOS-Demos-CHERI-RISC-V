@@ -109,7 +109,7 @@
     #define configTOTAL_HEAP_SIZE                  ( ( size_t ) ( 1024 * 1024 * 16 ) )
 #endif
 #ifndef configTOTAL_RTL_HEAP_SIZE
-    #define configTOTAL_RTL_HEAP_SIZE                  ( ( size_t ) ( 1024 * 1024 * 16 ) )
+    #define configTOTAL_RTL_HEAP_SIZE                  ( ( size_t ) ( 1024 * 1024 * 7 ) )
 #endif
 #define configMAX_TASK_NAME_LEN                    ( 16 )
 #define configUSE_TRACE_FACILITY                   1

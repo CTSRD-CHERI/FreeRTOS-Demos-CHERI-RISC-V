@@ -1363,7 +1363,7 @@ def configure(ctx):
     ctx.env.configFAST_MEM_SIZE = 0x02000000 # 32 MiB
     ctx.env.configSLOW_MEM_START = 0x82000000
     ctx.env.configSLOW_MEM_SIZE = 0x02000000 # 32 MiB
-    ctx.define('configTOTAL_RTL_HEAP_SIZE', 16 * 1024 * 1024) # 16 MiB
+    ctx.define('configTOTAL_RTL_HEAP_SIZE', 7 * 1024 * 1024) # 7 MiB
 
     # PURECAP
     if ctx.options.purecap and not ctx.env.PURECAP:
