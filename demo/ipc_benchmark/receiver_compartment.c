@@ -71,6 +71,8 @@ void externFault( void * pvParameters ) {
 
 void queueReceiveTask( void * pvParameters )
 {
+    portDISABLE_INTERRUPTS();
+
     UBaseType_t xTotalSize = IPC_TOTAL_SIZE;
     UBaseType_t xBufferSize = IPC_BUFFER_SIZE;
     QueueHandle_t* xQueue = NULL;
