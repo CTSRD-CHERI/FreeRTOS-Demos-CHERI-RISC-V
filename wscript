@@ -265,7 +265,7 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
         elif 'p2-embedded' in ctx.env.PLATFORM:
             ctx.define('configCPU_CLOCK_HZ', 50000000)
             ctx.define('configPERIPH_CLOCK_HZ', 50000000)
-            ctx.define('configCUSTOM_HEAP_SIZE', 300) # 300 KiB
+            ctx.define('configCUSTOM_HEAP_SIZE', 250) # 300 KiB
 
             ctx.env.configFAST_MEM_START = 0xC0000000
             ctx.env.configFAST_MEM_SIZE = 512 * 1024  # 512 KiB
@@ -273,8 +273,8 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
             ctx.env.configSLOW_MEM_SIZE = 0x02000000 # 32 MiB
             ctx.env.UNCACHED_MEMSTART = 0x80000000
         else:
-            ctx.define('configCPU_CLOCK_HZ', 50000000)
-            ctx.define('configPERIPH_CLOCK_HZ', 50000000)
+            ctx.define('configCPU_CLOCK_HZ', 100000000)
+            ctx.define('configPERIPH_CLOCK_HZ', 100000000)
 
             ctx.env.configFAST_MEM_START = 0xC0000000
             ctx.env.configFAST_MEM_SIZE = 0x02000000 # 32 MiB
