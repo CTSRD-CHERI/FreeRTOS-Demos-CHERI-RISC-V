@@ -70,6 +70,10 @@
 #ifndef _FF_CONFIG_H_
 #define _FF_CONFIG_H_
 
+#ifdef __waf__
+    #include "waf_config.h"
+#endif
+
 /* Must be set to either pdFREERTOS_LITTLE_ENDIAN or pdFREERTOS_BIG_ENDIAN,
  * depending on the endian of the architecture on which FreeRTOS is running. */
 #define ffconfigBYTE_ORDER                   pdFREERTOS_LITTLE_ENDIAN
@@ -307,7 +311,9 @@
  * Note that the value of this define is directly related to the maximum stack
  * use of the +FAT library. In some API's, a character buffer of size
  * 'ffconfigMAX_FILENAME' will be declared on stack. */
+#ifndef ffconfigMAX_FILENAME
 #define ffconfigMAX_FILENAME             250
+#endif
 
 #define FF_PRINTF                        printf
 
