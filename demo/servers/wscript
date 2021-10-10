@@ -57,7 +57,6 @@ def configure(ctx):
     ctx.define('configHTTP_ROOT', "/ram/websrc/")
     ctx.define('configUSE_NET_VIRTIO', 1)
     ctx.define('mainRAM_DISK_NAME', "/")
-    ctx.define('_STAT_H_', 1)
     ctx.define('mainCONFIG_INIT_FAT_FILESYSTEM', 1)
     ctx.define('configEMBED_LIBS_FAT', 1)
     ctx.define('configLIBDL_LIB_PATH', "/lib/")
