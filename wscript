@@ -276,6 +276,7 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
             ctx.define('configCPU_CLOCK_HZ', 100000000)
             ctx.define('configPERIPH_CLOCK_HZ', 100000000)
 
+        if 'p2-embedded' not in ctx.env.PLATFORM:
             ctx.env.configFAST_MEM_START = 0xC0000000
             ctx.env.configFAST_MEM_SIZE = 0x02000000 # 32 MiB
             ctx.env.configSLOW_MEM_START = 0xC2000000
