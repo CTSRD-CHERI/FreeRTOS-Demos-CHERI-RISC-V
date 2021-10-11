@@ -1711,15 +1711,13 @@ def build(bld):
             if not task.hasrun:
                 task.run()
 
-    if not bld.env.DEBUG:
-        bld.env.append_value('CFLAGS', '-Werror')
-
     bld.program(
         source=main_sources,
         target=PROG_NAME,
         features="c",
         includes=['.'],
         libpath=['.', bld.env.PROGRAM_PATH],
+        cflags=bld.env.CFLAGS + [''] if bld.env.DEBUG else ['-Werror'],
         use=use_libs,
         ldflags=bld.env.CFLAGS +
             ['-T',
