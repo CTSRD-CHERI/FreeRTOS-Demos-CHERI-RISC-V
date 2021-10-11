@@ -464,6 +464,7 @@ class FreeRTOSBspFett(FreeRTOSBsp):
 class FreeRTOSLib:
     name = ""
     srcs = []
+    cflags = []
     includes = []
     defines = []
     export_includes = []
@@ -472,7 +473,6 @@ class FreeRTOSLib:
         bld.env.append_value('INCLUDES', self.export_includes)
         bld.env.append_value('DEFINES', self.defines)
         self.is_compartment = False
-        self.cflags = []
 
     def build(self, bld):
         bld(export_includes=self.export_includes, name=self.name + "_headers")
@@ -579,6 +579,7 @@ class FreeRTOSLibCheri(FreeRTOSLib):
         self.srcs = [self.libcheri_dir + '/cheri/cheri-riscv.c']
         self.includes = [self.libcheri_dir + '/include']
         self.export_includes = [self.libcheri_dir + '/include']
+        self.cflags = ['-Werror']
 
         FreeRTOSLib.__init__(self, ctx)
 
@@ -617,6 +618,9 @@ class FreeRTOSLibDL(FreeRTOSLib):
         ]
 
         self.export_includes = [self.libdl_dir + '/include']
+
+        if not ctx.env.DEBUG:
+            self.cflags = ['-Werror', '-Wno-error=format-security']
 
         FreeRTOSLib.__init__(self, ctx)
 
@@ -1706,6 +1710,9 @@ def build(bld):
             if not task.hasrun:
                 task.run()
 
+    if not bld.env.DEBUG:
+        bld.env.append_value('CFLAGS', '-Werror')
+
     bld.program(
         source=main_sources,
         target=PROG_NAME,
@@ -1715,7 +1722,7 @@ def build(bld):
         use=use_libs,
         ldflags=bld.env.CFLAGS +
             ['-T',
-            bld.path.abspath() + '/link.ld', '-nostartfiles', '-nostdlib',
+            bld.path.abspath() + '/link.ld',
             '-Wl,--defsym=configFAST_MEM_START=' + str(bld.env.configFAST_MEM_START),
             '-Wl,--defsym=configFAST_MEM_SIZE=' + str(bld.env.configFAST_MEM_SIZE),
             '-Wl,--defsym=configSLOW_MEM_START=' + str(bld.env.configSLOW_MEM_START),
@@ -1761,7 +1768,7 @@ def build(bld):
             libpath=['.', bld.env.PROGRAM_PATH],
             ldflags=bld.env.CFLAGS +
                 ['-T',
-                bld.path.abspath() + '/link.ld', '-nostartfiles', '-nostdlib',
+                bld.path.abspath() + '/link.ld',
                 '-Wl,--defsym=configFAST_MEM_START=' + str(bld.env.configFAST_MEM_START),
                 '-Wl,--defsym=configFAST_MEM_SIZE=' + str(bld.env.configFAST_MEM_SIZE),
                 '-Wl,--defsym=configSLOW_MEM_START=' + str(bld.env.configSLOW_MEM_START),

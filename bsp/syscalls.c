@@ -57,8 +57,8 @@ int _gettimeofday( struct timeval * tv,
 static int free_fd = 3;
 
 typedef struct fileMap {
-    FF_FILE* ff_file;
-    char*    name;
+    FF_FILE*       ff_file;
+    const char*    name;
 } fileMap_t;
 
 static fileMap_t ff_map[configFF_FDS_TABLE_SIZE];
@@ -119,7 +119,7 @@ int _open( const char * name,
             return -1;
     }
 
-    ff_file = ff_fopen(name, &ff_strMode);
+    ff_file = ff_fopen(name, (const char *) &ff_strMode);
 
     if (ff_file == NULL) {
       return -1;

@@ -210,7 +210,7 @@ uint64_t port_get_current_mtime( void )
         void vFatEmbedLibFiles( void );
     #endif
 
-    static void prvLoader( void )
+    static void prvLoader( void* unused )
     {
         typedef void (* prog_entry_t)( int argc, char *argv[]);
         prog_entry_t entry = NULL;
@@ -247,7 +247,7 @@ uint64_t port_get_current_mtime( void )
         if( obj == NULL )
         {
             printf( "Failed to dynamically load the app and/or libs\n" );
-            _exit( -1 );
+            exit( -1 );
         }
 
     #define str( s )     # s
@@ -262,7 +262,7 @@ uint64_t port_get_current_mtime( void )
         if( entry == NULL )
         {
             printf( "Failed to to find the specified prog entry: %s\n", xstr( configPROG_ENTRY ) );
-            _exit( -1 );
+            exit( -1 );
         }
         else
         {
