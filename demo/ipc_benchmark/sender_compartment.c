@@ -218,7 +218,7 @@ void queueSendTask( void * pvParameters )
 
     if( !pBufferToSend )
     {
-        log( "Failed to allocated a send buffer of size %d\n", xBufferSize );
+        log( "Failed to allocated a send buffer of size %u\n", (unsigned) xBufferSize );
     }
 
     /* Warm up the cache */

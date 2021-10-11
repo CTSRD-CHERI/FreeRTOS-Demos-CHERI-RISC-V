@@ -66,7 +66,7 @@ void externFunc( void * pvParameters ) {
 void externFault( void * pvParameters ) {
     start_instret = portCounterGet(COUNTER_INSTRET);
     start_cycle = portCounterGet(COUNTER_CYCLE);
-    *((int *) 0) = 0;
+    *((volatile int *) 0) = 0;
 }
 
 void queueReceiveTask( void * pvParameters )
@@ -130,7 +130,7 @@ void queueReceiveTask( void * pvParameters )
 
     if( !pReceiveBuffer )
     {
-        log( "Failed to allocated a receive buffer of size %d\n", xBufferSize );
+        log( "Failed to allocated a receive buffer of size %u\n", (unsigned) xBufferSize );
     }
 
     /* Zero the buffer to warm up the cache */
