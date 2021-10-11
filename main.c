@@ -334,7 +334,7 @@ int demo_main( void )
                              tskIDLE_PRIORITY,
                              NULL );
             #else
-                xTaskCreate( configPROG_ENTRY,
+                xTaskCreate( ( TaskFunction_t ) configPROG_ENTRY,
                              "root-app",
                              configMINIMAL_STACK_SIZE * 2U,
                              0,
