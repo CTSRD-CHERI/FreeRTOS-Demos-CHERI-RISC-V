@@ -100,7 +100,7 @@ SECTIONS {
 	.text.fast : ALIGN(8) {
 		*(.boot.text);
 		*(.text.fast);
-        *libfreertos_core.a:*(.*)
+        *libfreertos_core.a:*(.text)
 	} > fastmem
 
 	.init : {
