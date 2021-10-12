@@ -92,7 +92,7 @@
     extern void main_modbus( void );
 #else /* if mainDEMO_TYPE == 1 */
     #ifdef configPROG_ENTRY
-        extern void configPROG_ENTRY( int argc, char* argv[]);
+        extern int configPROG_ENTRY( int argc, char* argv[]);
     #else
         #error "Unsupported demo type"
     #endif
