@@ -465,7 +465,6 @@ class FreeRTOSBspFett(FreeRTOSBsp):
 class FreeRTOSLib:
     name = ""
     srcs = []
-    cflags = []
     includes = []
     defines = []
     export_includes = []
@@ -474,6 +473,7 @@ class FreeRTOSLib:
         bld.env.append_value('INCLUDES', self.export_includes)
         bld.env.append_value('DEFINES', self.defines)
         self.is_compartment = False
+        self.cflags = []
 
     def build(self, bld):
         bld(export_includes=self.export_includes, name=self.name + "_headers")
