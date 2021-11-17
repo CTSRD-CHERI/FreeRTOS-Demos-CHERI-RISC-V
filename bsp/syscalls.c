@@ -53,7 +53,7 @@ int _gettimeofday( struct timeval * tv,
                    struct timezone * tz );
 
 #if ipconfigUSE_FAT_LIBDL
-#define configFF_FDS_TABLE_SIZE 128
+#define configFF_FDS_TABLE_SIZE 1024
 static int free_fd = 3;
 
 typedef struct fileMap {
