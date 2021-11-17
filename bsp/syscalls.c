@@ -240,6 +240,10 @@ int _write( int file,
             char * ptr,
             int len )
 {
+#if (configENABLE_MPU == 1)
+    BaseType_t xRunningPrivileged = xPortRaisePrivilege();
+#endif
+
     ( void ) file;
     #if PLATFORM_SPIKE || PLATFORM_SAIL
         return htif_console_write_polled( ptr, len );
@@ -250,6 +254,9 @@ int _write( int file,
     #else
     #error "Unsupported Console for this PLATFORM"
     #endif
+#if (configENABLE_MPU == 1)
+    vPortResetPrivilege( xRunningPrivileged );
+#endif
 }
 
 int _open( const char * name,
