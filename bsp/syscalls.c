@@ -119,6 +119,11 @@ int _open( const char * name,
             return -1;
     }
 
+    for (int i = 0; i < free_fd; i++) {
+      if (ff_map[i].name && strcmp(name, ff_map[i].name) == 0)
+        return i;
+    }
+
     ff_file = ff_fopen(name, (const char *) &ff_strMode);
 
     if (ff_file == NULL) {
