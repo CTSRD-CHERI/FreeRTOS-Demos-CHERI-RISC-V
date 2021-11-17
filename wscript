@@ -529,6 +529,11 @@ class FreeRTOSLibCore(FreeRTOSLib):
             'portable/GCC/RISC-V/portASM.S'
         ]
 
+        if ctx.env.ENABLE_MPU:
+            ctx.env.append_value('ASFLAGS', ['-DconfigENABLE_MPU=1'])
+            self.srcs += [self.freertos_core_dir + 'portable/Common/mpu_wrappers.c']
+
+
         FreeRTOSLib.__init__(self, ctx)
 
     @staticmethod
@@ -1221,6 +1226,11 @@ def options(ctx):
                    default=False,
                    help='Comparmentalization and dynamically load libc and builtins')
 
+    ctx.add_option('--enable_mpu',
+                   action='store_true',
+                   default=False,
+                   help='Build FreeRTOS with MPU support')
+
     ctx.add_option('--plot_compartments',
                    action='store_true',
                    default=False,
@@ -1306,6 +1316,7 @@ def configure(ctx):
     ctx.env.IP_ADDR = ctx.options.ipaddr
     ctx.env.GATEWAY_ADDR = ctx.options.gateway
     ctx.env.LOG_UDP = ctx.options.log_udp
+    ctx.env.ENABLE_MPU = ctx.options.enable_mpu
 
     ipaddr_freertos_ipconfig(ctx.env.IP_ADDR, ctx.env.GATEWAY_ADDR, ctx)
 
@@ -1369,6 +1380,11 @@ def configure(ctx):
     ctx.env.configSLOW_MEM_START = 0x82000000
     ctx.env.configSLOW_MEM_SIZE = 0x02000000 # 32 MiB
     ctx.define('configTOTAL_RTL_HEAP_SIZE', 7 * 1024 * 1024) # 7 MiB
+
+    # FreeRTOS-MPU?
+    if ctx.env.ENABLE_MPU:
+        ctx.env.append_value('DEFINES', ['configENABLE_MPU=1'])
+
 
     # PURECAP
     if ctx.options.purecap and not ctx.env.PURECAP:
