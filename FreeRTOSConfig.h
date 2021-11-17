@@ -192,6 +192,7 @@ extern uint64_t port_get_current_mtime( void );
 #define INCLUDE_xTaskAbortDelay              1
 #define INCLUDE_xTaskGetHandle               1
 #define INCLUDE_xSemaphoreGetMutexHolder     1
+#define INCLUDE_xTaskGetSchedulerState       1
 
 /* Normal assert() semantics without relying on the provision of an assert.h
  * header file. */
