@@ -84,6 +84,9 @@ _HEAP_SIZE = 0x4000;
  * Define memory layout
  ****************************************************************************/
 MEMORY {
+    SRAM : ORIGIN = configSRAM_START, LENGTH = configSRAM_SIZE
+    FLASH : ORIGIN = configFLASH_START, LENGTH = configFLASH_SIZE
+
     fastmem : ORIGIN = configFAST_MEM_START, LENGTH = configFAST_MEM_SIZE
     slowmem : ORIGIN = configSLOW_MEM_START, LENGTH = configSLOW_MEM_SIZE
 	uncached : ORIGIN = UNCACHED_MEM_START, LENGTH = 0x0010000
@@ -97,76 +100,98 @@ ENTRY(boot)
  * Define the sections, and where they are mapped in memory
  ****************************************************************************/
 SECTIONS {
+
 	.text.fast : ALIGN(8) {
+        __FLASH_segment_start__ = ABSOLUTE(.);
 		*(.boot.text);
-		*(.text.fast);
-        *libfreertos_core.a:*(.text)
-	} > fastmem
+	} > FLASH
+
+    priviliged_functions : ALIGN(8) {
+      __privileged_functions_start__ = ABSOLUTE(.);
+      *(privileged_functions)
+      __privileged_functions_end__ = ABSOLUTE(.);
+    } > FLASH
 
 	.init : {
 	   KEEP (*(.init))
-	} > fastmem
+	} > FLASH
 
     .fini : {
        KEEP (*(.fini))
-    } > fastmem
+    } > FLASH
 
 	.text : ALIGN(8) {
-		*(.text);
-		*(.text.*);
-	} > slowmem
+
+      __syscalls_flash_start__ = ABSOLUTE(.);
+      *(freertos_system_calls)
+      __syscalls_flash_end__ = ABSOLUTE(.);
+
+      __unprivileged_flash_start__ = ABSOLUTE(.);
+	  *(.text.fast);
+	  *(.text);
+	  *(.text.*);
+	} > FLASH
 
     .rodata : {
        __rodata_start = .;
        *(.rodata)
        *(.rodata.*)
+       *(.rom)
        *(.gnu.linkonce.r.*)
+      __unprivileged_flash_end__ = ABSOLUTE(.);
        __rodata_end = .;
-	} > fastmem
+	} > FLASH
+
+    .ramdisk (NOLOAD) :  ALIGN(16) {
+      *(.ramdisk)
+    } > FLASH
+
+    __cap_relocs :  ALIGN(16) {
+      *(__cap_relocs)
+
+      __FLASH_segment_end__ = ABSOLUTE(.);
+    } > FLASH
+
+    .captable : ALIGN(16) {
+       __SRAM_segment_start__ = ABSOLUTE(.);
+       __privileged_data_start__ = ABSOLUTE(.);
+      *(.captable)
+    } > SRAM
+
+	.heap_kernel (NOLOAD): {
+       *(privileged_heap)
+	} > SRAM
+
+	.data : {
+	   __data_start = .;
+       *(privileged_data)
+       __privileged_data_end__ = ABSOLUTE(.);
+
+       __unprivileged_sram_start__ = ABSOLUTE(.);
+
+	   *(.data)
+	   *(.data.*)
+	   *(.gnu.linkonce.d.*)
+	   __data_end = .;
+	} > SRAM
 
     .sdata : {
         _gp = . + 0x800;
         *(.srodata.cst16) *(.srodata.cst8) *(.srodata.cst4) *(.srodata.cst2) *(.srodata*)
         *(.sdata .sdata.* .gnu.linkonce.s.*)
-     }	> fastmem
+     }	> SRAM
 
-	.data : {
-	   __data_start = .;
-	   *(.data)
-	   *(.data.*)
-	   *(.gnu.linkonce.d.*)
-	   __data_end = .;
-	} > fastmem
+    .stack (NOLOAD) :  ALIGN(16) {
+       _stack_end = .;
+       . += _STACK_SIZE;
+       _stack = .;
+       __stack = _stack;
+       __freertos_irq_stack_top = .;
+    } > SRAM
 
 	.htif (NOLOAD) : {
 	   *(.htif)
-	} > slowmem
-
-	.eh_frame : {
-	   *(.eh_frame)
-	} > slowmem
-
-    __cap_relocs :  ALIGN(16) {
-      *(__cap_relocs)
-    } > slowmem
-
-    .captable : ALIGN(16) {
-      *(.captable)
-    } > fastmem
-
-    .slowpath : ALIGN(16) {
-        *libfreertos_libdl.a:*(.text .text.*)
-        *libfreertos_fat.a:*(.text .text.*)
-        *libfreertos_bsp.a:*(.text .text.*)
-    } > slowmem
-
-    .rom : ALIGN(16) {
-      *.syms.o:*(.rodata)
-    } > slowmem
-
-    .ramdisk (NOLOAD) :  ALIGN(16) {
-      *(.ramdisk)
-    } > slowmem
+	} > SRAM
 
     .bss (NOLOAD) :  ALIGN(16) {
        __bss_start = .;
@@ -176,7 +201,7 @@ SECTIONS {
        *(COMMON)
        . = ALIGN(16);
        __bss_end = .;
-    } > fastmem
+    } > SRAM
 
     .sbss (NOLOAD) : {
        __sbss_start = .;
@@ -184,15 +209,10 @@ SECTIONS {
        *(.sbss.*)
        *(.gnu.linkonce.sb.*)
        __sbss_end = .;
-    } > fastmem
+      __unprivileged_sram_end__ = ABSOLUTE(.);
+    } > SRAM
 
-    .stack (NOLOAD) :  ALIGN(16) {
-       _stack_end = .;
-       . += _STACK_SIZE;
-       _stack = .;
-       __stack = _stack;
-       __freertos_irq_stack_top = .;
-    } > fastmem
+    __SRAM_segment_end__ = ABSOLUTE(.);
 
     .uncached (NOLOAD) : {
        *(.uncached)

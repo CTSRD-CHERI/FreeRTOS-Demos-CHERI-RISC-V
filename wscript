@@ -271,6 +271,10 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
             ctx.env.configFAST_MEM_SIZE = 512 * 1024  # 512 KiB
             ctx.env.configSLOW_MEM_START = 0xc0080000
             ctx.env.configSLOW_MEM_SIZE = 0x02000000 # 32 MiB
+            ctx.env.configFLASH_START = 0xc0000000
+            ctx.env.configFLASH_SIZE =  1024 * 1024
+            ctx.env.configSRAM_START = 0xc1000000
+            ctx.env.configSRAM_SIZE = 512 * 1024
             ctx.env.UNCACHED_MEMSTART = 0x80000000
         else:
             ctx.define('configCPU_CLOCK_HZ', 100000000)
@@ -280,7 +284,11 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
             ctx.env.configFAST_MEM_START = 0xC0000000
             ctx.env.configFAST_MEM_SIZE = 0x02000000 # 32 MiB
             ctx.env.configSLOW_MEM_START = 0xC2000000
-            ctx.env.configSLOW_MEM_SIZE = 0x02000000 # 32 MiB
+            ctx.env.configSLOW_MEM_SIZE = 0x10000000 # 32 MiB
+            ctx.env.configFLASH_START = 0xc0000000
+            ctx.env.configFLASH_SIZE =  32 * 1024 * 1024
+            ctx.env.configSRAM_START = 0xc2000000
+            ctx.env.configSRAM_SIZE = 32 * 1024 * 1024
             ctx.env.UNCACHED_MEMSTART = 0x80000000
 
         # Galois/Xilinx defines
@@ -454,6 +462,10 @@ class FreeRTOSBspFett(FreeRTOSBsp):
         ctx.env.configFAST_MEM_SIZE = 0x02000000 # 32 MiB
         ctx.env.configSLOW_MEM_START = 0xC2000000
         ctx.env.configSLOW_MEM_SIZE = 0x02000000 # 32 MiB
+        ctx.env.configFLASH_START = 0xc0000000
+        ctx.env.configFLASH_SIZE =  32* 1024 * 1024
+        ctx.env.configSRAM_START = 0xc2000000
+        ctx.env.configSRAM_SIZE = 32* 1024 * 1024
         ctx.env.MEMSTART = 0xC0000000
         ctx.env.UNCACHED_MEMSTART = 0x80000000
 
@@ -1376,9 +1388,15 @@ def configure(ctx):
     # Expected to be pre-defined elsewhere for custom paltforms/demos, but if not, pick up the
     # the followi/ng defaults
     ctx.env.configFAST_MEM_START = 0x80000000
-    ctx.env.configFAST_MEM_SIZE = 0x02000000 # 32 MiB
-    ctx.env.configSLOW_MEM_START = 0x82000000
-    ctx.env.configSLOW_MEM_SIZE = 0x02000000 # 32 MiB
+    ctx.env.configFAST_MEM_SIZE = 0x04000000 # 32 MiB
+    ctx.env.configSLOW_MEM_START = 0x84000000
+    ctx.env.configSLOW_MEM_SIZE = 0x04000000 # 32 MiB
+
+    ctx.env.configFLASH_START = 0x80000000
+    ctx.env.configFLASH_SIZE =  32* 1024 * 1024
+    ctx.env.configSRAM_START = 0x82000000
+    ctx.env.configSRAM_SIZE = 32* 1024 * 1024
+
     ctx.define('configTOTAL_RTL_HEAP_SIZE', 7 * 1024 * 1024) # 7 MiB
 
     # FreeRTOS-MPU?
@@ -1743,6 +1761,10 @@ def build(bld):
             '-Wl,--defsym=configSLOW_MEM_START=' + str(bld.env.configSLOW_MEM_START),
             '-Wl,--defsym=configSLOW_MEM_SIZE=' + str(bld.env.configSLOW_MEM_SIZE),
             '-Wl,--defsym=UNCACHED_MEM_START=' + str(bld.env.UNCACHED_MEMSTART),
+            '-Wl,--defsym=configSRAM_START=' + str(bld.env.configSRAM_START),
+            '-Wl,--defsym=configSRAM_SIZE=' + str(bld.env.configSRAM_SIZE),
+            '-Wl,--defsym=configFLASH_START=' + str(bld.env.configFLASH_START),
+            '-Wl,--defsym=configFLASH_SIZE=' + str(bld.env.configFLASH_SIZE),
             '-defsym=_STACK_SIZE=4K'
         ],
     )
@@ -1789,6 +1811,10 @@ def build(bld):
                 '-Wl,--defsym=configSLOW_MEM_START=' + str(bld.env.configSLOW_MEM_START),
                 '-Wl,--defsym=configSLOW_MEM_SIZE=' + str(bld.env.configSLOW_MEM_SIZE),
                 '-Wl,--defsym=UNCACHED_MEM_START=' + str(bld.env.UNCACHED_MEMSTART),
+                '-Wl,--defsym=configSRAM_START=' + str(bld.env.configSRAM_START),
+                '-Wl,--defsym=configSRAM_SIZE=' + str(bld.env.configSRAM_SIZE),
+                '-Wl,--defsym=configFLASH_START=' + str(bld.env.configFLASH_START),
+                '-Wl,--defsym=configFLASH_SIZE=' + str(bld.env.configFLASH_SIZE),
                 '-defsym=_STACK_SIZE=4K'
             ],
         )

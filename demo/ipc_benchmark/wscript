@@ -44,9 +44,9 @@ def configure(ctx):
         'configPROG_ENTRY     = main_ipc_benchmark',
         'IPC_BUFFER_SIZE      = 8',
         'log = printf ',
-        'IPC_TOTAL_SIZE       = 8',
+        'IPC_TOTAL_SIZE       = 4096',
         'configCOMPARTMENTS_NUM= 8',
-        'DISCARD_RUNS         = 0',
+        'DISCARD_RUNS         = 4',
         'RUNS                 = 1',
         'VARY_QUEUE_SIZES     = 0',
         'IPC_MODE             = 2'
