@@ -121,14 +121,14 @@ void vToggleLED( void );
 uint64_t get_cycle_count( void )
 {
     #if __riscv_xlen == 64
-        return read_csr( mcycle );
+        return read_csr( cycle );
     #else
         uint32_t cycle_lo, cycle_hi;
         asm volatile (
             "%=:\n\t"
-            "csrr %1, mcycleh\n\t"
-            "csrr %0, mcycle\n\t"
-            "csrr t1, mcycleh\n\t"
+            "csrr %1, cycleh\n\t"
+            "csrr %0, cycle\n\t"
+            "csrr t1, cycleh\n\t"
             "bne  %1, t1, %=b"
             : "=r" ( cycle_lo ), "=r" ( cycle_hi )
             : /* No inputs. */
