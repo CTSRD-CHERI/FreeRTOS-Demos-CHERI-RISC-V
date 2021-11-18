@@ -161,10 +161,62 @@ void main_ipc_benchmark( int argc,
     {
         for( int i = 0; i < xIterations; i++ )
         {
+#if (configENABLE_MPU == 1)
+        /* Fill in a TaskParameters_t structure to define the task - this is the
+        structure passed to the xTaskCreateRestricted() function. */
+        static portSTACK_TYPE xTaskStackRX[ configMINIMAL_STACK_SIZE * 2U ] __attribute__((aligned(configMINIMAL_STACK_SIZE * 2U * sizeof(size_t))));
+        static portSTACK_TYPE xTaskStackTX[ configMINIMAL_STACK_SIZE * 2U ] __attribute__((aligned(configMINIMAL_STACK_SIZE * 2U * sizeof(size_t))));
+        printf("params = %p\n", &params);
+        printf("xTaskStackRX = %p\n", &xTaskStackRX);
+        printf("xTaskStackTX = %p\n", &xTaskStackTX);
+        static const TaskParameters_t xTaskDefinitionRX =
+        {
+            queueReceiveTask,  /* pvTaskCode */
+            "RX",              /* pcName */
+            configMINIMAL_STACK_SIZE * 2U, /* usStackDepth - defined in words, not bytes. */
+            &params,           /* pvParameters */
+            mainQUEUE_RECEIVE_TASK_PRIORITY,    /* uxPriority - priority 1, start in User mode. */
+            xTaskStackRX,        /* puxStackBuffer - the array to use as the task stack. */
+
+            /* xRegions - In this case only one of the three user definable regions is
+            actually used.  The parameters are used to set the region to read only. */
+            {
+                /* Base address   Length                    Parameters */
+                { &start_hpms, sizeof(start_hpms), portMPU_REGION_READ_WRITE },
+                { &end_hpms,   sizeof(end_hpms),   portMPU_REGION_READ_WRITE },
+                { &params,     sizeof(params),     portMPU_REGION_READ_WRITE },
+            }
+        };
+
+        static const TaskParameters_t xTaskDefinitionTX =
+        {
+            queueSendTask,  /* pvTaskCode */
+            "TX",              /* pcName */
+            configMINIMAL_STACK_SIZE * 2U, /* usStackDepth - defined in words, not bytes. */
+            &params,           /* pvParameters */
+            mainQUEUE_SEND_TASK_PRIORITY,    /* uxPriority - priority 1, start in User mode. */
+            xTaskStackTX,        /* puxStackBuffer - the array to use as the task stack. */
+
+            /* xRegions - In this case only one of the three user definable regions is
+            actually used.  The parameters are used to set the region to read only. */
+            {
+                /* Base address   Length                    Parameters */
+                { &start_hpms, sizeof(start_hpms), portMPU_REGION_READ_WRITE },
+                { &end_hpms,   sizeof(end_hpms),   portMPU_REGION_READ_WRITE },
+                { &params,     sizeof(params),     portMPU_REGION_READ_WRITE },
+            }
+        };
+
+        xTaskCreateRestricted( &xTaskDefinitionRX, &recvTask );
+        params.receiverTask = recvTask;
+        xTaskCreateRestricted( &xTaskDefinitionTX, &sendTask );
+        params.senderTask = sendTask;
+#else
             xTaskCreate( queueReceiveTask, "RX", configMINIMAL_STACK_SIZE * 2U, &params, mainQUEUE_RECEIVE_TASK_PRIORITY, &recvTask );
             params.receiverTask = recvTask;
             xTaskCreate( queueSendTask, "TX", configMINIMAL_STACK_SIZE * 2U, &params, mainQUEUE_SEND_TASK_PRIORITY, &sendTask );
             params.senderTask = sendTask;
+#endif
 
             /* Wait for the receive task to notify us all is done */
             ulTaskNotifyTake( pdFALSE, portMAX_DELAY );

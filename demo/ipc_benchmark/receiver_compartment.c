@@ -49,29 +49,25 @@
 
 extern cheri_riscv_hpms start_hpms;
 extern cheri_riscv_hpms end_hpms;
-extern uint64_t start_instret;
-extern uint64_t start_cycle;
-extern uint64_t end_instret;
-extern uint64_t end_cycle;
 /*-----------------------------------------------------------*/
 
 void queueReceiveTask( void * pvParameters );
 void __attribute__ ((noinline)) externFunc( void * pvParameters );
 
 void externFunc( void * pvParameters ) {
-    end_instret = portCounterGet(COUNTER_INSTRET);
-    end_cycle = portCounterGet(COUNTER_CYCLE);
+    end_hpms.counters[COUNTER_INSTRET] = portCounterGet(COUNTER_INSTRET);
+    end_hpms.counters[COUNTER_CYCLE] = portCounterGet(COUNTER_CYCLE);
 }
 
 void externFault( void * pvParameters ) {
-    start_instret = portCounterGet(COUNTER_INSTRET);
-    start_cycle = portCounterGet(COUNTER_CYCLE);
+    start_hpms.counters[COUNTER_INSTRET] = portCounterGet(COUNTER_INSTRET);
+    start_hpms.counters[COUNTER_CYCLE] = portCounterGet(COUNTER_CYCLE);
     *((volatile int *) 0) = 0;
 }
 
 void queueReceiveTask( void * pvParameters )
 {
-    portDISABLE_INTERRUPTS();
+    //portDISABLE_INTERRUPTS();
 
     UBaseType_t xTotalSize = IPC_TOTAL_SIZE;
     UBaseType_t xBufferSize = IPC_BUFFER_SIZE;
@@ -126,7 +122,8 @@ void queueReceiveTask( void * pvParameters )
         log( "Invalid biffer sizes\n" );
     }
 
-    char * pReceiveBuffer = pvPortMalloc( xBufferSize );
+    //char * pReceiveBuffer = pvPortMalloc( xBufferSize );
+    static char pReceiveBuffer[IPC_TOTAL_SIZE];
 
     if( !pReceiveBuffer )
     {
@@ -187,7 +184,7 @@ void queueReceiveTask( void * pvParameters )
         }
     #endif
 
-    vPortFree( pReceiveBuffer );
+    //vPortFree( pReceiveBuffer );
     /* Notify main task we are finished */
     xTaskNotifyGive( params->mainTask );
     vTaskDelete( NULL );

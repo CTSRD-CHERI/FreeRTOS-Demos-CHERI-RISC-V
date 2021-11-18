@@ -48,11 +48,6 @@
 extern cheri_riscv_hpms start_hpms;
 extern cheri_riscv_hpms end_hpms;
 
-uint64_t start_instret = 0;
-uint64_t end_instret = 0;
-uint64_t start_cycle = 0;
-uint64_t end_cycle = 0;
-
 void queueSendTask( void * pvParameters );
 
 static void __attribute__ ((noinline)) local( void * pvParameters );
@@ -67,100 +62,100 @@ void callSameCompartment( void * pvParameters );
 void callExternalCompartment( void * pvParameters );
 
 static void local( void * pvParameters ) {
-    end_instret = portCounterGet(COUNTER_INSTRET);
-    end_cycle = portCounterGet(COUNTER_CYCLE);
+    end_hpms.counters[COUNTER_INSTRET] = portCounterGet(COUNTER_INSTRET);
+    end_hpms.counters[COUNTER_CYCLE] = portCounterGet(COUNTER_CYCLE);
 }
 
 void localFunc( void * pvParameters ) {
-    end_instret = portCounterGet(COUNTER_INSTRET);
-    end_cycle = portCounterGet(COUNTER_CYCLE);
+    end_hpms.counters[COUNTER_INSTRET] = portCounterGet(COUNTER_INSTRET);
+    end_hpms.counters[COUNTER_CYCLE] = portCounterGet(COUNTER_CYCLE);
 }
 
 void callFault( void * pvParameters ) {
     for( int i = 0; i < DISCARD_RUNS; i++ ) {
         externFault(pvParameters);
-        end_instret = portCounterGet(COUNTER_INSTRET);
-        end_cycle = portCounterGet(COUNTER_CYCLE);
+        end_hpms.counters[COUNTER_INSTRET] = portCounterGet(COUNTER_INSTRET);
+        end_hpms.counters[COUNTER_CYCLE] = portCounterGet(COUNTER_CYCLE);
     }
 
     externFault(pvParameters);
-    end_instret = portCounterGet(COUNTER_INSTRET);
-    end_cycle = portCounterGet(COUNTER_CYCLE);
+    end_hpms.counters[COUNTER_INSTRET] = portCounterGet(COUNTER_INSTRET);
+    end_hpms.counters[COUNTER_CYCLE] = portCounterGet(COUNTER_CYCLE);
 
     log( "IPC Performance Results for: compartment faults\n");
-    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_CYCLE], end_cycle - start_cycle);
-    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_INSTRET], end_instret - start_instret);
+    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_CYCLE], end_hpms.counters[COUNTER_CYCLE] - start_hpms.counters[COUNTER_CYCLE]);
+    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_INSTRET], end_hpms.counters[COUNTER_INSTRET] - start_hpms.counters[COUNTER_INSTRET]);
 }
 
 void ecall( void ) {
 
     for( int i = 0; i < DISCARD_RUNS; i++ ) {
-        start_cycle = portCounterGet(COUNTER_CYCLE);
-        start_instret = portCounterGet(COUNTER_INSTRET);
-        asm volatile("ecall");
-        end_instret = portCounterGet(COUNTER_INSTRET);
-        end_cycle = portCounterGet(COUNTER_CYCLE);
+        start_hpms.counters[COUNTER_INSTRET] = portCounterGet(COUNTER_INSTRET);
+        start_hpms.counters[COUNTER_CYCLE] = portCounterGet(COUNTER_CYCLE);
+        asm volatile("li a7, 1; ecall");
+        end_hpms.counters[COUNTER_INSTRET] = portCounterGet(COUNTER_INSTRET);
+        end_hpms.counters[COUNTER_CYCLE] = portCounterGet(COUNTER_CYCLE);
     }
 
-    start_cycle = portCounterGet(COUNTER_CYCLE);
-    start_instret = portCounterGet(COUNTER_INSTRET);
+    start_hpms.counters[COUNTER_CYCLE] = portCounterGet(COUNTER_CYCLE);
+    start_hpms.counters[COUNTER_INSTRET] = portCounterGet(COUNTER_INSTRET);
     asm volatile("ecall");
-    end_instret = portCounterGet(COUNTER_INSTRET);
-    end_cycle = portCounterGet(COUNTER_CYCLE);
+    end_hpms.counters[COUNTER_INSTRET] = portCounterGet(COUNTER_INSTRET);
+    end_hpms.counters[COUNTER_CYCLE] = portCounterGet(COUNTER_CYCLE);
 
     log( "IPC Performance Results for: ecall\n");
-    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_CYCLE], end_cycle - start_cycle);
-    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_INSTRET], end_instret - start_instret);
+    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_CYCLE], end_hpms.counters[COUNTER_CYCLE] - start_hpms.counters[COUNTER_CYCLE]);
+    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_INSTRET], end_hpms.counters[COUNTER_INSTRET] - start_hpms.counters[COUNTER_INSTRET]);
 }
 
 void callLocal( void * pvParameters ) {
     for( int i = 0; i < DISCARD_RUNS; i++ ) {
-        start_cycle = portCounterGet(COUNTER_CYCLE);
-        start_instret = portCounterGet(COUNTER_INSTRET);
+        start_hpms.counters[COUNTER_CYCLE] = portCounterGet(COUNTER_CYCLE);
+        start_hpms.counters[COUNTER_INSTRET] = portCounterGet(COUNTER_INSTRET);
         local(pvParameters);
     }
 
-    start_cycle = portCounterGet(COUNTER_CYCLE);
-    start_instret = portCounterGet(COUNTER_INSTRET);
+    start_hpms.counters[COUNTER_CYCLE] = portCounterGet(COUNTER_CYCLE);
+    start_hpms.counters[COUNTER_INSTRET] = portCounterGet(COUNTER_INSTRET);
     local(pvParameters);
 
     log( "IPC Performance Results for: local function call\n" );
-    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_CYCLE], end_cycle - start_cycle);
-    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_INSTRET], end_instret - start_instret);
+    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_CYCLE], end_hpms.counters[COUNTER_CYCLE] - start_hpms.counters[COUNTER_CYCLE]);
+    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_INSTRET], end_hpms.counters[COUNTER_INSTRET] - start_hpms.counters[COUNTER_INSTRET]);
 }
 
 void callSameCompartment( void * pvParameters ) {
 
     for( int i = 0; i < DISCARD_RUNS; i++ ) {
-        start_cycle = portCounterGet(COUNTER_CYCLE);
-        start_instret = portCounterGet(COUNTER_INSTRET);
+        start_hpms.counters[COUNTER_CYCLE] = portCounterGet(COUNTER_CYCLE);
+        start_hpms.counters[COUNTER_INSTRET] = portCounterGet(COUNTER_INSTRET);
         localFunc(pvParameters);
     }
 
-    start_cycle = portCounterGet(COUNTER_CYCLE);
-    start_instret = portCounterGet(COUNTER_INSTRET);
+    start_hpms.counters[COUNTER_CYCLE] = portCounterGet(COUNTER_CYCLE);
+    start_hpms.counters[COUNTER_INSTRET] = portCounterGet(COUNTER_INSTRET);
     localFunc(pvParameters);
 
     log( "IPC Performance Results for: same compartment call\n" );
-    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_CYCLE], end_cycle - start_cycle);
-    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_INSTRET], end_instret - start_instret);
+    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_CYCLE], end_hpms.counters[COUNTER_CYCLE] - start_hpms.counters[COUNTER_CYCLE]);
+    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_INSTRET], end_hpms.counters[COUNTER_INSTRET] - start_hpms.counters[COUNTER_INSTRET]);
 }
 
 void callExternalCompartment( void * pvParameters ) {
 
     for( int i = 0; i < DISCARD_RUNS; i++ ) {
-        start_cycle = portCounterGet(COUNTER_CYCLE);
-        start_instret = portCounterGet(COUNTER_INSTRET);
+        start_hpms.counters[COUNTER_CYCLE] = portCounterGet(COUNTER_CYCLE);
+        start_hpms.counters[COUNTER_INSTRET] = portCounterGet(COUNTER_INSTRET);
         externFunc(pvParameters);
     }
 
-    start_cycle = portCounterGet(COUNTER_CYCLE);
-    start_instret = portCounterGet(COUNTER_INSTRET);
+    start_hpms.counters[COUNTER_CYCLE] = portCounterGet(COUNTER_CYCLE);
+    start_hpms.counters[COUNTER_INSTRET] = portCounterGet(COUNTER_INSTRET);
     externFunc(pvParameters);
 
     log( "IPC Performance Results for: compartment switch call\n" );
-    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_CYCLE], end_cycle - start_cycle);
-    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_INSTRET], end_instret - start_instret);
+    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_CYCLE], end_hpms.counters[COUNTER_CYCLE] - start_hpms.counters[COUNTER_CYCLE]);
+    log("HPM %s: %" PRIu64 "\n", hpm_names[COUNTER_INSTRET], end_hpms.counters[COUNTER_INSTRET] - start_hpms.counters[COUNTER_INSTRET]);
 }
 
 void queueSendTask( void * pvParameters )
@@ -173,7 +168,7 @@ void queueSendTask( void * pvParameters )
 
     IPCTaskParams_t * params = ( IPCTaskParams_t * ) pvParameters;
 
-    portDISABLE_INTERRUPTS();
+    //portDISABLE_INTERRUPTS();
 
     if( params != NULL )
     {
@@ -214,7 +209,7 @@ void queueSendTask( void * pvParameters )
 
     unsigned int cnt = xTotalSize / xBufferSize;
 
-    char * pBufferToSend = pvPortMalloc( xBufferSize );
+    static char pBufferToSend[IPC_TOTAL_SIZE];
 
     if( !pBufferToSend )
     {
@@ -261,7 +256,7 @@ void queueSendTask( void * pvParameters )
         }
     #endif
 
-    vPortFree( pBufferToSend );
+    //vPortFree( pBufferToSend );
     vTaskDelete( NULL );
 
     while( 1 )
