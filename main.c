@@ -338,7 +338,7 @@ int demo_main( void )
                              "root-app",
                              configMINIMAL_STACK_SIZE * 2U,
                              0,
-                             tskIDLE_PRIORITY,
+                             tskIDLE_PRIORITY | portPRIVILEGE_BIT,
                              NULL );
             #endif
         #else /* ifdef configPROG_ENTRY */
