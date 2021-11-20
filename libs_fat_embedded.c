@@ -95,6 +95,7 @@ static void prvCreateLibs( void )
     int iReturned;
     size_t x;
     FF_FILE * pxFile;
+    size_t xOverAllEmbeddedSize = 0;
 
     /* Create the directory used as the root of the libs path. */
     iReturned = ff_mkdir( configLIBDL_LIB_PATH );
@@ -114,15 +115,19 @@ static void prvCreateLibs( void )
 
             if( pxFile != NULL )
             {
+                printf("Embedded Loader: Copying %-32s of size %-10zu bytes from ELF to the filesystem\n", xLibFilesToCopy[ x ].pcFileName, xLibFilesToCopy[ x ].xFileSize);
                 /* Write out all the data to the file. */
                 ff_fwrite( xLibFilesToCopy[ x ].pucFileData,
                            xLibFilesToCopy[ x ].xFileSize,
                            1,
                            pxFile );
+                xOverAllEmbeddedSize += xLibFilesToCopy[ x ].xFileSize;
 
                 ff_fclose( pxFile );
             }
         }
+
+        printf("Embedded Loader: overall compartments size = %zu\n", xOverAllEmbeddedSize);
     }
 }
 /*-----------------------------------------------------------*/
