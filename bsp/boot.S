@@ -242,6 +242,10 @@ init_stack:
     cjalr           cra, ct0 # jump to main
 #endif
 #else
+
+    la t0, freertos_risc_v_trap_handler
+    csrw mtvec, t0
+
     /* set stack pointer */
     la	sp, _stack
 
