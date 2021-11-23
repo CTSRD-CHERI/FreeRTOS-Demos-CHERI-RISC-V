@@ -1454,6 +1454,7 @@ def configure(ctx):
         ctx.define('configLIBDL_CONF_PATH', "/etc/")
         if not ctx.is_defined('configCOMPARTMENTS_NUM'):
             ctx.define('configCOMPARTMENTS_NUM', 128)
+            ctx.env.append_value('ASFLAGS', ['-DconfigCOMPARTMENTS_NUM=128'])
         ctx.define('configMAXLEN_COMPNAME', 255)
 
         # libdl will send solib events to GDB while loading objects
@@ -1467,6 +1468,19 @@ def configure(ctx):
                 ctx.define('configCHERI_COMPARTMENTALIZATION_MODE', 1)
             elif ctx.env.COMP_MODE == "libs":
                 ctx.define('configCHERI_COMPARTMENTALIZATION_MODE', 2)
+            else:
+                ctx.fatal('Invalid compartmentalization mode: either objs or libs are supported')
+
+        if ctx.env.ENABLE_MPU:
+            ctx.define('configMPU_COMPARTMENTALIZATION', 1)
+            ctx.define('configMPU_REGIONS_NUM', 16)
+            ctx.env.append_value('ASFLAGS', ['-DconfigMPU_COMPARTMENTALIZATION=1'])
+            ctx.env.append_value('ASFLAGS', ['-DconfigMPU_REGIONS_NUM=16'])
+
+            if ctx.env.COMP_MODE == "objs":
+                ctx.define('configMPU_COMPARTMENTALIZATION_MODE', 1)
+            elif ctx.env.COMP_MODE == "libs":
+                ctx.define('configMPU_COMPARTMENTALIZATION_MODE', 2)
             else:
                 ctx.fatal('Invalid compartmentalization mode: either objs or libs are supported')
 
