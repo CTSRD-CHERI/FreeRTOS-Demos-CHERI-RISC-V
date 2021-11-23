@@ -71,7 +71,7 @@ def configure(ctx):
          #])
          #ctx.define('mainCONFIG_USE_DYNAMIC_LOADER', 0)
 
-         ctx.env.append_value('LIB_DEPS_EMBED_FAT', ['freertos_tcpip', 'virtio'])
+         ctx.env.append_value('LIB_DEPS_EMBED_FAT', ['freertos_tcpip', 'freertos_cli', 'virtio'])
 
          #if not ctx.env.VIRTIO_BLK:
          #    ctx.env.append_value('LIB_DEPS_EMBED_FAT', ['virtio'])
