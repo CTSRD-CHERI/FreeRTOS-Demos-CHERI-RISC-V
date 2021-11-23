@@ -1495,6 +1495,9 @@ def configure(ctx):
     else:
         ctx.define('configCOMPARTMENTS_NUM', 0)
         ctx.define('configMAXLEN_COMPNAME', 0)
+        ctx.define('configMPU_COMPARTMENTALIZATION', 0)
+        ctx.define('configCHERI_COMPARTMENTALIZATION', 0)
+        ctx.env.append_value('ASFLAGS', ['-DconfigMPU_COMPARTMENTALIZATION=0'])
 
     if ctx.env.CREATE_DISK_IMAGE:
         try:
