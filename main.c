@@ -331,7 +331,7 @@ int demo_main( void )
                              "loader",
                              configMINIMAL_STACK_SIZE * 2U,
                              NULL,
-                             tskIDLE_PRIORITY,
+                             tskIDLE_PRIORITY | portPRIVILEGE_BIT,
                              NULL );
             #else
                 xTaskCreate( ( TaskFunction_t ) configPROG_ENTRY,
