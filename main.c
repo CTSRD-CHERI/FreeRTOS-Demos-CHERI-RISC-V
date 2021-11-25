@@ -166,7 +166,7 @@ uint64_t port_get_current_mtime( void )
         #define mainRAM_DISK_SECTORS         ( ( 8UL * 1024UL * 1024UL ) / mainRAM_DISK_SECTOR_SIZE ) /* 8M bytes. */
     #endif /* mainRAM_DISK_SECTORS */
 
-    #define mainIO_MANAGER_CACHE_SIZE    ( 2UL * mainRAM_DISK_SECTOR_SIZE )
+    #define mainIO_MANAGER_CACHE_SIZE    ( 15UL * mainRAM_DISK_SECTOR_SIZE )
 
     static void prvCreateDisk( void )
     {
