@@ -71,7 +71,9 @@ def configure(ctx):
          #])
          #ctx.define('mainCONFIG_USE_DYNAMIC_LOADER', 0)
 
-         ctx.env.append_value('LIB_DEPS_EMBED_FAT', ['freertos_tcpip', 'freertos_cli', 'virtio'])
+         ctx.env.append_value('LIB_DEPS_EMBED_FAT', ['freertos_tcpip', 'freertos_cli', 'virtio',
+            "http_server", "ftp_server", "tftp_server", "cli_server", "tcp_server", "echo_servers"
+         ])
 
          #if not ctx.env.VIRTIO_BLK:
          #    ctx.env.append_value('LIB_DEPS_EMBED_FAT', ['virtio'])
@@ -99,26 +101,94 @@ def build(bld):
         features=['c'],
         cflags = bld.env.CFLAGS + cflags,
         source=[
-            bld.path.parent.find_resource('TCPEchoClient_SingleTasks.c'),
-            bld.path.parent.find_resource('SimpleUDPClientAndServer.c'),
-            bld.path.parent.find_resource('SimpleTCPEchoServer.c'),
-            bld.path.parent.find_resource('main_servers.c'), 'CLI-commands.c',
-            'logging_output.c',
-            'Common/FreeRTOS_Plus_FAT_Demos/CreateAndVerifyExampleFiles.c',
-            'Common/FreeRTOS_Plus_FAT_Demos/test/ff_stdio_tests_with_cwd.c',
-            'Common/FreeRTOS_Plus_CLI_Demos/TCPCommandConsole.c',
-            'Common/FreeRTOS_Plus_CLI_Demos/UDPCommandConsole.c',
-            'Common/FreeRTOS_Plus_CLI_Demos/File-related-CLI-commands.c',
-            'Common/Demo_IP_Protocols/FTP/FreeRTOS_FTP_server.c',
-            'Common/Demo_IP_Protocols/FTP/FreeRTOS_FTP_commands.c',
-            'Common/FreeRTOS_Plus_TCP_Demos/TFTPServer.c',
-            'Common/Demo_IP_Protocols/Common/FreeRTOS_TCP_server.c',
             'Common/Demo_IP_Protocols/HTTP/FreeRTOS_HTTP_commands.c',
             'Common/Demo_IP_Protocols/HTTP/FreeRTOS_HTTP_server.c',
-            'TraceMacros/Example1/DemoIPTrace.c'
         ],
         use=[
             "freertos_core_headers", "freertos_bsp_headers", "freertos_tcpip_headers", "freertos_cli_headers",
             "freertos_libdl_headers", "freertos_fat_headers", "virtio_headers", "cheri_headers"
+        ],
+        target="http_server")
+
+    bld.stlib(
+        features=['c'],
+        cflags = bld.env.CFLAGS + cflags,
+        source=[
+            'Common/Demo_IP_Protocols/FTP/FreeRTOS_FTP_server.c',
+            'Common/Demo_IP_Protocols/FTP/FreeRTOS_FTP_commands.c',
+        ],
+        use=[
+            "freertos_core_headers", "freertos_bsp_headers", "freertos_tcpip_headers", "freertos_cli_headers",
+            "freertos_libdl_headers", "freertos_fat_headers", "virtio_headers", "cheri_headers"
+        ],
+        target="ftp_server")
+
+    bld.stlib(
+        features=['c'],
+        cflags = bld.env.CFLAGS + cflags,
+        source=[
+            'Common/FreeRTOS_Plus_TCP_Demos/TFTPServer.c',
+        ],
+        use=[
+            "freertos_core_headers", "freertos_bsp_headers", "freertos_tcpip_headers", "freertos_cli_headers",
+            "freertos_libdl_headers", "freertos_fat_headers", "virtio_headers", "cheri_headers"
+        ],
+        target="tftp_server")
+
+    bld.stlib(
+        features=['c'],
+        cflags = bld.env.CFLAGS + cflags,
+        source=[
+            'CLI-commands.c',
+            'Common/FreeRTOS_Plus_CLI_Demos/TCPCommandConsole.c',
+            'Common/FreeRTOS_Plus_CLI_Demos/UDPCommandConsole.c',
+            'Common/FreeRTOS_Plus_CLI_Demos/File-related-CLI-commands.c',
+        ],
+        use=[
+            "freertos_core_headers", "freertos_bsp_headers", "freertos_tcpip_headers", "freertos_cli_headers",
+            "freertos_libdl_headers", "freertos_fat_headers", "virtio_headers", "cheri_headers"
+        ],
+        target="cli_server")
+
+    bld.stlib(
+        features=['c'],
+        cflags = bld.env.CFLAGS + cflags,
+        source=[
+            'Common/Demo_IP_Protocols/Common/FreeRTOS_TCP_server.c',
+        ],
+        use=[
+            "freertos_core_headers", "freertos_bsp_headers", "freertos_tcpip_headers", "freertos_cli_headers",
+            "freertos_libdl_headers", "freertos_fat_headers", "virtio_headers", "cheri_headers"
+        ],
+        target="tcp_server")
+
+    bld.stlib(
+        features=['c'],
+        cflags = bld.env.CFLAGS + cflags,
+        source=[
+            bld.path.parent.find_resource('TCPEchoClient_SingleTasks.c'),
+            bld.path.parent.find_resource('SimpleUDPClientAndServer.c'),
+            bld.path.parent.find_resource('SimpleTCPEchoServer.c'),
+        ],
+        use=[
+            "freertos_core_headers", "freertos_bsp_headers", "freertos_tcpip_headers", "freertos_cli_headers",
+            "freertos_libdl_headers", "freertos_fat_headers", "virtio_headers", "cheri_headers"
+        ],
+        target="echo_servers")
+
+    bld.stlib(
+        features=['c'],
+        cflags = bld.env.CFLAGS + cflags,
+        source=[
+            bld.path.parent.find_resource('main_servers.c'),
+            'logging_output.c',
+            'Common/FreeRTOS_Plus_FAT_Demos/CreateAndVerifyExampleFiles.c',
+            'Common/FreeRTOS_Plus_FAT_Demos/test/ff_stdio_tests_with_cwd.c',
+            'TraceMacros/Example1/DemoIPTrace.c'
+        ],
+        use=[
+            "freertos_core_headers", "freertos_bsp_headers", "freertos_tcpip_headers", "freertos_cli_headers",
+            "freertos_libdl_headers", "freertos_fat_headers", "virtio_headers", "cheri_headers",
+            "http_server", "ftp_server", "tftp_server", "cli_server", "tcp_server", "echo_servers"
         ],
         target=name)
