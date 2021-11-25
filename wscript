@@ -491,7 +491,8 @@ class FreeRTOSLib:
         bld(export_includes=self.export_includes, name=self.name + "_headers")
 
         if self.is_compartment:
-            self.cflags += ['-cheri-cap-table-abi=gprel']
+            # medlow to force emitting relocs for function pointers
+            self.cflags += ['-cheri-cap-table-abi=gprel', '-mcmodel=medlow']
 
         bld.stlib(features=['c'],
                   asflags=bld.env.CFLAGS + bld.env.ASFLAGS,
@@ -1665,7 +1666,7 @@ def build(bld):
 
     # LIBS - Build required libs
     for lib in bld.env.LIB_DEPS:
-        if lib in bld.env.LIB_DEPS_EMBED_FAT and bld.env.PURECAP:
+        if lib in bld.env.LIB_DEPS_EMBED_FAT and (bld.env.PURECAP or bld.env.ENABLE_MPU):
             bld.env.libs[lib].is_compartment = True
         bld.env.libs[lib].build(bld)
 
@@ -1680,9 +1681,16 @@ def build(bld):
     else:
         # Just for legacy compatibility where simple programs with one file are assumed
         # to have main_xxx.c files under demo/ and don't define their own wscript.
+        cflags = []
+
+        if bld.env.COMPARTMENTALIZE:
+            if bld.env.PURECAP:
+                cflags = ['-cheri-cap-table-abi=gprel']
+            if bld.env.ENABLE_MPU:
+                cflags = ['-mcmodel=medlow'] # To force emitting relocs for function pointers
+
         bld.stlib(source=['./demo/' + bld.env.PROG + '.c'],
-                  cflags = ['-cheri-cap-table-abi=gprel'] if bld.env.COMPARTMENTALIZE
-                    and bld.env.PURECAP else [],
+                  cflags = cflags,
                   target=bld.env.PROG)
 
     main_sources = ['main.c']

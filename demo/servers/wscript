@@ -97,6 +97,10 @@ def build(bld):
     if bld.env.COMPARTMENTALIZE and bld.env.PURECAP:
         cflags = ['-cheri-cap-table-abi=gprel']
 
+    if bld.env.COMPARTMENTALIZE and bld.env.ENABLE_MPU:
+        # To force emitting relocs for function pointers
+        cflags = ['-mcmodel=medlow']
+
     bld.stlib(
         features=['c'],
         cflags = bld.env.CFLAGS + cflags,
