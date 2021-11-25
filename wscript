@@ -1898,7 +1898,7 @@ def plot_compartments(ctx):
     freertos_apps = graphviz.Digraph(name='clusterApplication Libs', node_attr={'shape': 'box'})
     freertos_apps.attr(label="Application Libs");
 
-    freertos_plus_libs = ["freertos_tcpip", "freertos_libcoremqtt", "freertos_libcorejson"]
+    freertos_plus_libs = ["freertos_tcpip", "freertos_libcoremqtt", "freertos_libcorejson", "freertos_cli"]
     freertos_thirdparty_libs = ["freertos_libmbedtls", "freertos_libota", "freertos_libcorejson",
                                 "libtinycbor", "virtio", "freertos_network_transport"]
     freertos_labs_libs = ["freertos_libdl", "freertos_fat"]
