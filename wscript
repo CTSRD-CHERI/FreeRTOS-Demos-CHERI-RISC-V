@@ -1474,6 +1474,7 @@ def configure(ctx):
 
         if ctx.env.ENABLE_MPU:
             ctx.define('configMPU_COMPARTMENTALIZATION', 1)
+            ctx.define('configMPU_EMULATE_UNLIMITED', 1)
             ctx.define('configMPU_REGIONS_NUM', 16)
             ctx.env.append_value('ASFLAGS', ['-DconfigMPU_COMPARTMENTALIZATION=1'])
             ctx.env.append_value('ASFLAGS', ['-DconfigMPU_REGIONS_NUM=16'])
