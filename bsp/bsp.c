@@ -1,29 +1,31 @@
+#include <stdint.h>
 #include "FreeRTOS.h"
 #include "FreeRTOSConfig.h"
 #include "task.h"
 #include "bsp.h"
+#include "portmacro.h"
+#include "portstatcounters.h"
 #include "plic_driver.h"
 
 #if PLATFORM_GFE
     #include "iic.h"
 #endif
 
-#include "portstatcounters.h"
-
 #ifdef configUART16550_BASE
     #include "uart16550.h"
 #endif
+
+#if (configMPU_COMPARTMENTALIZATION == 1 || configCHERI_COMPARTMENTALIZATION == 1)
+    #include <rtl/rtl-freertos-compartments.h>
+#endif
+
 
 plic_instance_t Plic;
 
 #define CHERI_COMPARTMENT_FAIL (-28)
 
-#ifdef __CHERI_PURE_CAPABILITY__
-    #include <stdint.h>
-    #include <rtl/rtl-freertos-compartments.h>
+#if __CHERI_PURE_CAPABILITY__
     #include <cheri/cheri-utility.h>
-    #include "portmacro.h"
-
 
     #if configCHERI_VERBOSE_FAULT_INFO
         const char* cheri_faults[] = {
@@ -228,6 +230,81 @@ plic_instance_t Plic;
         {
         }
     }
+#else
+    __attribute__((section(".text.fast"))) static uint32_t default_exception_handler( uintptr_t * exception_frame )
+    {
+            BaseType_t pxHigherPriorityTaskWoken = 0;
+            size_t cause = 0;
+            size_t epc = 0;
+            size_t mtval = 0;
+            size_t xCompID = -1;
+            rtems_rtl_obj * obj = NULL;
+
+            asm volatile ( "csrr %0, mcause" : "=r" ( cause )::);
+            asm volatile ( "csrr %0, mepc" : "=r" ( epc )::);
+            asm volatile ( "csrr %0, mtval" : "=r" ( mtval )::);
+
+
+            #if (DEBUG)
+                printf( "mcause -> 0x%zx\n", cause );
+                printf( "mepc -> 0x%zx\n", epc );
+                printf( "mtval -> 0x%zu\n\n", mtval );
+
+                printf( "GPRs:\n" );
+                for( int i = 0; i < 32; i++ )
+                {
+                    printf( "x%i -> 0x%zx\n", i, *( exception_frame + i ));
+                }
+
+            #endif
+
+            #if configMPU_COMPARTMENTALIZATION
+                xCompID = xPortGetCurrentCompartmentID();
+            #if configMPU_COMPARTMENTALIZATION_MODE == 1
+                obj = rtl_cherifreertos_compartment_get_obj( xCompID );
+
+                if( obj != NULL )
+                {
+                    void * ret = xPortGetCurrentCompartmentReturn();
+                    printf("Got return compartment address = %p @ %p\n", ret, exception_frame);
+
+                    #if (DEBUG)
+                        printf( "<<<< Fault in Task %s: Compartment #%d: %s\n", pcTaskGetName( NULL ), xCompID, obj->oname );
+                    #endif
+
+                    pxHigherPriorityTaskWoken = rtl_cherifreertos_compartment_faultHandler(xCompID);
+
+                    /* Caller compartment return */
+                    *( exception_frame ) = ( uintptr_t ) ret;
+                    *( exception_frame + 7) = ( uintptr_t ) -1;
+                    return 0;
+                }
+            #elif configMPU_COMPARTMENTALIZATION_MODE == 2
+                rtems_rtl_archive* archive = rtl_cherifreertos_compartment_get_archive( xCompID );
+
+                if( archive != NULL )
+                {
+                    void * ret = xPortGetCurrentCompartmentReturn();
+
+                    #if (DEBUG)
+                        printf( "<<<< Fault in Task %s: Compartment #%d: %s\n", pcTaskGetName( NULL ), xCompID, archive->name );
+                    #endif
+
+                    pxHigherPriorityTaskWoken = rtl_cherifreertos_compartment_faultHandler(xCompID);
+
+                    /* Caller compartment return */
+                    *( exception_frame ) = ( uintptr_t ) ret;
+                    *( exception_frame + 7) = ( uintptr_t ) -1;
+                    return pxHigherPriorityTaskWoken;
+                }
+
+            #endif
+            #endif
+
+        while( 1 )
+        {
+        }
+    }
 #endif /* ifdef __CHERI_PURE_CAPABILITY__ */
 /*-----------------------------------------------------------*/
 
@@ -259,7 +336,7 @@ void prvSetupHardware( void )
         #endif
     #endif
 
-    #if ((__CHERI_PURE_CAPABILITY__ && DEBUG) || configCHERI_COMPARTMENTALIZATION)
+    #if ((DEBUG) || (configCHERI_COMPARTMENTALIZATION == 1) || (configMPU_COMPARTMENTALIZATION == 1))
         /* Setup an exception handler for CHERI */
         for (int i = 0; i < 64; i++)
             vPortSetExceptionHandler( i, default_exception_handler );
