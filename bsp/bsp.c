@@ -237,8 +237,10 @@ plic_instance_t Plic;
             size_t cause = 0;
             size_t epc = 0;
             size_t mtval = 0;
-            size_t xCompID = -1;
-            rtems_rtl_obj * obj = NULL;
+            #if configMPU_COMPARTMENTALIZATION
+                size_t xCompID = -1;
+                rtems_rtl_obj * obj = NULL;
+            #endif
 
             asm volatile ( "csrr %0, mcause" : "=r" ( cause )::);
             asm volatile ( "csrr %0, mepc" : "=r" ( epc )::);
