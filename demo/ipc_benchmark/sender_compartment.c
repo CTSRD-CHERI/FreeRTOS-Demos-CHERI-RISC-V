@@ -257,6 +257,31 @@ void queueSendTask( void * pvParameters )
         }
     #endif
 
+    #if VARY_BUFFER_SIZES
+        for( int i = 0; i < DISCARD_RUNS; i++ )
+        {
+            xReturned = xQueueSend( xQueue[0], pBufferToSend, 0U );
+            configASSERT( xReturned == pdPASS );
+        }
+
+
+        for( int buffsize = 2; buffsize <= xTotalSize; buffsize *=2 ) {
+            cnt = xTotalSize / buffsize;
+
+            PortStatCounters_ReadAll(&start_hpms);
+
+            for( int i = 0; i < cnt; i++ )
+            {
+                /* Send to the queue - causing the queue receive task to unblock
+                 * 0 is used as the block time so the sending operation
+                 * will not block - it shouldn't need to block as the queue should always
+                 * be empty at this point in the code. */
+                xReturned = xQueueSend( xQueue[(int) log2(buffsize)], pBufferToSend, 0U );
+                configASSERT( xReturned == pdPASS );
+            }
+        }
+    #endif
+
     //vPortFree( pBufferToSend );
     vTaskDelete( NULL );
 

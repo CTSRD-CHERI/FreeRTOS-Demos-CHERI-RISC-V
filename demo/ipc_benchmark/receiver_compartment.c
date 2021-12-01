@@ -185,6 +185,35 @@ void queueReceiveTask( void * pvParameters )
         }
     #endif
 
+    #if VARY_BUFFER_SIZES
+        for( int i = 0; i < DISCARD_RUNS; i++ )
+        {
+            xQueueReceive( xQueue[0], pReceiveBuffer, portMAX_DELAY );
+        }
+
+        for( int buffsize = 2; buffsize <= xTotalSize; buffsize *=2 ) {
+            cnt = xTotalSize / buffsize;
+
+            PortStatCounters_ReadAll(&start_hpms);
+
+            for( int i = 0; i < cnt; i++ )
+            {
+                xQueueReceive( xQueue[(int) log2(buffsize)], pReceiveBuffer, portMAX_DELAY );
+            }
+
+            PortStatCounters_ReadAll(&end_hpms);
+            PortStatCounters_DiffAll(&start_hpms, &end_hpms, &end_hpms);
+
+            log( "IPC Performance Results for: queues: buffer size: %lu: total size: %lu\n",
+                 buffsize, xTotalSize
+                 );
+
+            for (int i = 0; i < COUNTERS_NUM; i++) {
+                log("HPM %s: %" PRIu64 "\n", hpm_names[i], end_hpms.counters[i]);
+            }
+        }
+    #endif
+
     //vPortFree( pReceiveBuffer );
     /* Notify main task we are finished */
     xTaskNotifyGive( params->mainTask );
