@@ -268,7 +268,6 @@ plic_instance_t Plic;
                 if( obj != NULL )
                 {
                     void * ret = xPortGetCurrentCompartmentReturn();
-                    printf("Got return compartment address = %p @ %p\n", ret, exception_frame);
 
                     #if (DEBUG)
                         printf( "<<<< Fault in Task %s: Compartment #%d: %s\n", pcTaskGetName( NULL ), xCompID, obj->oname );
