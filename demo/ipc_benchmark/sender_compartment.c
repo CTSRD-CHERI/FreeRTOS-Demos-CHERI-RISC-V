@@ -99,7 +99,7 @@ void ecall( void ) {
 
     start_hpms.counters[COUNTER_CYCLE] = portCounterGet(COUNTER_CYCLE);
     start_hpms.counters[COUNTER_INSTRET] = portCounterGet(COUNTER_INSTRET);
-    asm volatile("ecall");
+    asm volatile("li a7, 1; ecall");
     end_hpms.counters[COUNTER_INSTRET] = portCounterGet(COUNTER_INSTRET);
     end_hpms.counters[COUNTER_CYCLE] = portCounterGet(COUNTER_CYCLE);
 
