@@ -226,6 +226,7 @@ void main_ipc_benchmark( int argc,
     }
 
     log( "Ended main_ipc_benchmark\n" );
+    exit( 0 );
 
     /* There are two cases main_ipc_benchmark can execute in:
      * 1) When called from main.c, in which case we're expected to return so that
