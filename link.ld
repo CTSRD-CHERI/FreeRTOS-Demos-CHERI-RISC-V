@@ -158,10 +158,6 @@ SECTIONS {
       *(.captable)
     } > SRAM
 
-	.heap_kernel (NOLOAD): {
-       *(privileged_heap)
-	} > SRAM
-
 	.data : {
 	   __data_start = .;
        *(privileged_data)
@@ -180,6 +176,10 @@ SECTIONS {
         *(.srodata.cst16) *(.srodata.cst8) *(.srodata.cst4) *(.srodata.cst2) *(.srodata*)
         *(.sdata .sdata.* .gnu.linkonce.s.*)
      }	> SRAM
+
+	.heap_kernel (NOLOAD):  ALIGN(16) {
+       *(privileged_heap)
+	} > SRAM
 
     .stack (NOLOAD) :  ALIGN(16) {
        _stack_end = .;
