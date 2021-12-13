@@ -288,7 +288,7 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
             ctx.env.configFLASH_START = 0xc0000000
             ctx.env.configFLASH_SIZE =  32 * 1024 * 1024
             ctx.env.configSRAM_START = 0xc2000000
-            ctx.env.configSRAM_SIZE = 32 * 1024 * 1024
+            ctx.env.configSRAM_SIZE = 64 * 1024 * 1024
             ctx.env.UNCACHED_MEMSTART = 0x80000000
 
         # Galois/Xilinx defines
