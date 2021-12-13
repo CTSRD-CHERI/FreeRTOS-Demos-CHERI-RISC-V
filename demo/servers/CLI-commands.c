@@ -71,6 +71,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <inttypes.h>
 
 /* FreeRTOS includes. */
 #include "FreeRTOS.h"
@@ -98,6 +100,7 @@
     #define configINCLUDE_TRACE_RELATED_CLI_COMMANDS    0
 #endif
 
+#include "portstatcounters.h"
 
 /*
  * Implements the run-time-stats command.
@@ -159,6 +162,26 @@ static BaseType_t prvNetStatCommand( char * pcWriteBuffer,
  * Defines a command that sends a shutdown signal to the underlying platform.
  */
 static BaseType_t prvShutDownCommand( char * pcWriteBuffer,
+                                      size_t xWriteBufferLen,
+                                      const char * pcCommandString );
+
+/*
+ * Defines a command that starts reading performance counters
+ */
+static BaseType_t prvStartPerformanceCounters( char * pcWriteBuffer,
+                                      size_t xWriteBufferLen,
+                                      const char * pcCommandString );
+/*
+ * Defines a command that ends and diffs performance counters
+ */
+static BaseType_t prvEndPerformanceCounters( char * pcWriteBuffer,
+                                      size_t xWriteBufferLen,
+                                      const char * pcCommandString );
+
+/*
+ * Defines a command that prints performance counters between two points
+ */
+static BaseType_t prvPrintPerformanceCounters( char * pcWriteBuffer,
                                       size_t xWriteBufferLen,
                                       const char * pcCommandString );
 
@@ -305,6 +328,36 @@ static const CLI_Command_Definition_t xParameterEcho =
         prvShutDownCommand, /* The function to run. */
         0                   /* No parameters are expected. */
     };
+
+    static cheri_riscv_hpms start_hpms;
+    static cheri_riscv_hpms end_hpms;
+
+/* Structure that defines the "start_hpms" command line command */
+    static const CLI_Command_Definition_t xStartHPMs =
+    {
+        "start_hpms",
+        "start_hpms:\r\n Read and save HPMs at a start sampling point\r\n\r\n",
+        prvStartPerformanceCounters, /* The function to run. */
+        0                   /* No parameters are expected. */
+    };
+
+/* Structure that defines the "end_hpms" command line command */
+    static const CLI_Command_Definition_t xEndHPMs =
+    {
+        "end_hpms",
+        "end_hpms:\r\n Read and save HPMs at an end samping point\n\r\n",
+        prvEndPerformanceCounters, /* The function to run. */
+        0                   /* No parameters are expected. */
+    };
+
+/* Structure that defines the "print_hpms" command line command */
+    static const CLI_Command_Definition_t xPrintHPMs =
+    {
+        "print_hpms",
+        "print_hpms:\r\n Print diff HPMs between start_hpms and end_hpms command\r\n\r\n",
+        prvPrintPerformanceCounters, /* The function to run. */
+        0                   /* No parameters are expected. */
+    };
 /*-----------------------------------------------------------*/
 
 #ifdef ipconfigUSE_FAT_LIBDL
@@ -377,6 +430,10 @@ void vRegisterCLICommands( void )
         #endif
 
             FreeRTOS_CLIRegisterCommand( &xShutDown );
+
+            FreeRTOS_CLIRegisterCommand( &xStartHPMs );
+            FreeRTOS_CLIRegisterCommand( &xEndHPMs );
+            FreeRTOS_CLIRegisterCommand( &xPrintHPMs );
 
         #ifdef ipconfigUSE_FAT_LIBDL
             FreeRTOS_CLIRegisterCommand( &xDlOpen );
@@ -845,6 +902,34 @@ static BaseType_t prvDisplayIPConfig( char * pcWriteBuffer,
                                           const char * pcCommandString )
     {
         _exit( 0 );
+        return pdTRUE;
+    }
+    /*-----------------------------------------------------------*/
+
+    static BaseType_t prvStartPerformanceCounters( char * pcWriteBuffer,
+                                          size_t xWriteBufferLen,
+                                          const char * pcCommandString )
+    {
+        PortStatCounters_ReadAll(&start_hpms);
+        return pdTRUE;
+    }
+
+    static BaseType_t prvEndPerformanceCounters( char * pcWriteBuffer,
+                                          size_t xWriteBufferLen,
+                                          const char * pcCommandString )
+    {
+        PortStatCounters_ReadAll(&end_hpms);
+        return pdTRUE;
+    }
+
+    static BaseType_t prvPrintPerformanceCounters( char * pcWriteBuffer,
+                                          size_t xWriteBufferLen,
+                                          const char * pcCommandString )
+    {
+        PortStatCounters_DiffAll(&start_hpms, &end_hpms, &end_hpms);
+        for (int i = 0; i < COUNTERS_NUM; i++) {
+            printf("HPM %s: %" PRIu64 "\n", hpm_names[i], end_hpms.counters[i]);
+        }
         return pdTRUE;
     }
     /*-----------------------------------------------------------*/
