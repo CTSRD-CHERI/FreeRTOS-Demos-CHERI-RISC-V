@@ -168,7 +168,15 @@ void queueSendTask( void * pvParameters )
 
     IPCTaskParams_t * params = ( IPCTaskParams_t * ) pvParameters;
 
-    //portDISABLE_INTERRUPTS();
+#if (configENABLE_MPU == 1 && configMPU_COMPARTMENTALIZATION == 0)
+    BaseType_t xRunningPrivileged = xPortRaisePrivilege();
+#endif
+
+    portDISABLE_INTERRUPTS();
+
+#if (configENABLE_MPU == 1 && configMPU_COMPARTMENTALIZATION == 0)
+    vPortResetPrivilege( xRunningPrivileged );
+#endif
 
     if( params != NULL )
     {

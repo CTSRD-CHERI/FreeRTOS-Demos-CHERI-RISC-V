@@ -68,7 +68,15 @@ void externFault( void * pvParameters ) {
 
 void queueReceiveTask( void * pvParameters )
 {
-    //portDISABLE_INTERRUPTS();
+#if (configENABLE_MPU == 1 && configMPU_COMPARTMENTALIZATION == 0)
+    BaseType_t xRunningPrivileged = xPortRaisePrivilege();
+#endif
+
+    portDISABLE_INTERRUPTS();
+
+#if (configENABLE_MPU == 1 && configMPU_COMPARTMENTALIZATION == 0)
+    vPortResetPrivilege( xRunningPrivileged );
+#endif
 
     UBaseType_t xTotalSize = IPC_TOTAL_SIZE;
     UBaseType_t xBufferSize = IPC_BUFFER_SIZE;
