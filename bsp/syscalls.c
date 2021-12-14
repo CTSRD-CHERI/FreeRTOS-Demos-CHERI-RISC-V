@@ -356,9 +356,9 @@ void _exit( int x )
 {
     portDISABLE_INTERRUPTS();
 
+    printf("Shutting Down...\n");
     do
     {
-        printf("Shutting Down...\n");
         #if PLATFORM_QEMU_VIRT || PLATFORM_SPIKE || PLATFORM_SAIL || PLATFORM_FETT
             vTerminate( x );
         #else
