@@ -100,9 +100,9 @@
     #define configPERIPH_CLOCK_HZ                  configCPU_CLOCK_HZ
 #endif
 #define configTICK_RATE_HZ                         ( 1000 )
-#define configMAX_PRIORITIES                       ( 5 )
+#define configMAX_PRIORITIES                       ( 10 )
 #ifndef configMINIMAL_STACK_SIZE
-#define configMINIMAL_STACK_SIZE                   ( ( uint32_t ) 4096 ) /* Can be as low as 60 but some of the demo tasks that use this constant require it to be higher. */
+#define configMINIMAL_STACK_SIZE                   ( ( uint32_t ) 8192 ) /* Can be as low as 60 but some of the demo tasks that use this constant require it to be higher. */
 #endif
 #define configSTACK_DEPTH_TYPE                     uint32_t              /*the default ifndef is uint16_t */
 #ifdef configCUSTOM_HEAP_SIZE
