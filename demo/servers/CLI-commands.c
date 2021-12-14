@@ -911,7 +911,7 @@ static BaseType_t prvDisplayIPConfig( char * pcWriteBuffer,
                                           const char * pcCommandString )
     {
         PortStatCounters_ReadAll(&start_hpms);
-        return pdTRUE;
+        return pdFALSE;
     }
 
     static BaseType_t prvEndPerformanceCounters( char * pcWriteBuffer,
@@ -919,7 +919,7 @@ static BaseType_t prvDisplayIPConfig( char * pcWriteBuffer,
                                           const char * pcCommandString )
     {
         PortStatCounters_ReadAll(&end_hpms);
-        return pdTRUE;
+        return pdFALSE;
     }
 
     static BaseType_t prvPrintPerformanceCounters( char * pcWriteBuffer,
@@ -930,7 +930,7 @@ static BaseType_t prvDisplayIPConfig( char * pcWriteBuffer,
         for (int i = 0; i < COUNTERS_NUM; i++) {
             printf("HPM %s: %" PRIu64 "\n", hpm_names[i], end_hpms.counters[i]);
         }
-        return pdTRUE;
+        return pdFALSE;
     }
     /*-----------------------------------------------------------*/
 
