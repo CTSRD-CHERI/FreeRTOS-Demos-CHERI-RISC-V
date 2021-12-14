@@ -240,7 +240,7 @@ int _write( int file,
             char * ptr,
             int len )
 {
-#if (configENABLE_MPU == 1)
+#if (configENABLE_MPU == 1 && configMPU_COMPARTMENTALIZATION == 0)
     BaseType_t xRunningPrivileged = xPortRaisePrivilege();
 #endif
 
@@ -254,7 +254,7 @@ int _write( int file,
     #else
     #error "Unsupported Console for this PLATFORM"
     #endif
-#if (configENABLE_MPU == 1)
+#if (configENABLE_MPU == 1 && configMPU_COMPARTMENTALIZATION == 0)
     vPortResetPrivilege( xRunningPrivileged );
 #endif
 }
