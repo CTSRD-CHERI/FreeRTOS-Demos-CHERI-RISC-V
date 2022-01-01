@@ -58,7 +58,8 @@ with open('upload_file', 'rb') as f:
     ftp.connect(args.server, int(args.port))
     ftp.login()
     print("Sending the file over")
-    ftp.storbinary('STOR /ram/upload_file', f)     # send the file
+
+    ftp.storbinary('STOR /ram/upload_file', f, int(args.file_size))     # send the file
     print("File sent")
-    f.close()                                      # close file and FTP
+    f.close()                                                           # close file and FTP
     ftp.quit()
