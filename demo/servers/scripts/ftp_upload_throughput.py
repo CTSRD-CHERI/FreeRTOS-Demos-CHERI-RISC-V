@@ -37,6 +37,7 @@ import argparse
 import os.path
 from os import path
 from ftplib import FTP
+import time
 
 # Args
 parser = argparse.ArgumentParser(description='Process FTP script command.')
@@ -59,7 +60,9 @@ with open('upload_file', 'rb') as f:
     ftp.login()
     print("Sending the file over")
 
+    start = time.time()
     ftp.storbinary('STOR /ram/upload_file', f, int(args.file_size))     # send the file
-    print("File sent")
+    end = time.time()
+    print("File sent successfully " + args.file_size + " Bytes (" + str(round(int(args.file_size) / 1024 / (end - start), 2)) + " KiB/Sec)")
     f.close()                                                           # close file and FTP
     ftp.quit()
