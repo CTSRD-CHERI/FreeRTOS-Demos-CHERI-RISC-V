@@ -51,7 +51,7 @@ with open('upload_file', 'w') as f:
     f.write('0' * num_chars)
     f.flush()
 
-with open('upload_file', 'r') as f:
+with open('upload_file', 'rb') as f:
     ftp = FTP(args.server, 'anonymous', '')
     ftp.set_debuglevel(2)
     ftp.set_pasv(True)
