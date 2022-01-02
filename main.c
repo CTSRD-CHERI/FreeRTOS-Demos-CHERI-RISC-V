@@ -163,7 +163,7 @@ uint64_t port_get_current_mtime( void )
     #define mainRAM_DISK_SECTOR_SIZE     512UL                                                    /* Currently fixed! */
 
     #ifndef mainRAM_DISK_SECTORS
-        #define mainRAM_DISK_SECTORS         ( ( 8UL * 1024UL * 1024UL ) / mainRAM_DISK_SECTOR_SIZE ) /* 8M bytes. */
+        #define mainRAM_DISK_SECTORS         ( ( 80UL * 1024UL * 1024UL ) / mainRAM_DISK_SECTOR_SIZE ) /* 80M bytes. */
     #endif /* mainRAM_DISK_SECTORS */
 
     #define mainIO_MANAGER_CACHE_SIZE    ( 15UL * mainRAM_DISK_SECTOR_SIZE )
@@ -181,7 +181,7 @@ uint64_t port_get_current_mtime( void )
                 FF_VirtIODiskShowPartition( pxDisk );
             #endif
         #else
-            static uint8_t ucRAMDisk[ mainRAM_DISK_SECTORS * mainRAM_DISK_SECTOR_SIZE ] __attribute__((section(".ramdisk")));
+            static uint8_t ucRAMDisk[ mainRAM_DISK_SECTORS * mainRAM_DISK_SECTOR_SIZE ];
             pxDisk = FF_RAMDiskInit( mainDISK_NAME, ucRAMDisk, mainRAM_DISK_SECTORS, (uint32_t) mainIO_MANAGER_CACHE_SIZE );
 
             #if DEBUG

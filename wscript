@@ -288,7 +288,7 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
             ctx.env.configFLASH_START = 0xc0000000
             ctx.env.configFLASH_SIZE =  32 * 1024 * 1024
             ctx.env.configSRAM_START = 0xc2000000
-            ctx.env.configSRAM_SIZE = 256 * 1024 * 1024
+            ctx.env.configSRAM_SIZE = 300 * 1024 * 1024
             ctx.env.UNCACHED_MEMSTART = 0x80000000
 
         # Galois/Xilinx defines
@@ -465,7 +465,7 @@ class FreeRTOSBspFett(FreeRTOSBsp):
         ctx.env.configFLASH_START = 0xc0000000
         ctx.env.configFLASH_SIZE =  32 * 1024 * 1024
         ctx.env.configSRAM_START = 0xc0000000 + ctx.env.configFLASH_SIZE
-        ctx.env.configSRAM_SIZE = 256 * 1024 * 1024
+        ctx.env.configSRAM_SIZE = 300 * 1024 * 1024
         ctx.env.MEMSTART = 0xC0000000
         ctx.env.UNCACHED_MEMSTART = 0x80000000
 
@@ -1396,7 +1396,7 @@ def configure(ctx):
     ctx.env.configFLASH_START = 0x80000000
     ctx.env.configFLASH_SIZE =  32* 1024 * 1024
     ctx.env.configSRAM_START = 0x82000000
-    ctx.env.configSRAM_SIZE = 256 * 1024 * 1024
+    ctx.env.configSRAM_SIZE = 300 * 1024 * 1024
 
     ctx.define('configTOTAL_RTL_HEAP_SIZE', 7 * 1024 * 1024) # 7 MiB
 

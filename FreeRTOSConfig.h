@@ -108,7 +108,7 @@
 #ifdef configCUSTOM_HEAP_SIZE
     #define configTOTAL_HEAP_SIZE                  ( ( size_t ) ( configCUSTOM_HEAP_SIZE * 1024 ) )
 #else
-    #define configTOTAL_HEAP_SIZE                  ( ( size_t ) ( 1024 * 1024 * 16 ) )
+    #define configTOTAL_HEAP_SIZE                  ( ( size_t ) ( 1024 * 1024 * 100 ) )
 #endif
 #ifndef configTOTAL_RTL_HEAP_SIZE
     #define configTOTAL_RTL_HEAP_SIZE                  ( ( size_t ) ( 1024 * 1024 * 7 ) )

@@ -157,7 +157,7 @@
 /* The number and size of sectors that will make up the RAM disk.  The RAM disk
  * is huge to allow some verbose FTP tests. */
 #define mainRAM_DISK_SECTOR_SIZE                      512UL                                                    /* Currently fixed! */
-#define mainRAM_DISK_SECTORS                          ( ( 100UL * 1024UL * 1024UL ) / mainRAM_DISK_SECTOR_SIZE ) /* 100M bytes. */
+#define mainRAM_DISK_SECTORS                          ( ( 50UL * 1024UL * 1024UL ) / mainRAM_DISK_SECTOR_SIZE ) /* 50M bytes. */
 #define mainIO_MANAGER_CACHE_SIZE                     ( 15UL * mainRAM_DISK_SECTOR_SIZE )
 
 /* Where the RAM disk is mounted. */
