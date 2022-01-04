@@ -281,6 +281,7 @@
  *	FD_ISSET will not be used.  This work function will always be called at
  *	regular intervals, and also after a select() event has occurred.
  */
+    static uint64_t xIdleTimeStart = 0;
     BaseType_t xFTPClientWork( TCPClient_t * pxTCPClient )
     {
         FTPClient_t * pxClient = ( FTPClient_t * ) pxTCPClient;
@@ -1124,10 +1125,13 @@
             BaseType_t xLength;
             char pcStrBuf[ 32 ];
 
+            uint64_t idleTime = pdMS_TO_TICKS((ulTaskGetIdleRunTimeCounter() - xIdleTimeStart) / 1000);
+            uint64_t totalTime = (xTaskGetTickCount() - pxClient->xStartTime);
+
             if( pxClient->bits1.bHadError == pdFALSE_UNSIGNED )
             {
                 xLength = snprintf( pxClient->pcClientAck, sizeof( pxClient->pcClientAck ),
-                                    "226 Closing connection %d bytes transmitted\r\n", ( int ) pxClient->ulRecvBytes );
+                                    "226 Closing connection %d bytes transmitted. IdleTime=%u:TotalTime=%u\r\n", ( int ) pxClient->ulRecvBytes, (int) idleTime, (int) totalTime);
             }
             else
             {
@@ -1484,6 +1488,7 @@
 
             /* To get some statistics about the performance. */
             pxClient->xStartTime = xTaskGetTickCount();
+            xIdleTimeStart = ulTaskGetIdleRunTimeCounter();
 
             xResult = pdTRUE;
         }
