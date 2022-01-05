@@ -45,6 +45,7 @@ def configure(ctx):
 
     ctx.env.append_value('DEFINES', [
         'configPROG_ENTRY                   = main_servers',
+        'configCHERI_INT_MEMCPY = 0'
     ])
 
     ctx.env.LIBDL_PROG_START_FILE = "main_servers.c"
