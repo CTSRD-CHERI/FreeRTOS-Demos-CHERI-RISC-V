@@ -50,7 +50,8 @@ def configure(ctx):
         'RUNS                 = 1',
         'VARY_BUFFER_SIZES    = 1',
         'VARY_QUEUE_SIZES     = 1',
-        'IPC_MODE             = 2'
+        'IPC_MODE             = 2',
+        'configCHERI_INT_MEMCPY = 0'
     ])
 
     if ctx.env.LOG_UDP:
