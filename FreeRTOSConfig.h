@@ -143,7 +143,7 @@
 #define configUSE_STATS_FORMATTING_FUNCTIONS    1
 extern uint64_t port_get_current_mtime( void );
 #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS()
-#define configGENERATE_RUN_TIME_STATS              1
+#define configGENERATE_RUN_TIME_STATS              0
 #define INCLUDE_xTaskGetIdleTaskHandle             1
 #define portGET_RUN_TIME_COUNTER_VALUE()    port_get_current_mtime()
 
