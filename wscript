@@ -491,8 +491,11 @@ class FreeRTOSLib:
         bld(export_includes=self.export_includes, name=self.name + "_headers")
 
         if self.is_compartment:
+            if bld.env.PURECAP:
+                self.cflags += ['-cheri-cap-table-abi=gprel']
             # medlow to force emitting relocs for function pointers
-            self.cflags += ['-cheri-cap-table-abi=gprel', '-mcmodel=medlow']
+            elif bld.env.ENABLE_MPU:
+                self.cflags += ['-mcmodel=medlow']
 
         bld.stlib(features=['c'],
                   asflags=bld.env.CFLAGS + bld.env.ASFLAGS,
