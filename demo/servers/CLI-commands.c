@@ -485,7 +485,9 @@ static BaseType_t prvRunTimeStatsCommand( char * pcWriteBuffer,
 
     /* Generate a table of task stats. */
     strcpy( pcWriteBuffer, pcHeader );
+#if (configGENERATE_RUN_TIME_STATS == 1)
     vTaskGetRunTimeStats( pcWriteBuffer + strlen( pcHeader ) );
+#endif
 
     /* There is no more data to return after this single string, so return
      * pdFALSE. */

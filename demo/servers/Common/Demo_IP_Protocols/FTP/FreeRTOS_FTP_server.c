@@ -1125,8 +1125,12 @@
             BaseType_t xLength;
             char pcStrBuf[ 32 ];
 
-            uint64_t idleTime = pdMS_TO_TICKS((ulTaskGetIdleRunTimeCounter() - xIdleTimeStart) / 1000);
-            uint64_t totalTime = (xTaskGetTickCount() - pxClient->xStartTime);
+            uint64_t idleTime = 0;
+            uint64_t totalTime = 0;
+#if (configGENERATE_RUN_TIME_STATS == 1)
+            idleTime = pdMS_TO_TICKS((ulTaskGetIdleRunTimeCounter() - xIdleTimeStart) / 1000);
+            totalTime = (xTaskGetTickCount() - pxClient->xStartTime);
+#endif
 
             if( pxClient->bits1.bHadError == pdFALSE_UNSIGNED )
             {
@@ -1488,7 +1492,9 @@
 
             /* To get some statistics about the performance. */
             pxClient->xStartTime = xTaskGetTickCount();
+#if (configGENERATE_RUN_TIME_STATS == 1)
             xIdleTimeStart = ulTaskGetIdleRunTimeCounter();
+#endif
 
             xResult = pdTRUE;
         }
