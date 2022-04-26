@@ -73,8 +73,9 @@ def configure(ctx):
          #ctx.define('mainCONFIG_USE_DYNAMIC_LOADER', 0)
 
          ctx.env.append_value('LIB_DEPS_EMBED_FAT', ['freertos_tcpip', 'freertos_cli', 'virtio',
-            "http_server", "ftp_server", "tftp_server", "cli_server", "tcp_server", "echo_servers"
-         ])
+            "http_server", "ftp_server", "tftp_server", "cli_server", "tcp_server", "echo_servers",
+            "freertos_bspdynamic"
+            ])
 
          #if not ctx.env.VIRTIO_BLK:
          #    ctx.env.append_value('LIB_DEPS_EMBED_FAT', ['virtio'])
@@ -85,7 +86,11 @@ def configure(ctx):
 
     ctx.env.append_value(
         'LIB_DEPS',
-        ['freertos_tcpip', 'freertos_cli', 'freertos_libdl', 'freertos_fat', 'virtio'])
+        ['freertos_tcpip', 'freertos_cli', 'freertos_libdl', 'freertos_fat', 'virtio'
+        , 'freertos_bspdynamic'
+        , 'freertos_bspstatic'
+        , 'freertos_bsp'
+        ])
 
 
 def build(bld):
@@ -112,6 +117,7 @@ def build(bld):
         use=[
             "freertos_core_headers", "freertos_bsp_headers", "freertos_tcpip_headers", "freertos_cli_headers",
             "freertos_libdl_headers", "freertos_fat_headers", "virtio_headers", "cheri_headers"
+            , "freertos_bspstatic_headers", "freertos_bspdynamic_headers"
         ],
         target="http_server")
 
@@ -125,6 +131,7 @@ def build(bld):
         use=[
             "freertos_core_headers", "freertos_bsp_headers", "freertos_tcpip_headers", "freertos_cli_headers",
             "freertos_libdl_headers", "freertos_fat_headers", "virtio_headers", "cheri_headers"
+            , "freertos_bspstatic_headers", "freertos_bspdynamic_headers"
         ],
         target="ftp_server")
 
@@ -137,6 +144,7 @@ def build(bld):
         use=[
             "freertos_core_headers", "freertos_bsp_headers", "freertos_tcpip_headers", "freertos_cli_headers",
             "freertos_libdl_headers", "freertos_fat_headers", "virtio_headers", "cheri_headers"
+            , "freertos_bspstatic_headers", "freertos_bspdynamic_headers"
         ],
         target="tftp_server")
 
@@ -152,6 +160,7 @@ def build(bld):
         use=[
             "freertos_core_headers", "freertos_bsp_headers", "freertos_tcpip_headers", "freertos_cli_headers",
             "freertos_libdl_headers", "freertos_fat_headers", "virtio_headers", "cheri_headers"
+            , "freertos_bspstatic_headers", "freertos_bspdynamic_headers"
         ],
         target="cli_server")
 
@@ -164,6 +173,7 @@ def build(bld):
         use=[
             "freertos_core_headers", "freertos_bsp_headers", "freertos_tcpip_headers", "freertos_cli_headers",
             "freertos_libdl_headers", "freertos_fat_headers", "virtio_headers", "cheri_headers"
+            , "freertos_bspstatic_headers", "freertos_bspdynamic_headers"
         ],
         target="tcp_server")
 
@@ -178,6 +188,7 @@ def build(bld):
         use=[
             "freertos_core_headers", "freertos_bsp_headers", "freertos_tcpip_headers", "freertos_cli_headers",
             "freertos_libdl_headers", "freertos_fat_headers", "virtio_headers", "cheri_headers"
+            , "freertos_bspstatic_headers", "freertos_bspdynamic_headers"
         ],
         target="echo_servers")
 
@@ -193,7 +204,9 @@ def build(bld):
         ],
         use=[
             "freertos_core_headers", "freertos_bsp_headers", "freertos_tcpip_headers", "freertos_cli_headers",
-            "freertos_libdl_headers", "freertos_fat_headers", "virtio_headers", "cheri_headers",
+            "freertos_libdl_headers", "freertos_fat_headers", "virtio_headers",
+            "cheri_headers",
+            "freertos_bspstatic_headers", "freertos_bspdynamic_headers",
             "http_server", "ftp_server", "tftp_server", "cli_server", "tcp_server", "echo_servers"
         ],
         target=name)
