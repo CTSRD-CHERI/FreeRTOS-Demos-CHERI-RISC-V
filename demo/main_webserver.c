@@ -144,7 +144,11 @@
 /* The number and size of sectors that will make up the RAM disk.  The RAM disk
  * is huge to allow some verbose FTP tests. */
 #define mainRAM_DISK_SECTOR_SIZE                      512UL                                                    /* Currently fixed! */
-#define mainRAM_DISK_SECTORS                          ( ( 5UL * 1024UL * 1024UL ) / mainRAM_DISK_SECTOR_SIZE ) /* 5M bytes. */
+#ifdef PLATFORM_SIM
+    #define mainRAM_DISK_SECTORS         ( ( 256UL * 1024UL ) / mainRAM_DISK_SECTOR_SIZE ) /* 256K bytes. */
+#else
+    #define mainRAM_DISK_SECTORS         ( ( 5UL * 1024UL * 1024UL ) / mainRAM_DISK_SECTOR_SIZE ) /* 5M bytes. */
+#endif
 #define mainIO_MANAGER_CACHE_SIZE                     ( 15UL * mainRAM_DISK_SECTOR_SIZE )
 
 /* Where the RAM disk is mounted. */

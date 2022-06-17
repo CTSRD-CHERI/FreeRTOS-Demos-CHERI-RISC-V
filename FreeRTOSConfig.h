@@ -114,12 +114,16 @@
     #define configTOTAL_RTL_HEAP_SIZE                  ( ( size_t ) ( 1024 * 1024 * 7 ) )
 #endif
 #define configMAX_TASK_NAME_LEN                    ( 16 )
-#define configUSE_TRACE_FACILITY                   1
+#ifndef PLATFORM_SIM
+    #define configUSE_TRACE_FACILITY                   1
+#endif
 #define configUSE_16_BIT_TICKS                     0
 #define configIDLE_SHOULD_YIELD                    0
 #define configUSE_MUTEXES                          1
 #define configQUEUE_REGISTRY_SIZE                  8
-#define configCHECK_FOR_STACK_OVERFLOW             2
+#ifndef PLATFORM_SIM
+    #define configCHECK_FOR_STACK_OVERFLOW             2
+#endif
 #define configUSE_RECURSIVE_MUTEXES                1
 #define configUSE_MALLOC_FAILED_HOOK               1
 #define configUSE_APPLICATION_TASK_TAG             0
@@ -131,11 +135,13 @@
 
 /* TODO: use only for debugging */
 #if DEBUG
-#define configGENERATE_RUN_TIME_STATS              1
-#define configRECORD_STACK_HIGH_ADDRESS            ( 1 )
-#define INCLUDE_uxTaskGetStackHighWaterMark        1
-#define configUSE_PORT_OPTIMISED_TASK_SELECTION    1
-#define configPORT_ALLOW_APP_EXCEPTION_HANDLERS    1
+#ifndef PLATFORM_SIM
+    #define configGENERATE_RUN_TIME_STATS              1
+    #define configRECORD_STACK_HIGH_ADDRESS            ( 1 )
+    #define INCLUDE_uxTaskGetStackHighWaterMark        1
+    #define configUSE_PORT_OPTIMISED_TASK_SELECTION    1
+    #define configPORT_ALLOW_APP_EXCEPTION_HANDLERS    1
+#endif
 #endif
 
 /* Runtime stats definitions */

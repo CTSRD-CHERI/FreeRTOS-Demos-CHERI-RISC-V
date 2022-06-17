@@ -70,7 +70,7 @@ int _write( int file,
     if (file == STDOUT_FILENO) {
         #if PLATFORM_SPIKE || PLATFORM_SAIL
             return htif_console_write_polled( ptr, len );
-        #elif PLATFORM_QEMU_VIRT || PLATFORM_PICCOLO || PLATFORM_GFE || PLATFORM_FETT
+        #elif PLATFORM_QEMU_VIRT || PLATFORM_PICCOLO || PLATFORM_GFE || PLATFORM_FETT || PLATFORM_SIM
             return uart16550_txbuffer( ( uint8_t * ) ptr, len );
         #elif PLATFORM_RVBS
             return plat_console_write( ptr, len );
@@ -247,7 +247,7 @@ int _write( int file,
     ( void ) file;
     #if PLATFORM_SPIKE || PLATFORM_SAIL
         return htif_console_write_polled( ptr, len );
-    #elif PLATFORM_QEMU_VIRT || PLATFORM_PICCOLO || PLATFORM_GFE || PLATFORM_FETT
+    #elif PLATFORM_QEMU_VIRT || PLATFORM_PICCOLO || PLATFORM_GFE || PLATFORM_FETT || PLATFORM_SIM
         return uart16550_txbuffer( ( uint8_t * ) ptr, len );
     #elif PLATFORM_RVBS
         return plat_console_write( ptr, len );

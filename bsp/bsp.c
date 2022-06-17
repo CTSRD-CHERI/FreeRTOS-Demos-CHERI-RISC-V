@@ -318,7 +318,7 @@ void prvSetupHardware( void )
 {
     /* Resets PLIC, threshold 0, nothing enabled */
 
-    #if PLATFORM_QEMU_VIRT || PLATFORM_FETT || PLATFORM_GFE
+    #if PLATFORM_QEMU_VIRT || PLATFORM_FETT || PLATFORM_GFE || PLATFORM_SIM
         PLIC_init( &Plic, PLIC_BASE_ADDR, PLIC_NUM_SOURCES, PLIC_NUM_PRIORITIES );
     #endif
 
@@ -326,9 +326,11 @@ void prvSetupHardware( void )
         uart16550_init( configUART16550_BASE );
     #endif
 
-    #if PLATFORM_GFE
+    #if PLATFORM_GFE || PLATFORM_SIM
         configASSERT(BSP_USE_DMA);
+        #ifndef PLATFORM_SIM
         PLIC_set_priority(&Plic, PLIC_SOURCE_ETH, PLIC_PRIORITY_ETH);
+        #endif
         PLIC_set_priority(&Plic, PLIC_SOURCE_DMA_MM2S, PLIC_PRIORITY_DMA_MM2S);
         PLIC_set_priority(&Plic, PLIC_SOURCE_DMA_S2MM, PLIC_PRIORITY_DMA_S2MM);
         #if BSP_USE_IIC0
@@ -348,7 +350,7 @@ void prvSetupHardware( void )
     #endif
 }
 
-#if !(PLATFORM_QEMU_VIRT || PLATFORM_FETT || PLATFORM_GFE)
+#if !(PLATFORM_QEMU_VIRT || PLATFORM_FETT || PLATFORM_GFE || PLATFORM_SIM)
 __attribute__( ( weak ) ) BaseType_t xNetworkInterfaceInitialise( void )
 {
     printf( "xNetworkInterfaceInitialise is not implemented, No NIC backend driver\n" );

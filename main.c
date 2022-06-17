@@ -163,7 +163,11 @@ uint64_t port_get_current_mtime( void )
     #define mainRAM_DISK_SECTOR_SIZE     512UL                                                    /* Currently fixed! */
 
     #ifndef mainRAM_DISK_SECTORS
-        #define mainRAM_DISK_SECTORS         ( ( 80UL * 1024UL * 1024UL ) / mainRAM_DISK_SECTOR_SIZE ) /* 80M bytes. */
+        #ifdef PLATFORM_SIM
+            #define mainRAM_DISK_SECTORS         ( ( 256UL * 1024UL ) / mainRAM_DISK_SECTOR_SIZE ) /* 256K bytes. */
+        #else
+            #define mainRAM_DISK_SECTORS         ( ( 80UL * 1024UL * 1024UL ) / mainRAM_DISK_SECTOR_SIZE ) /* 80M bytes. */
+        #endif
     #endif /* mainRAM_DISK_SECTORS */
 
     #define mainIO_MANAGER_CACHE_SIZE    ( 15UL * mainRAM_DISK_SECTOR_SIZE )

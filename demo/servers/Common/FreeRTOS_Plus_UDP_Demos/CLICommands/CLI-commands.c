@@ -58,9 +58,11 @@
 /*
  * Implements the run-time-stats command.
  */
+#if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
 static BaseType_t prvTaskStatsCommand( char * pcWriteBuffer,
                                        size_t xWriteBufferLen,
                                        const char * pcCommandString );
+#endif
 
 /*
  * Implements the task-stats command.
@@ -143,6 +145,7 @@ static const CLI_Command_Definition_t xRunTimeStats =
     0                       /* No parameters are expected. */
 };
 
+#if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
 /* Structure that defines the "task-stats" command line command.  This generates
  * a table that gives information on each task in the system. */
 static const CLI_Command_Definition_t xTaskStats =
@@ -152,6 +155,7 @@ static const CLI_Command_Definition_t xTaskStats =
     prvTaskStatsCommand, /* The function to run. */
     0                    /* No parameters are expected. */
 };
+#endif
 
 /* Structure that defines the "echo_3_parameters" command line command.  This
  * takes exactly three parameters that the command simply echos back one at a
@@ -208,7 +212,9 @@ static const CLI_Command_Definition_t xParameterEcho =
 void vRegisterCLICommands( void )
 {
     /* Register all the command line commands defined immediately above. */
+    #if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
     FreeRTOS_CLIRegisterCommand( &xTaskStats );
+    #endif
     FreeRTOS_CLIRegisterCommand( &xRunTimeStats );
     FreeRTOS_CLIRegisterCommand( &xThreeParameterEcho );
     FreeRTOS_CLIRegisterCommand( &xParameterEcho );
@@ -227,6 +233,8 @@ void vRegisterCLICommands( void )
 }
 /*-----------------------------------------------------------*/
 
+// Same requirements as vTaskList
+#if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) )
 static BaseType_t prvTaskStatsCommand( char * pcWriteBuffer,
                                        size_t xWriteBufferLen,
                                        const char * pcCommandString )
@@ -266,6 +274,7 @@ static BaseType_t prvTaskStatsCommand( char * pcWriteBuffer,
      * pdFALSE. */
     return pdFALSE;
 }
+#endif
 /*-----------------------------------------------------------*/
 
 static BaseType_t prvRunTimeStatsCommand( char * pcWriteBuffer,
