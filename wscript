@@ -1215,10 +1215,6 @@ def create_disk_image(ctx, size=5):
 
         # Get the libraries to write in the disk image
         LIBS_TO_EMBED = ["lib" + lib + ".a" for lib in ctx.env.LIB_DEPS_EMBED_FAT]
-        # temporarily remove bspdynamic from the list
-        print("LIBS_TO_EMBED before: ", LIBS_TO_EMBED)
-        LIBS_TO_EMBED.remove("freertos_bspdynamic")
-        print("LIBS_TO_EMBED after: ", LIBS_TO_EMBED)
 
         # Create a libdl.conf file that contains the list of libraries, read by libdl
         with open(libdl_config_path, 'wb') as libdlconf:
@@ -1678,7 +1674,6 @@ def gen_header_libs(bld):
     # Create a libdl.conf file that contains the list of libraries
     # temporarily remove the dynamically linked axi+ethernet drivers from the
     # config file
-    LIBS_TO_EMBED.remove("libfreertos_bspdynamic.a")
     libdl_config = '\n'.join(['/lib/' + lib for lib in LIBS_TO_EMBED])
     print("libdl_config: ", libdl_config)
 
