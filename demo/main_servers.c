@@ -366,17 +366,17 @@ static TaskHandle_t xServerWorkTaskHandle = NULL;
             int is_scr = ( ( ccsr >> 15 ) & 0x1 );
             cheri_cause = ( unsigned ) ( ( ccsr >> 5 ) & 0x1f );
 
-            for( int i = 0; i < 35; i++ )
-            {
-                printf( "x%i ", i );
-                cheri_print_cap( *( exception_frame + i ) );
-            }
-
             printf( "mepc = 0x%lx\n", epc );
             printf( "TRAP: CCSR = 0x%lx (cause: %x reg: %u : scr: %u)\n",
                     ccsr,
                     cheri_cause,
                     reg_num, is_scr );
+
+            for( int i = 0; i < 35; i++ )
+            {
+                printf( "x%i ", i );
+                cheri_print_cap( *( exception_frame + i ) );
+            }
         #endif /* ifdef __CHERI_PURE_CAPABILITY__ */
 
         while( 1 )

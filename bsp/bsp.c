@@ -159,12 +159,6 @@ plic_instance_t Plic;
             #endif
 
             #if (DEBUG || configCHERI_VERBOSE_FAULT_INFO)
-                for( int i = 0; i < 35; i++ )
-                {
-                    printf( "x%i ", i );
-                    cheri_print_cap( *( exception_frame + i ) );
-                }
-
                 printf( "mepc = 0x%lx\n", epc );
                 printf( "mepcc -> " );
                 cheri_print_cap( mepcc );
@@ -172,6 +166,12 @@ plic_instance_t Plic;
                         ccsr,
                         cheri_cause,
                         reg_num, is_scr );
+
+                for( int i = 0; i < 35; i++ )
+                {
+                    printf( "x%i ", i );
+                    cheri_print_cap( *( exception_frame + i ) );
+                }
             #endif
 
             #if configCHERI_COMPARTMENTALIZATION
