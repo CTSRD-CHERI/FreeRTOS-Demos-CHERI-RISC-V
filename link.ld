@@ -89,7 +89,7 @@ MEMORY {
 
     fastmem : ORIGIN = configFAST_MEM_START, LENGTH = configFAST_MEM_SIZE
     slowmem : ORIGIN = configSLOW_MEM_START, LENGTH = configSLOW_MEM_SIZE
-	uncached : ORIGIN = UNCACHED_MEM_START, LENGTH = 0x0010000
+	uncached : ORIGIN = UNCACHED_MEM_START, LENGTH = 0x1000000
 }
 
 /* Specify the default entry point to the program */

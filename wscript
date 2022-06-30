@@ -255,6 +255,7 @@ class FreeRTOSLibDL(FreeRTOSLib):
            self.libdl_dir + 'libdl/fastlz.c',
            self.libdl_dir + 'libdl/rtl-alloc-heap.c',
            self.libdl_dir + 'libdl/rtl-heap_4.c',
+           self.libdl_dir + 'libdl/rtl-uncached-heap_4.c',
            self.libdl_dir + 'libdl/rtl-allocator.c',
            self.libdl_dir + 'libdl/rtl-alloc-lock.c',
            self.libdl_dir + 'libdl/rtl-archive.c',
@@ -1481,6 +1482,7 @@ def configure(ctx):
     ctx.env.configSRAM_SIZE = 300 * 1024 * 1024
 
     ctx.define('configTOTAL_RTL_HEAP_SIZE', 7 * 1024 * 1024) # 7 MiB
+    ctx.define('configTOTAL_RTL_UNCACHED_HEAP_SIZE', 7 * 1024 * 1024) # 7 MiB
 
     # FreeRTOS-MPU?
     if ctx.env.ENABLE_MPU:
