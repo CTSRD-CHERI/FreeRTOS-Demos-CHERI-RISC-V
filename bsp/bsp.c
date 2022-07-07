@@ -327,12 +327,13 @@ void prvSetupHardware( void )
     #endif
 
     #if PLATFORM_GFE || PLATFORM_SIM
-        configASSERT(BSP_USE_DMA);
-        #ifndef PLATFORM_SIM
+        #if BSP_USE_ETHERNET
         PLIC_set_priority(&Plic, PLIC_SOURCE_ETH, PLIC_PRIORITY_ETH);
         #endif
+        #if BSP_USE_DMA
         PLIC_set_priority(&Plic, PLIC_SOURCE_DMA_MM2S, PLIC_PRIORITY_DMA_MM2S);
         PLIC_set_priority(&Plic, PLIC_SOURCE_DMA_S2MM, PLIC_PRIORITY_DMA_S2MM);
+        #endif
         #if BSP_USE_IIC0
             PLIC_set_priority(&Plic, PLIC_SOURCE_IIC0, PLIC_PRIORITY_IIC0);
             iic0_init();

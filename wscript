@@ -326,17 +326,19 @@ class FreeRTOSLibTCPIP(FreeRTOSLib):
             self.libtcpip_dir + '/portable/Compiler/GCC'
         ]
 
-        if ctx.env.PLATFORM in ["qemu_virt", "fett"]:
+        if ctx.env.NETWORK_DRIVER == 'virtio':
             self.driver_srcs = [
                 self.libtcpip_dir +
                 '/portable/NetworkInterface/virtio/NetworkInterface.c']
-        elif 'gfe' in ctx.env.PLATFORM or 'sim' in ctx.env.PLATFORM:
+        elif ctx.env.NETWORK_DRIVER == 'xilinx':
             self.driver_srcs = [
                 self.libtcpip_dir +
                 '/portable/NetworkInterface/RISC-V/riscv_hal_eth.c',
                 self.libtcpip_dir +
                 '/portable/NetworkInterface/RISC-V/NetworkInterface.c',
             ]
+        else:
+            print("ERROR: incompatible network driver ", ctx.env.NETWORK_DRIVER)
 
         if ctx.env.COMPARTMENTALIZE:
             self.comp_srcs = [self.libtcpip_dir + '/CheriFreeRTOS_FaultHandler.c']
@@ -1032,37 +1034,40 @@ class FreeRTOSBspGfeStatic(FreeRTOSBsp):
         #])
 
 # TODO this may contain extra stuff that is not needed
-class FreeRTOSBspSim(FreeRTOSBsp):
+class FreeRTOSBspSimStatic(FreeRTOSBsp):
     def __init__(self, ctx):
         self.platform = "sim"
         self.bld_ctx = ctx,
+        self.name = "freertos_bspstatic"
 
         self.srcs = ['./bsp/uart16550.c','./bsp/iic.c']
 
-        # Xilinx Drivers
-        self.srcs += [
-            '../RISC-V_Galois_demo/bsp/xilinx/axidma/xaxidma_bd.c',
-            '../RISC-V_Galois_demo/bsp/xilinx/axidma/xaxidma_bdring.c',
-            '../RISC-V_Galois_demo/bsp/xilinx/axidma/xaxidma.c',
-            '../RISC-V_Galois_demo/bsp/xilinx/axidma/xaxidma_selftest.c',
-            '../RISC-V_Galois_demo/bsp/xilinx/axidma/xaxidma_g.c',
-            '../RISC-V_Galois_demo/bsp/xilinx/axidma/xaxidma_sinit.c',
-            '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic.c',
-            '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic_g.c',
-            '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic_l.c',
-            '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic_sinit.c',
-            '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic_selftest.c',
-            '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic_master.c',
-            '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic_intr.c',
-            '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic_stats.c',
-            '../RISC-V_Galois_demo/bsp/xilinx/axiethernet/xaxiethernet.c',
-            '../RISC-V_Galois_demo/bsp/xilinx/axiethernet/xaxiethernet_control.c',
-            '../RISC-V_Galois_demo/bsp/xilinx/axiethernet/xaxiethernet_g.c',
-            '../RISC-V_Galois_demo/bsp/xilinx/axiethernet/xaxiethernet_sinit.c',
-            '../RISC-V_Galois_demo/bsp/xilinx/common/xbasic_types.c',
-            '../RISC-V_Galois_demo/bsp/xilinx/common/xil_io.c',
-            '../RISC-V_Galois_demo/bsp/xilinx/common/xil_assert.c',
-        ]
+        if ctx.env.NETWORK_DRIVER == "xilinx":
+            # Xilinx Drivers
+            self.srcs += [
+                '../RISC-V_Galois_demo/bsp/xilinx/axidma/xaxidma_bd.c',
+                '../RISC-V_Galois_demo/bsp/xilinx/axidma/xaxidma_bdring.c',
+                '../RISC-V_Galois_demo/bsp/xilinx/axidma/xaxidma.c',
+                '../RISC-V_Galois_demo/bsp/xilinx/axidma/xaxidma_selftest.c',
+                '../RISC-V_Galois_demo/bsp/xilinx/axidma/xaxidma_g.c',
+                '../RISC-V_Galois_demo/bsp/xilinx/axidma/xaxidma_sinit.c',
+                '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic.c',
+                '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic_g.c',
+                '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic_l.c',
+                '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic_sinit.c',
+                '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic_selftest.c',
+                '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic_master.c',
+                '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic_intr.c',
+                '../RISC-V_Galois_demo/bsp/xilinx/iic/xiic_stats.c',
+                '../RISC-V_Galois_demo/bsp/xilinx/axiethernet/xaxiethernet.c',
+                '../RISC-V_Galois_demo/bsp/xilinx/axiethernet/xaxiethernet_control.c',
+                '../RISC-V_Galois_demo/bsp/xilinx/axiethernet/xaxiethernet_g.c',
+                '../RISC-V_Galois_demo/bsp/xilinx/axiethernet/xaxiethernet_sinit.c',
+                '../RISC-V_Galois_demo/bsp/xilinx/common/xbasic_types.c',
+                '../RISC-V_Galois_demo/bsp/xilinx/common/xil_io.c',
+                '../RISC-V_Galois_demo/bsp/xilinx/common/xil_assert.c',
+            ]
+        FreeRTOSBsp.__init__(self, ctx)
 
     @staticmethod
     def configure(ctx):
@@ -1095,98 +1100,89 @@ class FreeRTOSBspSim(FreeRTOSBsp):
         ctx.define('PLIC_PRIORITY_IIC0', 0x3)
         ctx.define('PLIC_PRIORITY_SPI1', 0x2)
 
-        if 'p3' in ctx.env.PLATFORM:
-            ctx.define('configCPU_CLOCK_HZ', 25000000)
-            ctx.define('configPERIPH_CLOCK_HZ', 25000000)
-            ctx.define('configMTIME_HZ', 250000)
-        elif 'p1' in ctx.env.PLATFORM:
-            ctx.define('configCPU_CLOCK_HZ', 50000000)
-            ctx.define('configPERIPH_CLOCK_HZ', 50000000)
-        elif 'p2-embedded' in ctx.env.PLATFORM:
-            ctx.define('configCPU_CLOCK_HZ', 50000000)
-            ctx.define('configPERIPH_CLOCK_HZ', 50000000)
-            ctx.define('configCUSTOM_HEAP_SIZE', 250) # 300 KiB
-
-            ctx.env.configFAST_MEM_START = 0xC0000000
-            ctx.env.configFAST_MEM_SIZE = 512 * 1024  # 512 KiB
-            ctx.env.configSLOW_MEM_START = 0xc0080000
-            ctx.env.configSLOW_MEM_SIZE = 0x02000000 # 32 MiB
-            ctx.env.configFLASH_START = 0xc0000000
-            ctx.env.configFLASH_SIZE =  1024 * 1024
-            ctx.env.configSRAM_START = 0xc1000000
-            ctx.env.configSRAM_SIZE = 512 * 1024
-            ctx.env.UNCACHED_MEMSTART = 0x80000000
-        else:
-            ctx.define('configCPU_CLOCK_HZ', 100000000)
-            ctx.define('configPERIPH_CLOCK_HZ', 100000000)
-            ctx.define('configCUSTOM_HEAP_SIZE', 30000) # 300 KiB
-
-        if 'p2-embedded' not in ctx.env.PLATFORM:
-            ctx.env.configFAST_MEM_START = 0x80000000
-            ctx.env.configFAST_MEM_SIZE = 0x02000000 # 32 MiB
-            ctx.env.configSLOW_MEM_START = 0x82000000
-            ctx.env.configSLOW_MEM_SIZE = 0x10000000 # 32 MiB
-            ctx.env.configFLASH_START = 0x80000000
-            ctx.env.configFLASH_SIZE =  32 * 1024 * 1024
-            ctx.env.configSRAM_START = 0x82000000
-            ctx.env.configSRAM_SIZE = 32 * 1024 * 1024
-            ctx.env.UNCACHED_MEMSTART = 0x88000000
+        ctx.define('configCPU_CLOCK_HZ', 100000000)
+        ctx.define('configPERIPH_CLOCK_HZ', 100000000)
+        ctx.define('configCUSTOM_HEAP_SIZE', 30000) # 300 KiB
+        ctx.env.configFAST_MEM_START = 0x80000000
+        ctx.env.configFAST_MEM_SIZE = 0x02000000 # 32 MiB
+        ctx.env.configSLOW_MEM_START = 0x82000000
+        ctx.env.configSLOW_MEM_SIZE = 0x10000000 # 32 MiB
+        ctx.env.configFLASH_START = 0x80000000
+        ctx.env.configFLASH_SIZE =  32 * 1024 * 1024
+        ctx.env.configSRAM_START = 0x82000000
+        ctx.env.configSRAM_SIZE = 64 * 1024 * 1024 # TODO reduce this when possible
+        ctx.env.UNCACHED_MEMSTART = 0x88000000
 
         # Galois/Xilinx defines
 
-        # DMA defines
-        ctx.define('BSP_USE_DMA', 1)
-        ctx.define('XPAR_XAXIDMA_NUM_INSTANCES', 1)
-        ctx.define('XPAR_AXI_DMA', 1)
-        ctx.define('XPAR_AXIDMA_0_DEVICE_ID', 0)
-        ctx.define('XPAR_AXIDMA_0_BASEADDR', '0x62200000ULL', False, 'Virtual base address of DMA engine')
-        ctx.define('XPAR_AXIDMA_0_SIZE', 0x10000)
-        ctx.define('XPAR_AXIDMA_0_SG_INCLUDE_STSCNTRL_STRM', 1, 'Control/status stream')
-        ctx.define('XPAR_AXIDMA_0_INCLUDE_MM2S', 1, 'AXI4 memory-mapped to stream')
-        ctx.define('XPAR_AXIDMA_0_INCLUDE_MM2S_DRE', 1)
-        ctx.define('XPAR_AXIDMA_0_M_AXI_MM2S_DATA_WIDTH', 32, 'Allow unaligned transfers')
-        ctx.define('XPAR_AXIDMA_0_INCLUDE_S2MM', 1, 'AXI stream to memory-mapped')
-        ctx.define('XPAR_AXIDMA_0_INCLUDE_S2MM_DRE', 1)
-        ctx.define('XPAR_AXIDMA_0_M_AXI_S2MM_DATA_WIDTH', 32, 'Allow unaligned transfers')
-        ctx.define('XPAR_AXIDMA_0_INCLUDE_SG', 1)
-        ctx.define('XPAR_AXIDMA_0_NUM_MM2S_CHANNELS', 1)
-        ctx.define('XPAR_AXIDMA_0_NUM_S2MM_CHANNELS', 1)
-        ctx.define('XPAR_AXI_DMA_0_MM2S_BURST_SIZE', 16)
-        ctx.define('XPAR_AXI_DMA_0_S2MM_BURST_SIZE', 16)
-        ctx.define('XPAR_AXI_DMA_0_MICRO_DMA', 0)
-        ctx.define('XPAR_AXI_DMA_0_ADDR_WIDTH', 64)
-        ctx.define('XPAR_AXIDMA_0_SG_LENGTH_WIDTH', 16)
+        if ctx.env.NETWORK_DRIVER == 'xilinx':
+            ctx.define('configHAS_VIRTIO', 0) # TODO is this necessary?
+            # DMA defines
+            ctx.define('BSP_USE_DMA', 1)
+            ctx.define('XPAR_XAXIDMA_NUM_INSTANCES', 1)
+            ctx.define('XPAR_AXI_DMA', 1)
+            ctx.define('XPAR_AXIDMA_0_DEVICE_ID', 0)
+            ctx.define('XPAR_AXIDMA_0_BASEADDR', '0x62200000ULL', False, 'Virtual base address of DMA engine')
+            ctx.define('XPAR_AXIDMA_0_SIZE', 0x10000)
+            ctx.define('XPAR_AXIDMA_0_SG_INCLUDE_STSCNTRL_STRM', 1, 'Control/status stream')
+            ctx.define('XPAR_AXIDMA_0_INCLUDE_MM2S', 1, 'AXI4 memory-mapped to stream')
+            ctx.define('XPAR_AXIDMA_0_INCLUDE_MM2S_DRE', 1)
+            ctx.define('XPAR_AXIDMA_0_M_AXI_MM2S_DATA_WIDTH', 32, 'Allow unaligned transfers')
+            ctx.define('XPAR_AXIDMA_0_INCLUDE_S2MM', 1, 'AXI stream to memory-mapped')
+            ctx.define('XPAR_AXIDMA_0_INCLUDE_S2MM_DRE', 1)
+            ctx.define('XPAR_AXIDMA_0_M_AXI_S2MM_DATA_WIDTH', 32, 'Allow unaligned transfers')
+            ctx.define('XPAR_AXIDMA_0_INCLUDE_SG', 1)
+            ctx.define('XPAR_AXIDMA_0_NUM_MM2S_CHANNELS', 1)
+            ctx.define('XPAR_AXIDMA_0_NUM_S2MM_CHANNELS', 1)
+            ctx.define('XPAR_AXI_DMA_0_MM2S_BURST_SIZE', 16)
+            ctx.define('XPAR_AXI_DMA_0_S2MM_BURST_SIZE', 16)
+            ctx.define('XPAR_AXI_DMA_0_MICRO_DMA', 0)
+            ctx.define('XPAR_AXI_DMA_0_ADDR_WIDTH', 64)
+            ctx.define('XPAR_AXIDMA_0_SG_LENGTH_WIDTH', 16)
 
-        # Ethernet defines
-        ctx.define('BSP_USE_ETHERNET', 1)
-        ctx.define('XPAR_XAXIETHERNET_NUM_INSTANCES', 1)
-        ctx.define('XPAR_AXIETHERNET_0_PHYADDR', 0x03)
-        ctx.define('XPAR_AXIETHERNET_0_DEVICE_ID', 0)
-        ctx.define('XPAR_AXIETHERNET_0_BASEADDR', '0x62100000ULL', False)
-        ctx.define('XPAR_AXIETHERNET_0_SIZE', 0x40000)
-        ctx.define('XPAR_AXIETHERNET_0_TEMAC_TYPE', 2, '0 for SoftTemac at 10/100 Mbps, 1 for SoftTemac at 10/100/1000 Mbps and 2 for Vitex6 Hard Temac')
-        ctx.define('XPAR_AXIETHERNET_0_TXCSUM', 0, 'TxCsum indicates that the device has checksum offload on the Tx channel or not.')
-        ctx.define('XPAR_AXIETHERNET_0_RXCSUM', 0, 'RxCsum indicates that the device has checksum offload on the Rx channel or not')
-        ctx.define('XPAR_AXIETHERNET_0_PHY_TYPE', 'XAE_PHY_TYPE_SGMII', False, 'PhyType indicates which type of PHY interface is used (MII, GMII, RGMII, etc.)')
-        ctx.define('XPAR_AXIETHERNET_0_TXVLAN_TRAN', 0)
-        ctx.define('XPAR_AXIETHERNET_0_RXVLAN_TRAN', 0)
-        ctx.define('XPAR_AXIETHERNET_0_TXVLAN_TAG', 0)
-        ctx.define('XPAR_AXIETHERNET_0_RXVLAN_TAG', 0)
-        ctx.define('XPAR_AXIETHERNET_0_TXVLAN_STRP', 0)
-        ctx.define('XPAR_AXIETHERNET_0_RXVLAN_STRP', 0)
-        ctx.define('XPAR_AXIETHERNET_0_MCAST_EXTEND', 0, 'Extended multicast address filtering')
-        ctx.define('XPAR_AXIETHERNET_0_STATS', 1, 'Statistics gathering options')
-        ctx.define('XPAR_AXIETHERNET_0_AVB', 0, 'Ethernet Audio Video Bridging')
-        ctx.define('XPAR_AXIETHERNET_0_ENABLE_SGMII_OVER_LVDS', 1, 'SGMII over LVDS')
-        ctx.define('XPAR_AXIETHERNET_0_ENABLE_1588', 0, 'Enable 1588 option')
-        ctx.define('XPAR_AXIETHERNET_0_SPEED', 'XAE_SPEED_1000_MBPS', False, 'Tells whether MAC is 1G or 2p5G')
-        ctx.define('XPAR_AXIETHERNET_0_NUM_TABLE_ENTRIES', 4, ' Number of table entries for the multicast address filtering')
-        ctx.define('XPAR_AXIETHERNET_0_INTR', 'PLIC_SOURCE_ETH', False, 'Axi Ethernet interrupt ID.')
-        ctx.define('XPAR_AXIETHERNET_0_CONNECTED_TYPE', 'XPAR_AXI_DMA', False, 'AxiDevType is the type of device attached to the Axi Ethernets AXI4-Stream interface.')
-        ctx.define('XPAR_AXIETHERNET_0_CONNECTED_BASEADDR', '0x62200000ULL', False, 'AxiDevBaseAddress is the base address of the device attached to the Axi Ethernets AXI4-Stream interface.')
-        ctx.define('XPAR_AXIETHERNET_0_FIFO_INTR', 0xFF)
-        ctx.define('XPAR_AXIETHERNET_0_DMA_RX_INTR', 'PLIC_SOURCE_DMA_S2MM', False)
-        ctx.define('XPAR_AXIETHERNET_0_DMA_TX_INTR', 'PLIC_SOURCE_DMA_MM2S', False)
+            # Ethernet defines
+            ctx.define('BSP_USE_ETHERNET', 0) # don't use ethernet, but we still want to define these macros
+            ctx.define('XPAR_XAXIETHERNET_NUM_INSTANCES', 1)
+            ctx.define('XPAR_AXIETHERNET_0_PHYADDR', 0x03)
+            ctx.define('XPAR_AXIETHERNET_0_DEVICE_ID', 0)
+            ctx.define('XPAR_AXIETHERNET_0_BASEADDR', '0x62100000ULL', False)
+            ctx.define('XPAR_AXIETHERNET_0_SIZE', 0x40000)
+            ctx.define('XPAR_AXIETHERNET_0_TEMAC_TYPE', 2, '0 for SoftTemac at 10/100 Mbps, 1 for SoftTemac at 10/100/1000 Mbps and 2 for Vitex6 Hard Temac')
+            ctx.define('XPAR_AXIETHERNET_0_TXCSUM', 0, 'TxCsum indicates that the device has checksum offload on the Tx channel or not.')
+            ctx.define('XPAR_AXIETHERNET_0_RXCSUM', 0, 'RxCsum indicates that the device has checksum offload on the Rx channel or not')
+            ctx.define('XPAR_AXIETHERNET_0_PHY_TYPE', 'XAE_PHY_TYPE_SGMII', False, 'PhyType indicates which type of PHY interface is used (MII, GMII, RGMII, etc.)')
+            ctx.define('XPAR_AXIETHERNET_0_TXVLAN_TRAN', 0)
+            ctx.define('XPAR_AXIETHERNET_0_RXVLAN_TRAN', 0)
+            ctx.define('XPAR_AXIETHERNET_0_TXVLAN_TAG', 0)
+            ctx.define('XPAR_AXIETHERNET_0_RXVLAN_TAG', 0)
+            ctx.define('XPAR_AXIETHERNET_0_TXVLAN_STRP', 0)
+            ctx.define('XPAR_AXIETHERNET_0_RXVLAN_STRP', 0)
+            ctx.define('XPAR_AXIETHERNET_0_MCAST_EXTEND', 0, 'Extended multicast address filtering')
+            ctx.define('XPAR_AXIETHERNET_0_STATS', 1, 'Statistics gathering options')
+            ctx.define('XPAR_AXIETHERNET_0_AVB', 0, 'Ethernet Audio Video Bridging')
+            ctx.define('XPAR_AXIETHERNET_0_ENABLE_SGMII_OVER_LVDS', 1, 'SGMII over LVDS')
+            ctx.define('XPAR_AXIETHERNET_0_ENABLE_1588', 0, 'Enable 1588 option')
+            ctx.define('XPAR_AXIETHERNET_0_SPEED', 'XAE_SPEED_1000_MBPS', False, 'Tells whether MAC is 1G or 2p5G')
+            ctx.define('XPAR_AXIETHERNET_0_NUM_TABLE_ENTRIES', 4, ' Number of table entries for the multicast address filtering')
+            ctx.define('XPAR_AXIETHERNET_0_INTR', 'PLIC_SOURCE_ETH', False, 'Axi Ethernet interrupt ID.')
+            ctx.define('XPAR_AXIETHERNET_0_CONNECTED_TYPE', 'XPAR_AXI_DMA', False, 'AxiDevType is the type of device attached to the Axi Ethernets AXI4-Stream interface.')
+            ctx.define('XPAR_AXIETHERNET_0_CONNECTED_BASEADDR', '0x62200000ULL', False, 'AxiDevBaseAddress is the base address of the device attached to the Axi Ethernets AXI4-Stream interface.')
+            ctx.define('XPAR_AXIETHERNET_0_FIFO_INTR', 0xFF)
+            ctx.define('XPAR_AXIETHERNET_0_DMA_RX_INTR', 'PLIC_SOURCE_DMA_S2MM', False)
+            ctx.define('XPAR_AXIETHERNET_0_DMA_TX_INTR', 'PLIC_SOURCE_DMA_MM2S', False)
+        elif ctx.env.NETWORK_DRIVER == 'virtio':
+            ctx.define('BSP_USE_DMA', 0) # TODO is this necessary?
+            ctx.define('BSP_USE_ETHERNET', 0) # TODO is this necessary?
+
+            ctx.define('configHAS_VIRTIO', 1)
+            ctx.define('VIRTIO_USE_MMIO', 1)
+            ctx.define('configHAS_VIRTIO_NET', 1)
+            ctx.define('VIRTIO_NET_MMIO_ADDRESS', 0x40000000)
+            ctx.define('VIRTIO_NET_MMIO_SIZE', 0x1000)
+            ctx.define('VIRTIO_BLK_MMIO_ADDRESS', 0x40002000)
+            ctx.define('VIRTIO_BLK_MMIO_SIZE', 0x1000)
+            ctx.define('VIRTIO_NET_PLIC_INTERRUPT_ID', 0x2)
+            ctx.define('VIRTIO_NET_PLIC_INTERRUPT_PRIO', 0x1)
 
         # GPIO defines
         ctx.define('BSP_USE_GPIO', 1)
@@ -1258,6 +1254,20 @@ class FreeRTOSBspSim(FreeRTOSBsp):
 
             ctx.path.abspath() + '/../RISC-V_Galois_demo/bsp/xilinx/iic'
         ])
+
+
+# dummy; does not actually contain anything
+class FreeRTOSBspSimDynamic(FreeRTOSBsp):
+    def __init__(self, ctx):
+        self.platform = "sim"
+        self.bld_ctx = ctx,
+        self.name = "freertos_bspdynamic"
+        self.srcs = []
+        FreeRTOSBsp.__init__(self, ctx)
+
+    @staticmethod
+    def configure(ctx):
+        pass
 
 
 class FreeRTOSBspFett(FreeRTOSBsp):
@@ -1338,8 +1348,15 @@ def freertos_libs_init(bld_ctx):
     bld_ctx.env.libs["freertos_libmbedtls"] = FreeRTOSLibMbedTLS(bld_ctx)
     bld_ctx.env.libs[
         "freertos_libnetwork_transport"] = FreeRTOSLibNetworkTransport(bld_ctx)
-    bld_ctx.env.libs["freertos_bspstatic"] = FreeRTOSBspGfeStatic(bld_ctx)
-    bld_ctx.env.libs["freertos_bspdynamic"] = FreeRTOSBspGfeDynamic(bld_ctx)
+    if 'gfe' in bld_ctx.env.PLATFORM:
+        bld_ctx.env.libs["freertos_bspstatic"] = FreeRTOSBspGfeStatic(bld_ctx)
+        bld_ctx.env.libs["freertos_bspdynamic"] = FreeRTOSBspGfeDynamic(bld_ctx)
+    elif bld_ctx.env.PLATFORM == "sim":
+        bld_ctx.env.libs["freertos_bspstatic"] = FreeRTOSBspSimStatic(bld_ctx)
+        # TODO at the moment everything is in bspstatic because compartmentalization
+        # (specifically dynamic linking + loading) would be way too slow to do
+        # in simulation
+        bld_ctx.env.libs["freertos_bspdynamic"] = FreeRTOSBspSimDynamic(bld_ctx)
 
 def freertos_libs_configure(conf):
     FreeRTOSLibCore.configure(conf)
@@ -1360,7 +1377,7 @@ def freertos_bsp_configure(conf):
     elif platform == 'piccolo':
         FreeRTOSBspPiccolo.configure(conf)
     elif platform == "sim":
-        FreeRTOSBspSim.configure(conf)
+        FreeRTOSBspSimStatic.configure(conf)
     else:
         conf.fatal('Failed invalid to configure BSP')
 
@@ -1373,7 +1390,7 @@ def freertos_bsps_init(bld_ctx):
     bld_ctx.env.freertos_bsps["gfe"] = FreeRTOSBspGfeStatic(bld_ctx)
     bld_ctx.env.freertos_bsps["fett"] = FreeRTOSBspFett(bld_ctx)
     bld_ctx.env.freertos_bsps["piccolo"] = FreeRTOSBspPiccolo(bld_ctx)
-    bld_ctx.env.freertos_bsps["sim"] = FreeRTOSBspSim(bld_ctx)
+    bld_ctx.env.freertos_bsps["sim"] = FreeRTOSBspSimStatic(bld_ctx)
 
 
 def freertos_demos_init(bld):
@@ -1585,6 +1602,11 @@ def options(ctx):
                    default=False,
                    help='Log output over UDP and not stdout/serial')
 
+    ctx.add_option('--network_driver',
+                   action='store',
+                   default='xilinx',
+                   help='Which network driver to use (xilinx/virtio)')
+
     # Run options
     ctx.add_option('--run',
                    action='store_true',
@@ -1645,6 +1667,7 @@ def configure(ctx):
     ctx.env.GATEWAY_ADDR = ctx.options.gateway
     ctx.env.LOG_UDP = ctx.options.log_udp
     ctx.env.ENABLE_MPU = ctx.options.enable_mpu
+    ctx.env.NETWORK_DRIVER = ctx.options.network_driver
 
     ipaddr_freertos_ipconfig(ctx.env.IP_ADDR, ctx.env.GATEWAY_ADDR, ctx)
 

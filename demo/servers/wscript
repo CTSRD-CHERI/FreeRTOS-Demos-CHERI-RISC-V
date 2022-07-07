@@ -53,7 +53,6 @@ def configure(ctx):
     ctx.define('mainCREATE_HTTP_SERVER', 1)
     ctx.define('ipconfigUSE_HTTP', 1)
     ctx.define('ipconfigUSE_FTP', 1)
-    ctx.define('ipconfigUSE_FAT_LIBDL', 1)
     ctx.define('ffconfigMAX_FILENAME', 255)
     ctx.define('configHTTP_ROOT', "/ram/websrc/")
     ctx.define('configUSE_NET_VIRTIO', 1)
@@ -72,6 +71,7 @@ def configure(ctx):
          #   'mainCONFIG_USE_DYNAMIC_LOADER      = 0',
          #])
          #ctx.define('mainCONFIG_USE_DYNAMIC_LOADER', 0)
+         ctx.define('ipconfigUSE_FAT_LIBDL', 1)
 
          ctx.env.append_value('LIB_DEPS_EMBED_FAT', ['freertos_tcpip', 'freertos_cli', 'virtio',
             "http_server", "ftp_server", "tftp_server", "cli_server", "tcp_server", "echo_servers",
@@ -81,17 +81,26 @@ def configure(ctx):
          #if not ctx.env.VIRTIO_BLK:
          #    ctx.env.append_value('LIB_DEPS_EMBED_FAT', ['virtio'])
 
-    ctx.env.append_value('EXPORT_DEFINES', [
-        'ipconfigUSE_FAT_LIBDL              = 1'
-    ])
+         ctx.env.append_value('EXPORT_DEFINES', [
+             'ipconfigUSE_FAT_LIBDL              = 1'
+         ])
 
     ctx.env.append_value(
         'LIB_DEPS',
-        ['freertos_tcpip', 'freertos_cli', 'freertos_libdl', 'freertos_fat', 'virtio'
-        , 'freertos_bspdynamic'
+        ['freertos_tcpip', 'freertos_cli'
+        , 'freertos_fat'
         , 'freertos_bspstatic'
         , 'freertos_bsp'
         ])
+
+    if ctx.env.COMPARTMENTALIZE:
+        ctx.env.append_value('LIB_DEPS', ['freertos_libdl'])
+
+    if ctx.env.PLATFORM != 'sim':
+        ctx.env.append_value('LIB_DEPS', ['freertos_bspdynamic'])
+
+    if ctx.env.NETWORK_DRIVER == 'virtio':
+        ctx.env.append_value('LIB_DEPS', ['virtio'])
 
 
 def build(bld):
