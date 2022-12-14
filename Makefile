@@ -185,10 +185,12 @@ FREERTOS_FAT_SOURCE = \
     $(FREERTOS_FAT_SOURCE_DIR)/ff_sys.c \
     $(FREERTOS_FAT_SOURCE_DIR)/ff_time.c \
     $(FREERTOS_FAT_SOURCE_DIR)/ff_stdio.c \
+    $(FREERTOS_FAT_SOURCE_DIR)/portable/virtio-blk/ff_virtioblk_disk.c \
     $(FREERTOS_FAT_SOURCE_DIR)/portable/common/ff_ramdisk.c
 
 FREERTOS_FAT_INCLUDE = -I$(FREERTOS_FAT_SOURCE_DIR)/include \
-                       -I$(FREERTOS_FAT_SOURCE_DIR)/portable/common
+                       -I$(FREERTOS_FAT_SOURCE_DIR)/portable/common \
+                       -I$(FREERTOS_FAT_SOURCE_DIR)/portable/virtio-blk
 
 FREERTOS_CLI_SRC = $(FREERTOS_CLI_SOURCE_DIR)/FreeRTOS_CLI.c
 FREERTOS_CLI_INCLUDE = -I$(FREERTOS_CLI_SOURCE_DIR)

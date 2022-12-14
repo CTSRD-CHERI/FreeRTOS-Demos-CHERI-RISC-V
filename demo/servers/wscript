@@ -40,6 +40,7 @@ def configure(ctx):
         ctx.path.abspath() + "/Common/FreeRTOS_Plus_TCP_Demos/include",
         ctx.path.abspath() + "/Common/FreeRTOS_Plus_CLI_Demos/include",
         ctx.path.abspath() + "/Common/Utilities/include",
+        ctx.path.abspath() + "/Common/Utilities/include",
         ctx.path.abspath() + "/Common/Demo_IP_Protocols/include"
     ])
 
@@ -59,6 +60,7 @@ def configure(ctx):
     ctx.define('configUSE_NET_VIRTIO', 1)
     ctx.define('mainRAM_DISK_NAME', "/")
     ctx.define('mainCONFIG_INIT_FAT_FILESYSTEM', 1)
+    ctx.define('configHAS_VIRTIO_BLK', 1)
     ctx.define('configEMBED_LIBS_FAT', 1)
     ctx.define('configLIBDL_LIB_PATH', "/lib/")
     ctx.define('configLIBDL_CONF_PATH', "/etc/")

@@ -150,8 +150,7 @@ class FreeRTOSBspQemuVirt(FreeRTOSBsp):
         ctx.define('PLIC_NUM_SOURCES', 127)
         ctx.define('PLIC_NUM_PRIORITIES', 7)
 
-        if ctx.env.VIRTIO_BLK:
-            ctx.define('configHAS_VIRTIO_BLK', 1)
+        ctx.define('configHAS_VIRTIO_BLK', 1)
 
 class FreeRTOSBspSpike(FreeRTOSBsp):
     def __init__(self, ctx):
@@ -442,7 +441,7 @@ class FreeRTOSBspFett(FreeRTOSBsp):
         ctx.define('PLIC_PRIORITY_UART0', 0x1)
         ctx.define('configHAS_VIRTIO', 1)
         ctx.define('VIRTIO_USE_MMIO', 1)
-        ctx.define('configHAS_VIRTIO_NET', 1)
+        #ctx.define('configHAS_VIRTIO_NET', 1)
         ctx.define('VIRTIO_NET_MMIO_ADDRESS', 0x40000000)
         ctx.define('VIRTIO_NET_MMIO_SIZE', 0x1000)
         ctx.define('VIRTIO_BLK_MMIO_ADDRESS', 0x40002000)
@@ -455,8 +454,7 @@ class FreeRTOSBspFett(FreeRTOSBsp):
         else:
             ctx.define('MCAUSE_EXTERNAL_INTERRUPT', 0x8000000b)
 
-        if ctx.env.VIRTIO_BLK:
-            ctx.define('configHAS_VIRTIO_BLK', 1)
+        ctx.define('configHAS_VIRTIO_BLK', 1)
 
         ctx.env.configFAST_MEM_START = 0xC0000000
         ctx.env.configFAST_MEM_SIZE = 0x02000000 # 32 MiB
@@ -1319,7 +1317,7 @@ def configure(ctx):
     ctx.env.SYSROOT = ctx.options.sysroot
     ctx.env.MEMSTART = ctx.options.mem_start
     ctx.env.UNCACHED_MEMSTART = ctx.options.uncached_mem_start
-    ctx.env.VIRTIO_BLK = ctx.options.use_virtio_blk
+    ctx.env.VIRTIO_BLK = True
     ctx.env.CREATE_DISK_IMAGE = ctx.options.create_disk_image
     ctx.env.PROGRAM_PATH = ctx.options.program_path
     ctx.env.PROGRAM_ENTRY = ctx.env.PROG
