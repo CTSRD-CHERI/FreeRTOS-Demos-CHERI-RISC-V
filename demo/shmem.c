@@ -22,9 +22,10 @@
 int pe_id;
 #define PE_COUNT 2
 int pe_count = PE_COUNT;
-int pe_barrier = 0;
-//typedef enum {WORKING, WAITING, RELEASED} pe_barrier_state_t;
-//pe_barrier_state_t pe_barrier[PE_COUNT] = {WORKING};
+int pe_counter = 0;
+int pe_release_barrier_global = 0;
+//typedef enum {WORKING, WAITING, RELEASED} pe_counter_state_t;
+//pe_counter_state_t pe_counter[PE_COUNT] = {WORKING};
 
 void *shmem_addr (void * addr, int pe)
 {
@@ -59,28 +60,29 @@ int shmem_n_pes (void)
 
 void shmem_barrier_all (void)
 {
-        __atomic_fetch_add((int *)shmem_addr(&pe_barrier,0), 1, __ATOMIC_RELAXED);
-        while (shmem_int_g(&pe_barrier, 0)>0 && shmem_int_g(&pe_barrier, 0)<PE_COUNT);
-        // ToDo XXX surely there's something wrong with this. Need professional help.
-        if (pe_id == 0) shmem_int_p(&pe_barrier, 0, 0);
-        else while(shmem_int_g(&pe_barrier, 0)==PE_COUNT);
+        int pe_release_barrier_local = shmem_int_g(&pe_release_barrier_global, 0);
+        int old_pe_counter = __atomic_fetch_add((int *)shmem_addr(&pe_counter,0), 1, __ATOMIC_RELAXED);
+        if (old_pe_counter + 1 == PE_COUNT) {
+                shmem_int_p(&pe_counter, 0, 0);
+                shmem_int_p(&pe_release_barrier_global, pe_release_barrier_local+1, 0);
+        } else while(shmem_int_g(&pe_release_barrier_global, 0)==pe_release_barrier_local);
         /*
         if (pe_id == 0) {
                 int again = 1;
                 while (again) {
                         again = 0;
                         for (int i = 1; i < PE_COUNT; i++) {
-                                if (shmem_char_g(pe_barrier + i, 0) != WAITING) {
+                                if (shmem_char_g(pe_counter + i, 0) != WAITING) {
                                         again = 1;
                                         break;
                                 }
                         }
                 }
-                for (int i = 1; i < PE_COUNT; i++) shmem_char_p(pe_barrier + i, RELEASED, 0);
+                for (int i = 1; i < PE_COUNT; i++) shmem_char_p(pe_counter + i, RELEASED, 0);
         } else {
-                shmem_char_p(pe_barrier + pe_id, WAITING, 0);
-                while (shmem_char_g(pe_barrier + pe_id, 0) == WAITING);
-                shmem_char_p(pe_barrier + pe_id, WORKING, 0);
+                shmem_char_p(pe_counter + pe_id, WAITING, 0);
+                while (shmem_char_g(pe_counter + pe_id, 0) == WAITING);
+                shmem_char_p(pe_counter + pe_id, WORKING, 0);
         }
         */
 }
@@ -89,9 +91,10 @@ long long shmem_longlong_fadd (long long *target, long long value,
                                    int pe)
 {
         // XXX Make atomic.  LL old, (target); ADD new, old, value; SC new, (target); BEQZ new, LL_Label;
-        long long old = *target;
-        *target = old + value;
-        return old;
+        return __atomic_fetch_add((long long *)shmem_addr(target,pe), value, __ATOMIC_RELAXED);
+        //long long old = *target;
+        //*target = old + value;
+        //return old;
 }
 
 void shmem_char_p (char *addr, char value, int pe)
@@ -102,6 +105,11 @@ void shmem_char_p (char *addr, char value, int pe)
 void shmem_int_p (int *addr, int value, int pe)
 {
         *((volatile int *)(shmem_addr(addr,pe))) = value;
+}
+
+void shmem_long_p (long *addr, long value, int pe)
+{
+        *((long *)(shmem_addr(addr,pe))) = value;
 }
 
 void shmem_longlong_p (long long *addr, long long value, int pe)
@@ -130,10 +138,14 @@ void shmem_int_sum_to_all (int *target, int *source, int nreduce,
                                int PE_start, int logPE_stride,
                                int PE_size, int *pWrk, long *pSync)
 {
-        int pe, pe_count;
-        for (int i = 0; i < nreduce; i += 1)
+        int pe, pe_count, sum;
+        for (int i = 0; i < nreduce; i += 1){
+                sum = 0;
                 for (pe = PE_start, pe_count = 0; pe_count < PE_size; pe += (1<<logPE_stride), pe_count++)
-                        target[i] += ((int *)shmem_addr(source,pe))[i];
+                        sum += ((int *)shmem_addr(source,pe))[i];
+                target[i] = sum;
+        }
+        //shmem_barrier_all();
 }
 
 void shmem_longlong_sum_to_all (long long *target, long long *source,
@@ -141,18 +153,40 @@ void shmem_longlong_sum_to_all (long long *target, long long *source,
                                     int logPE_stride, int PE_size,
                                     long long *pWrk, long *pSync)
 {
-        int pe, pe_count;
-        for (int i = 0; i < nreduce; i += 1)
+        int pe, pe_count, sum;
+        for (int i = 0; i < nreduce; i += 1) {
+                sum = 0;
                 for (pe = PE_start, pe_count = 0; pe_count < PE_size; pe += (1<<logPE_stride), pe_count++)
-                        target[i] += ((long long *)shmem_addr(source,pe))[i];
+                        sum += ((long long *)shmem_addr(source,pe))[i];
+                target[i] = sum;
+        }
+        //shmem_barrier_all();
 }
 
 void shmem_broadcast64 (void *target, const void *source,
                         size_t nelems, int PE_root, int PE_start,
                         int logPE_stride, int PE_size, long *pSync)
 {
+        int pe, pe_count;
         for (int i = 0; i < nelems; i += 1)
-                ((int *)target)[i] = ((int *)source)[i]; // If multiple PEs, copy source[i] to target[i] on each PE.
+        {
+                long long bcast_val = ((long long *)shmem_addr(source,PE_root))[i];
+                for (pe = PE_start, pe_count = 0; pe_count < PE_size; pe += (1<<logPE_stride), pe_count++)
+                        ((long long *)shmem_addr(target,pe))[i] = bcast_val;
+        }
+        //shmem_barrier_all();
+        //for (int i = 0; i < nelems; i += 1)
+        //        ((int *)target)[i] = ((int *)source)[i]; // If multiple PEs, copy source[i] to target[i] on each PE.
+}
+
+void shmem_set_lock (long *lock)
+{
+        while (__atomic_exchange_n((long long *)shmem_addr(lock,0), 1, __ATOMIC_RELAXED));
+}
+
+void shmem_clear_lock (long *lock)
+{
+        shmem_long_p(lock, 0, 0);
 }
 
 void shfree (void *ptr)
@@ -160,11 +194,17 @@ void shfree (void *ptr)
         return vPortFree(ptr);
 }
 
+long shmalloc_print_lock = 0;
 void *shmalloc (size_t size)
 {
+        //shmem_set_lock(&shmalloc_print_lock);
         //printf("shmalloc called: size %zu bytes\r\n", size);
+        //shmem_clear_lock(&shmalloc_print_lock);
         void * ptr = pvPortMalloc(size);
+        //shmem_set_lock(&shmalloc_print_lock);
         //printf("shmalloc returning %p \r\n", ptr);
+        //shmem_clear_lock(&shmalloc_print_lock);
+        //shmem_barrier_all();
         return ptr;
 }
 

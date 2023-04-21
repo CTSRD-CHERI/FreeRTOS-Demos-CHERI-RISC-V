@@ -170,6 +170,8 @@ HPCC_Power2NodesSHMEMRandomAccessCheck(u64Int logTableSize,
     }
   }
 
+  shmem_barrier_all();
+
   errors = 0;
   for (i=0; i<LocalTableSize; i++){
     if (HPCC_Table[i] != i + GlobalStartMyProc)
