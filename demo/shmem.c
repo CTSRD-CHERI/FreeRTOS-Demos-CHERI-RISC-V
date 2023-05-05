@@ -130,6 +130,11 @@ int shmem_int_g (int *addr, int pe)
         return *((volatile int *)(shmem_addr(addr,pe)));
 }
 
+long long shmem_longlong_g (long long *addr, int pe)
+{
+        return *((volatile long long *)(shmem_addr(addr,pe)));
+}
+
 void shmem_longlong_put (long long *dest, const long long *src,
                              size_t nelems, int pe)
 {
@@ -182,6 +187,11 @@ void shmem_broadcast64 (void *target, const void *source,
         //        ((int *)target)[i] = ((int *)source)[i]; // If multiple PEs, copy source[i] to target[i] on each PE.
 }
 
+void shmem_quiet (void)
+{
+        return;
+}
+
 void shmem_set_lock (long *lock)
 {
         while (__atomic_exchange_n((long long *)shmem_addr(lock,0), 1, __ATOMIC_RELAXED));
@@ -192,13 +202,13 @@ void shmem_clear_lock (long *lock)
         shmem_long_p(lock, 0, 0);
 }
 
-void shfree (void *ptr)
+void shmem_free (void *ptr)
 {
         return vPortFree(ptr);
 }
 
-long shmalloc_print_lock = 0;
-void *shmalloc (size_t size)
+long shmem_malloc_print_lock = 0;
+void *shmem_malloc (size_t size)
 {
         //shmem_set_lock(&shmalloc_print_lock);
         //printf("shmalloc called: size %zu bytes\r\n", size);
@@ -211,7 +221,7 @@ void *shmalloc (size_t size)
         return ptr;
 }
 
-void *shrealloc (void *ptr, size_t size)
+void *shmem_realloc (void *ptr, size_t size)
 {
         return realloc(ptr, size);
 }

@@ -20,6 +20,13 @@ static double RTSEC()
  return tp.tv_sec + tp.tv_usec/(double)1.0e6;
 }
 
+static long long RTUSEC()
+{
+ struct timeval tp;
+ gettimeofday (&tp, NULL);
+ return tp.tv_sec*1.0e6 + tp.tv_usec;
+}
+
 extern s64Int starts (u64Int);
 
 #define WANT_MPI2_TEST 0
@@ -32,6 +39,8 @@ extern s64Int starts (u64Int);
 #define FINISHED_TAG 1
 #define UPDATE_TAG   2
 #define USE_NONBLOCKING_SEND 1
+
+#define MAX_MEMORY_PER_NODE 8000
 
 #define MAX_TOTAL_PENDING_UPDATES 1024
 #define LOCAL_BUFFER_SIZE MAX_TOTAL_PENDING_UPDATES
