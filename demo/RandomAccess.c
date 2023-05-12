@@ -176,7 +176,7 @@ HPCC_SHMEMRandomAccess(HPCC_Params *params) {
   u64Int logTableSize, TableSize;
 
   double CPUTime;               /* CPU  time to update table */
-  double RealTime;              /* Real time to update table */
+  long long RealTime;              /* Real time to update table */
 
   double TotalMem;
   static int sAbort, rAbort;
@@ -199,8 +199,8 @@ HPCC_SHMEMRandomAccess(HPCC_Params *params) {
   static int ipWrk[_SHMEM_REDUCE_SYNC_SIZE];
 
   FILE *outFile = NULL;
-  double *GUPs;
-  double *temp_GUPs;
+  long long *UPs;
+  long long *temp_GUPs;
 
 
   int numthreads;
@@ -213,7 +213,7 @@ HPCC_SHMEMRandomAccess(HPCC_Params *params) {
 
 
   params->SHMEMGUPs = -1;
-  GUPs = &params->SHMEMGUPs;
+  UPs = &params->SHMEMGUPs;
 
   NumProcs = shmem_n_pes();
   MyProc = shmem_my_pe();
@@ -223,7 +223,7 @@ HPCC_SHMEMRandomAccess(HPCC_Params *params) {
     setbuf(outFile, NULL);
   }
 
-  params->HPLMaxProcMem = 8000;
+  params->HPLMaxProcMem = MAX_MEMORY_PER_NODE;
 
   TotalMem = params->HPLMaxProcMem; /* max single node memory */
   TotalMem *= NumProcs;             /* max memory in NumProcs nodes */
@@ -299,7 +299,7 @@ HPCC_SHMEMRandomAccess(HPCC_Params *params) {
 
   shmem_barrier_all();
 
-  RealTime = -RTSEC();
+  RealTime = -RTUSEC();
 
   Power2NodesRandomAccessUpdate(logTableSize, TableSize, LocalTableSize,
                                      MinLocalTableSize, GlobalStartMyProc, Top,
@@ -310,31 +310,31 @@ HPCC_SHMEMRandomAccess(HPCC_Params *params) {
 
   /* End timed section */
 
-  RealTime += RTSEC();
+  RealTime += RTUSEC();
 
   /* Print timing results */
   if (MyProc == 0){
     params->SHMEMRandomAccess_time = RealTime;
-    *GUPs = 1e-9*NumUpdates / RealTime;
-    //printf("Real time used = %.6f seconds\n", RealTime );
-    //printf("%.9f Billion(10^9) Updates    per second [GUP/s]\n",
-    //         *GUPs );
-    //printf("%.9f Billion(10^9) Updates/PE per second [GUP/s]\n",
-    //         *GUPs / NumProcs );
+    *UPs = (NumUpdates*1000000) / RealTime;
+    printf("Real time used = %.6lld microseconds\n", RealTime );
+    printf("%.9lld Updates per second \n",
+             (*UPs) );
+    printf("%.9lld Updates/PE per second \n",
+             (*UPs / NumProcs) );
     /* No longer reporting per CPU number */
-    /* *GUPs /= NumProcs; */
+    /* *UPs /= NumProcs; */
   }
   /* distribute result to all nodes */
-  temp_GUPs = GUPs;
+  temp_GUPs = UPs;
   shmem_barrier_all();
-  shmem_broadcast64(GUPs,temp_GUPs,1,0,0,0,NumProcs,llpSync);
+  shmem_broadcast64(UPs,temp_GUPs,1,0,0,0,NumProcs,llpSync);
   shmem_barrier_all();
 
   /* Verification phase */
 
   /* Begin timing here */
 
-  RealTime = -RTSEC();
+  RealTime = -RTUSEC();
 
 
   HPCC_Power2NodesSHMEMRandomAccessCheck(logTableSize, TableSize, LocalTableSize,
@@ -349,7 +349,7 @@ HPCC_SHMEMRandomAccess(HPCC_Params *params) {
 
   /* End timed section */
 
-  RealTime += RTSEC();
+  RealTime += RTUSEC();
 
   if(MyProc == 0){
     params->SHMEMRandomAccess_CheckTime = RealTime;

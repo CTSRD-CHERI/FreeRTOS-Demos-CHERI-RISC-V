@@ -228,19 +228,16 @@ int main_gups(int argc, char **argv)
   int verify=0; 
   u64Int remote_val;
 
-  printf( outFile, "1");
-
   shmem_barrier_all();
   /* Begin timed section */
   RealTime = -RTSEC();
-  printf("2");
   for (iterate = 0; iterate < niterate; iterate++) {
       *ran = (*ran << 1) ^ ((s64Int) *ran < ZERO64B ? POLY : ZERO64B);
       remote_proc = (*ran >> logTableLocal) & (numNodes - 1);
 
       /*Forces updates to remote PE only*/
       if(remote_proc == MyProc)
-        remote_proc = (remote_proc+1)/numNodes;
+        remote_proc = (remote_proc+1)%numNodes;
 
       remote_val  = shmem_longlong_g( &HPCC_Table[*ran & (LocalTableSize-1)],remote_proc);
       remote_val ^= *ran;
@@ -250,9 +247,7 @@ int main_gups(int argc, char **argv)
       if(verify)
         shmem_longlong_inc(&updates[thisPeId], remote_proc);
   }
-  printf("3");
   shmem_barrier_all();
-  if (MyProc == 0) printf("\n");
   /* End timed section */
   RealTime += RTSEC();
 
