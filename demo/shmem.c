@@ -20,9 +20,10 @@
 
 // A couple of globals; assuming one thread per instance of this code.
 int pe_id;
-#define PE_COUNT 4
+#define PE_COUNT 1
 int pe_count = PE_COUNT;
 const uint16_t pe_addrs[] = {0x0000, 0x0001, 0x0100, 0x0101};
+void *pe_ptrs[4];
 int pe_counter = 0;
 int pe_release_barrier_global = 0;
 //typedef enum {WORKING, WAITING, RELEASED} pe_counter_state_t;
@@ -30,16 +31,21 @@ int pe_release_barrier_global = 0;
 
 void *shmem_addr (void * addr, int pe)
 {
-        return (void *)(((unsigned long long)addr) | (((unsigned long long)pe_addrs[pe])<<47) | (((unsigned long long)1)<<63));
+        //return (void *)(((unsigned long long)addr) | (((unsigned long long)pe_addrs[pe])<<47) | (((unsigned long long)1)<<63));
+        return pe_ptrs[pe] + (u_int64_t)addr;
 }
+
+extern void * pvAlmightyDataCap;
 
 void shmem_init (void)
 {
         // Read (x,y) ID from router configuration register.
-        uint16_t pe_addr = *(volatile uint16_t *)(0x20000000000);
-        for (int i=0; i<PE_COUNT; i++)
-                if (pe_addr==pe_addrs[i]) pe_id = i;
-        //pe_count = 2;
+        uint16_t pe_addr = *(volatile uint16_t *)(pvAlmightyDataCap + 0x20000000000);
+        //uint16_t pe_addr = *(cheri_build_data_cap((volatile uint16_t *)0x20000000000, 2, 0xfff));
+        for (int i=0; i<PE_COUNT; i++) {
+                if (pe_addr==(pe_addrs[i])) pe_id = i;
+                pe_ptrs[i] = __builtin_cheri_bounds_set((pvAlmightyDataCap + ((((unsigned long long)pe_addrs[i])<<47) | (((unsigned long long)1)<<63))), 1ull << 47);
+        }
 }
 
 void shmem_finalize (void)

@@ -43,7 +43,7 @@
 #include "shmem.h"
 
 /* Verification phase: local buckets to sort into */
-#define BUCKET_SIZE 1024
+#define BUCKET_SIZE 512
 #define SLOT_CNT 1
 #define FIRST_SLOT 2
 
