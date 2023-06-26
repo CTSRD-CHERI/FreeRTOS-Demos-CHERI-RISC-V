@@ -41,10 +41,14 @@ void shmem_init (void)
 {
         // Read (x,y) ID from router configuration register.
         uint16_t pe_addr = *(volatile uint16_t *)(pvAlmightyDataCap + 0x20000000000);
-        //uint16_t pe_addr = *(cheri_build_data_cap((volatile uint16_t *)0x20000000000, 2, 0xfff));
         for (int i=0; i<PE_COUNT; i++) {
                 if (pe_addr==(pe_addrs[i])) pe_id = i;
-                pe_ptrs[i] = __builtin_cheri_bounds_set((pvAlmightyDataCap + ((((unsigned long long)pe_addrs[i])<<47) | (((unsigned long long)1)<<63))), 1ull << 47);
+                pe_ptrs[i] = __builtin_cheri_bounds_set((pvAlmightyDataCap // Start with the almighty cap
+                                                          // Put the routing bits in the top of the address
+                                                          + ((((unsigned long long)pe_addrs[i])<<47)
+                                                          // Mark it as a global address
+                                                            | (((unsigned long long)1)<<63)))
+                                                         , 1ull << 47); // Bound it to its address space.
         }
 }
 
