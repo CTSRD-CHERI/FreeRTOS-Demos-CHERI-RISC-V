@@ -22,7 +22,11 @@
 int pe_id;
 #define PE_COUNT 1
 int pe_count = PE_COUNT;
-const uint16_t pe_addrs[] = {0x0000, 0x0001, 0x0100, 0x0101};
+const unsigned long long pe_bases[] = {((uint64_t)1)<<63 | ((uint64_t)0x0000)<<47,
+                                       ((uint64_t)1)<<63 | ((uint64_t)0x0001)<<47,
+                                       ((uint64_t)1)<<63 | ((uint64_t)0x0100)<<47,
+                                       ((uint64_t)1)<<63 | ((uint64_t)0x0101)<<47
+                                      };
 void *pe_ptrs[4];
 int pe_counter = 0;
 int pe_release_barrier_global = 0;
@@ -31,8 +35,8 @@ int pe_release_barrier_global = 0;
 
 void *shmem_addr (void * addr, int pe)
 {
-        //return (void *)(((unsigned long long)addr) | (((unsigned long long)pe_addrs[pe])<<47) | (((unsigned long long)1)<<63));
-        return pe_ptrs[pe] + (u_int64_t)addr;
+        uintptr_t relocated_addr = (uintptr_t) __builtin_cheri_offset_increment(addr, (uint64_t)(pe_ptrs[pe]));
+        return __builtin_cheri_cap_build(pe_ptrs[pe], relocated_addr);
 }
 
 extern void * pvAlmightyDataCap;
@@ -42,13 +46,11 @@ void shmem_init (void)
         // Read (x,y) ID from router configuration register.
         uint16_t pe_addr = *(volatile uint16_t *)(pvAlmightyDataCap + 0x20000000000);
         for (int i=0; i<PE_COUNT; i++) {
-                if (pe_addr==(pe_addrs[i])) pe_id = i;
-                pe_ptrs[i] = __builtin_cheri_bounds_set((pvAlmightyDataCap // Start with the almighty cap
-                                                          // Put the routing bits in the top of the address
-                                                          + ((((unsigned long long)pe_addrs[i])<<47)
-                                                          // Mark it as a global address
-                                                            | (((unsigned long long)1)<<63)))
-                                                         , 1ull << 47); // Bound it to its address space.
+                if (pe_addr==((uint16_t)(pe_bases[i]>>47))) pe_id = i;
+                pe_ptrs[i] = __builtin_cheri_bounds_set(pvAlmightyDataCap // Start with the almighty cap
+                                                        // Put the routing bits in the top of the address
+                                                        + pe_bases[i],
+                                                        1ull << 47); // Bound it to its address space.
         }
 }
 
