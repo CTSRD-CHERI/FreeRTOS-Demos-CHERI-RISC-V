@@ -165,18 +165,22 @@ _mstart:
     la	gp, _gp
 
 init_bss:
+#ifndef IMPLICIT_MEM_0
     /* init bss section */
     la	a0, __bss_start
     la	a1, __bss_end /* section end is actually the start of the next section */
     li	a2, 0x0
     jal	fill_block
+#endif
 
 init_sbss:
-    /* init bss section */
+#ifndef IMPLICIT_MEM_0
+    /* init sbss section */
     la	a0, __sbss_start
     la	a1, __sbss_end /* section end is actually the start of the next section */
     li	a2, 0x0
     jal	fill_block
+#endif
 
 write_stack_pattern:
     /* init bss section */
