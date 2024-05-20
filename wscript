@@ -1205,6 +1205,12 @@ def options(ctx):
                    action='store',
                    default="qemu_virt",
                    help='RISC-V Platform/Board')
+    
+    ctx.add_option('--implicit-mem-0',
+                   action='store_true',
+                   default=False,
+                   help='Set if running on a simulation platform which initializes memory to zero. '
+                   'This allows the boot phase to skip zero-initialization steps.')
 
     ctx.add_option('--mem-start',
                    action='store',
@@ -1344,6 +1350,9 @@ def configure(ctx):
     ctx.env.append_value('DEFINES', ['__freertos__=1'])
     ctx.env.append_value('DEFINES', ['__waf__=1'])
     ctx.env.append_value('DEFINES', ['HAVE_CONFIG_H=1'])
+
+    if ctx.options.implicit_mem_0:
+        ctx.env.append_value('DEFINES', ['IMPLICIT_MEM_0=1'])
 
     # TOOLCHAIN - Check for a valid installed toolchain
     if ctx.options.toolchain == "llvm":
