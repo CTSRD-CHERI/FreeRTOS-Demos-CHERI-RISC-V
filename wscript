@@ -415,6 +415,108 @@ class FreeRTOSBspGfe(FreeRTOSBsp):
             ctx.path.abspath() + '/../RISC-V_Galois_demo/bsp/xilinx/iic'
         ])
 
+
+class FreeRTOSBspDE10Toooba(FreeRTOSBsp):
+    """
+    A BSP for the CHERI-Toooba core running on a DE10-Pro, as in https://github.com/CTSRD-CHERI/de10pro-cheri-bgas.
+    Suitable for running in simulation, in which case the --implicit-mem-0 option is also recommended to skip unnecessary segment zeroing.
+    Based on FreeRTOSBspGfe.
+    """
+
+    def __init__(self, ctx):
+        self.platform = "de10toooba"
+        self.bld_ctx = ctx,
+
+        self.srcs = [
+            './bsp/uart16550.c',
+        ]
+
+    @staticmethod
+    def configure(ctx):
+        ctx.define('PLATFORM_DE10TOOOBA', 1)
+
+        # TODO what is this
+        # ctx.define('configPORT_HAS_HPM_COUNTERS', 1)
+
+        # "Near_Mem_IO (including CLINT, the core-local interruptor)""
+        # TODO this is deprecated and we should set configMTIME_BASE_ADDRESS and configMTIMECMP_BASE_ADDRESS directly instead
+        ctx.define('configCLINT_BASE_ADDRESS', 0x1000_0000)
+        # TODO don't have a source for this but I assume it's right
+        ctx.define('CLINT_CTRL_ADDR', 0x1000_0000)
+
+        ctx.define('configUART16550_BASE', 0x6230_0000)
+        # See Bluestuff/AXI4_Fake_16550.bsv
+        ctx.define('configUART16550_BAUD', 9600)
+        # ctx.define('configUART16550_BAUD', 115200)
+        # "regshift" = the amount the REGister indices on the uart are SHIFTed.
+        # The fake 16550 looks at (address[4:2] => bottom two bits don't matter)
+        ctx.define('configUART16550_REGSHIFT', 2)
+
+        ctx.define('PLIC_BASE_ADDR', 0x0C00_0000)
+        ctx.define('PLIC_BASE_SIZE', 0x0040_0000)
+        # TODO haven't checked these
+        ctx.define('PLIC_NUM_SOURCES', 16)
+        ctx.define('PLIC_NUM_PRIORITIES', 16)
+        ctx.define('PLIC_SOURCE_UART0', 0x1)
+        ctx.define('PLIC_SOURCE_ETH', 0x2)
+        ctx.define('PLIC_SOURCE_DMA_MM2S', 0x3)
+        ctx.define('PLIC_SOURCE_DMA_S2MM', 0x4)
+        ctx.define('PLIC_SOURCE_SPI0', 0x5)
+        ctx.define('PLIC_SOURCE_UART1', 0x6)
+        ctx.define('PLIC_SOURCE_IIC0', 0x7)
+        ctx.define('PLIC_SOURCE_SPI1', 0x8)
+        ctx.define('PLIC_PRIORITY_UART0', 0x1)
+        ctx.define('PLIC_PRIORITY_ETH', 0x2)
+        ctx.define('PLIC_PRIORITY_DMA_MM2S', 0x3)
+        ctx.define('PLIC_PRIORITY_DMA_S2MM', 0x3)
+        ctx.define('PLIC_PRIORITY_SPI0', 0x3)
+        ctx.define('PLIC_PRIORITY_UART1', 0x1)
+        ctx.define('PLIC_PRIORITY_IIC0', 0x3)
+        ctx.define('PLIC_PRIORITY_SPI1', 0x2)
+
+        ctx.define('configCPU_CLOCK_HZ', 50_000_000)
+        # This is used for the UART, which is defined in de10toooba-cheri-bgas/bluespec/CHERI_BGAS_System.bsv
+        ctx.define('configPERIPH_CLOCK_HZ', 50_000_000)
+        ctx.define('configMTIME_HZ', 250_000)
+
+        # To my knowledge the DE10 setup doesn't have fast memory.
+        # Pretend the first 16MiB are faster than the rest.
+        ctx.env.configFAST_MEM_START = 0x8000_0000
+        ctx.env.configFAST_MEM_SIZE  = 16 << 20 # 16 MiB
+        # The slow memory = the rest of the memory = 1GiB
+        ctx.env.configSLOW_MEM_START = 0x8000_0000 + (16 << 20)
+        # 1GiB = 1 << 30, subtract the fast-mem size
+        ctx.env.configSLOW_MEM_SIZE  = (1 << 30) - (16 << 20)
+        # Lie about Flash+SRAM matching main memory - this binary is just loaded into DRAM
+        # They can't overlap
+        # Flash = .text etc.
+        # i.e. program code
+        ctx.env.configFLASH_START    = 0x8000_0000
+        ctx.env.configFLASH_SIZE     = 0x0200_0000
+        # SRAM = .captable, .data, .sdata, .stack, .bss, .sbss
+        # i.e. program data
+        ctx.env.configSRAM_START     = 0x8200_0000
+        ctx.env.configSRAM_SIZE      = 0x3E00_0000
+
+        ctx.env.UNCACHED_MEMSTART = 0x8000_0000
+        ctx.env.MEMSTART          = 0xC000_0000
+
+        # ctx.define('configHAS_VIRTIO', 1)
+        # ctx.define('VIRTIO_USE_MMIO', 1)
+        # ctx.define('configHAS_VIRTIO_NET', 1)
+        # ctx.define('VIRTIO_NET_MMIO_ADDRESS', 0x10008000)
+        # ctx.define('VIRTIO_NET_MMIO_SIZE', 0x1000)
+        # ctx.define('VIRTIO_NET_PLIC_INTERRUPT_ID', 0x8)
+        # ctx.define('VIRTIO_NET_PLIC_INTERRUPT_PRIO', 0x1)
+        # ctx.define('VIRTIO_BLK_MMIO_ADDRESS', 0x10007000)
+        # ctx.define('VIRTIO_BLK_MMIO_SIZE', 0x1000 )
+
+        if ctx.env.RISCV_XLEN == '64':
+            ctx.define('MCAUSE_EXTERNAL_INTERRUPT', '0x800000000000000b', False)
+        else:
+            ctx.define('MCAUSE_EXTERNAL_INTERRUPT', '0x8000000b', False)
+
+
 class FreeRTOSBspFett(FreeRTOSBsp):
     def __init__(self, ctx):
         self.platform = "fett"
@@ -1037,7 +1139,9 @@ def freertos_libs_configure(conf):
 def freertos_bsp_configure(conf):
     platform = conf.options.riscv_platform
 
-    if platform == 'qemu_virt':
+    if platform == "de10toooba":
+        FreeRTOSBspDE10Toooba.configure(conf)
+    elif platform == 'qemu_virt':
         FreeRTOSBspQemuVirt.configure(conf)
     elif platform == 'spike':
         FreeRTOSBspSpike.configure(conf)
@@ -1055,6 +1159,7 @@ def freertos_bsp_configure(conf):
 def freertos_bsps_init(bld_ctx):
     bld_ctx.env.freertos_bsps = {}
 
+    bld_ctx.env.freertos_bsps["de10toooba"] = FreeRTOSBspDE10Toooba(bld_ctx)
     bld_ctx.env.freertos_bsps["spike"] = FreeRTOSBspSpike(bld_ctx)
     bld_ctx.env.freertos_bsps["qemu_virt"] = FreeRTOSBspQemuVirt(bld_ctx)
     bld_ctx.env.freertos_bsps["sail"] = FreeRTOSBspSail(bld_ctx)

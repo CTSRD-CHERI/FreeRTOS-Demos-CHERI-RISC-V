@@ -318,7 +318,7 @@ void prvSetupHardware( void )
 {
     /* Resets PLIC, threshold 0, nothing enabled */
 
-    #if PLATFORM_QEMU_VIRT || PLATFORM_FETT || PLATFORM_GFE
+    #if PLATFORM_QEMU_VIRT || PLATFORM_FETT || PLATFORM_GFE || PLATFORM_DE10TOOOBA
         PLIC_init( &Plic, PLIC_BASE_ADDR, PLIC_NUM_SOURCES, PLIC_NUM_PRIORITIES );
     #endif
 
