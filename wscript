@@ -479,27 +479,32 @@ class FreeRTOSBspDE10Toooba(FreeRTOSBsp):
         ctx.define('configPERIPH_CLOCK_HZ', 50_000_000)
         ctx.define('configMTIME_HZ', 250_000)
 
+        # Note: on DE10 Toooba "uncached" memory is untagged.
+        # Purecap binaries need to be executed in tagged, and therefore cached, memory.
+        # In order to make the ELF files small we put text+data in the cached memory, even though text doesn't necessarily need to be in there.
+        # In simulation, the DDRB is 1GiB and starts at 0x8000_0000, but loops every 1GiB => the data in 0x8000_0000 is repeated at 0xC000_0000.
+        # Most importantly the total size is 0x4000_0000, which is configured in the {FLASH,SRAM}_{START,SIZE} below.
+        ctx.env.UNCACHED_MEMSTART = 0x8000_0000
+        ctx.env.MEMSTART          = 0xC000_0000
+
         # To my knowledge the DE10 setup doesn't have fast memory.
         # Pretend the first 16MiB are faster than the rest.
-        ctx.env.configFAST_MEM_START = 0x8000_0000
+        ctx.env.configFAST_MEM_START = 0xC000_0000
         ctx.env.configFAST_MEM_SIZE  = 16 << 20 # 16 MiB
         # The slow memory = the rest of the memory = 1GiB
-        ctx.env.configSLOW_MEM_START = 0x8000_0000 + (16 << 20)
+        ctx.env.configSLOW_MEM_START = 0xC000_0000 + (16 << 20)
         # 1GiB = 1 << 30, subtract the fast-mem size
         ctx.env.configSLOW_MEM_SIZE  = (1 << 30) - (16 << 20)
         # Lie about Flash+SRAM matching main memory - this binary is just loaded into DRAM
         # They can't overlap
         # Flash = .text etc.
         # i.e. program code
-        ctx.env.configFLASH_START    = 0x8000_0000
+        ctx.env.configFLASH_START    = 0xC000_0000
         ctx.env.configFLASH_SIZE     = 0x0200_0000
         # SRAM = .captable, .data, .sdata, .stack, .bss, .sbss
         # i.e. program data
-        ctx.env.configSRAM_START     = 0x8200_0000
+        ctx.env.configSRAM_START     = 0xC200_0000
         ctx.env.configSRAM_SIZE      = 0x3E00_0000
-
-        ctx.env.UNCACHED_MEMSTART = 0x8000_0000
-        ctx.env.MEMSTART          = 0xC000_0000
 
         # ctx.define('configHAS_VIRTIO', 1)
         # ctx.define('VIRTIO_USE_MMIO', 1)
