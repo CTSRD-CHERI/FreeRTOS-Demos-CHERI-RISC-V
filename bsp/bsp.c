@@ -348,7 +348,7 @@ void prvSetupHardware( void )
     #endif
 }
 
-#if !(PLATFORM_QEMU_VIRT || PLATFORM_FETT || PLATFORM_GFE)
+#if !(PLATFORM_QEMU_VIRT || PLATFORM_FETT || PLATFORM_GFE || PLATFORM_DE10TOOOBA)
 __attribute__( ( weak ) ) BaseType_t xNetworkInterfaceInitialise( void )
 {
     printf( "xNetworkInterfaceInitialise is not implemented, No NIC backend driver\n" );

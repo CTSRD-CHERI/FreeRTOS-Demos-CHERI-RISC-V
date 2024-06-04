@@ -475,7 +475,8 @@ class FreeRTOSBspDE10Toooba(FreeRTOSBsp):
         ctx.define('PLIC_PRIORITY_SPI1', 0x2)
 
         ctx.define('configCPU_CLOCK_HZ', 50_000_000)
-        # This is used for the UART, which is defined in de10toooba-cheri-bgas/bluespec/CHERI_BGAS_System.bsv
+        # This is used to compute the UART baud rate,
+        # defined in de10pro-cheri-bgas/bluespec/CHERI_BGAS_System.bsv
         ctx.define('configPERIPH_CLOCK_HZ', 50_000_000)
         ctx.define('configMTIME_HZ', 250_000)
 
@@ -506,15 +507,36 @@ class FreeRTOSBspDE10Toooba(FreeRTOSBsp):
         ctx.env.configSRAM_START     = 0xC200_0000
         ctx.env.configSRAM_SIZE      = 0x3E00_0000
 
-        # ctx.define('configHAS_VIRTIO', 1)
-        # ctx.define('VIRTIO_USE_MMIO', 1)
-        # ctx.define('configHAS_VIRTIO_NET', 1)
-        # ctx.define('VIRTIO_NET_MMIO_ADDRESS', 0x10008000)
-        # ctx.define('VIRTIO_NET_MMIO_SIZE', 0x1000)
-        # ctx.define('VIRTIO_NET_PLIC_INTERRUPT_ID', 0x8)
-        # ctx.define('VIRTIO_NET_PLIC_INTERRUPT_PRIO', 0x1)
-        # ctx.define('VIRTIO_BLK_MMIO_ADDRESS', 0x10007000)
-        # ctx.define('VIRTIO_BLK_MMIO_SIZE', 0x1000 )
+
+        # We expect there to be a tinyemu-virtio server at the other end of some mapped memory.
+        # See <https://github.com/CTSRD-CHERI/tinyemu-virtio>.
+        # This starts at 0x4000_0000 (see de10pro-cheri-bgas/bluespec/SoC_Map.bsv)
+        # and has the following devices mapped at successive 0x1000 addresses:
+        # - 0x4000_0000, irq=BASE   = network
+        # - 0x4000_1000, irq=BASE+1 = entropy
+        # - 0x4000_2000, irq=BASE+2 = block (if created, else console (if created))
+        # - 0x4000_3000, irq=BASE+3 = console (if block and console are both present)
+        # (see tinyemu-virtio/virtiodevices.cpp)
+        # Technically the order of block and console can be swapped depending on the order of creation
+        # in tinyemu-virtio/main.cpp. Having the addresses be control-flow dependent is bad, and I want to fix this,
+        # but for now we can rely on tinyemu-virtio/main.cpp creating block first.
+        # The BASE irq is set in the call to VirtioDevices constructor in fpga.cpp, which uses FIRST_VIRTIO_IRQ
+        # which is defined as 3 => hence I believe the virtio network interrupt is 0x3.
+        ctx.define('configHAS_VIRTIO', 1)
+        ctx.define('VIRTIO_USE_MMIO', 1)
+        # Network device
+        ctx.define('configHAS_VIRTIO_NET', 1)
+        ctx.define('VIRTIO_NET_MMIO_ADDRESS', 0x4000_0000)
+        ctx.define('VIRTIO_NET_MMIO_SIZE',         0x1000)
+        ctx.define('VIRTIO_NET_PLIC_INTERRUPT_ID',   0x3)
+        ctx.define('VIRTIO_NET_PLIC_INTERRUPT_PRIO', 0x1)
+        # Block device
+        if ctx.env.VIRTIO_BLK:
+            ctx.define('configHAS_VIRTIO_BLK', 1)
+        else:
+            print("Warning: the --use-virtio-blk option was not set so a slow-to-init RAMDISK will be used")
+        ctx.define('VIRTIO_BLK_MMIO_ADDRESS', 0x4000_2000)
+        ctx.define('VIRTIO_BLK_MMIO_SIZE',         0x1000)
 
         if ctx.env.RISCV_XLEN == '64':
             ctx.define('MCAUSE_EXTERNAL_INTERRUPT', '0x800000000000000b', False)
@@ -794,7 +816,7 @@ class FreeRTOSLibTCPIP(FreeRTOSLib):
             self.libtcpip_dir + '/portable/Compiler/GCC'
         ]
 
-        if ctx.env.PLATFORM in ["qemu_virt", "fett"]:
+        if ctx.env.PLATFORM in ["qemu_virt", "fett", "de10toooba"]:
             self.driver_srcs = [
                 self.libtcpip_dir +
                 '/portable/NetworkInterface/virtio/NetworkInterface.c']
