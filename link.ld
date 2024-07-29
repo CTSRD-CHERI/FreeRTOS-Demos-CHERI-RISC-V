@@ -212,6 +212,10 @@ SECTIONS {
       __unprivileged_sram_end__ = ABSOLUTE(.);
     } > SRAM
 
+    . = ALIGN(8);
+    PROVIDE(__eh_frame = .);
+    .eh_frame : { KEEP (*(.eh_frame)) *(.eh_frame.*) } > SRAM
+
     __SRAM_segment_end__ = ABSOLUTE(.);
 
     .uncached (NOLOAD) : {

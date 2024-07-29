@@ -541,6 +541,11 @@ class FreeRTOSBspDE10Toooba(FreeRTOSBsp):
         ctx.define('VIRTIO_BLK_MMIO_ADDRESS', 0x4000_2000)
         ctx.define('VIRTIO_BLK_MMIO_SIZE',         0x1000)
 
+        # Include iocaps
+        # TODO put behind if ctx.env.VIRTIO_IOCAPS or similar
+        ctx.define('VIRTIO_USE_IOCAPS', 1)
+        ctx.define('VIRTIO_IOCAP_KEYMNGR_ADDRESS', 0x5000_0000)
+
         if ctx.env.RISCV_XLEN == '64':
             ctx.define('MCAUSE_EXTERNAL_INTERRUPT', '0x800000000000000b', False)
         else:
@@ -788,7 +793,9 @@ class FreeRTOSLibVirtIO(FreeRTOSLib):
         self.srcs = [
             self.libvirtio_dir + 'virtio.c',
             self.libvirtio_dir + 'virtio-net.c',
-            self.libvirtio_dir + 'helpers.c'
+            self.libvirtio_dir + 'helpers.c',
+            # TODO put behind if ctx.env.VIRTIO_IOCAPS or similar
+            self.libvirtio_dir + 'iocap/librust_caps_c_panic.c',
         ]
 
         if ctx.env.VIRTIO_BLK:
@@ -1168,7 +1175,6 @@ def freertos_libs_configure(conf):
 
 def freertos_bsp_configure(conf):
     platform = conf.options.riscv_platform
-
     if platform == "de10toooba":
         FreeRTOSBspDE10Toooba.configure(conf)
     elif platform == 'qemu_virt':
@@ -1848,7 +1854,13 @@ def build(bld):
     # linking the demo
     use_libs = []
     if not (bld.env.COMPARTMENTALIZE and bld.env.DYN_LOAD_APP):
-        use_libs = bld.env.PROG
+        use_libs = [bld.env.PROG]
+
+    # TODO put behind if ctx.env.VIRTIO_IOCAPS or similar
+    bld.env.LIB_IOCAPS = ["rust_caps_c"]
+    bld.env.LIBPATH_IOCAPS = [os.path.join(os.getcwd(), "../../../FreeRTOS-Labs/FreeRTOS-Labs/Source/FreeRTOS-libvirtio/iocap")]
+    bld.env.INCLUDES_IOCAPS = []
+    use_libs.append("IOCAPS")
 
     if bld.env.PROG not in use_libs:
         main_libs += [bld.env.PROG]
