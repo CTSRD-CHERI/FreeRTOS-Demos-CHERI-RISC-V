@@ -507,6 +507,9 @@ class FreeRTOSBspDE10Toooba(FreeRTOSBsp):
         ctx.env.configSRAM_START     = 0xC200_0000
         ctx.env.configSRAM_SIZE      = 0x3E00_0000
 
+        ctx.define('DEBUG', 1)
+        ctx.define('ipconfigHAS_DEBUG_PRINTF', 1)
+        ctx.define('configFF_FORMATTED_DISK_IMAGE', 1)
 
         # We expect there to be a tinyemu-virtio server at the other end of some mapped memory.
         # See <https://github.com/CTSRD-CHERI/tinyemu-virtio>.

@@ -174,6 +174,7 @@ uint64_t port_get_current_mtime( void )
 
         /* Create the VirtIO Block Disk. */
         #if configHAS_VIRTIO_BLK
+            printf("FF_VirtIODiskInit\n");
             pxDisk = FF_VirtIODiskInit( mainDISK_NAME, mainIO_MANAGER_CACHE_SIZE );
 
             #if DEBUG
@@ -181,6 +182,7 @@ uint64_t port_get_current_mtime( void )
                 FF_VirtIODiskShowPartition( pxDisk );
             #endif
         #else
+            printf("FF_RAMDiskInit\n");
             static uint8_t ucRAMDisk[ mainRAM_DISK_SECTORS * mainRAM_DISK_SECTOR_SIZE ];
             pxDisk = FF_RAMDiskInit( mainDISK_NAME, ucRAMDisk, mainRAM_DISK_SECTORS, (uint32_t) mainIO_MANAGER_CACHE_SIZE );
 
@@ -291,9 +293,12 @@ uint64_t port_get_current_mtime( void )
 int demo_main( void )
 {
     prvSetupHardware();
+    printf("prvSetupHardware done\n");
 
     #if mainCONFIG_INIT_FAT_FILESYSTEM
+        printf("prvCreateDisk\n");
         prvCreateDisk();
+        printf("prvCreateDisk done\n");
     #endif
 
     /* The mainCREATE_SIMPLE_BLINKY_DEMO_ONLY setting is described at the top
@@ -316,6 +321,7 @@ int demo_main( void )
         }
     #elif mainDEMO_TYPE == 6
         {
+            printf("main_servers\n");
             main_servers();
         }
     #elif mainDEMO_TYPE == 42

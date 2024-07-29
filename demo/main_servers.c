@@ -405,6 +405,8 @@ int main_servers( void )
     const uint32_t ulLongTime_ms = 250UL, ulCheckTimerPeriod_ms = 15000UL;
     TimerHandle_t xCheckTimer;
 
+    printf("main_servers\n");
+
     if( xTaskGetSchedulerState() == taskSCHEDULER_RUNNING )
     {
         vTaskSuspendAll();
@@ -418,9 +420,12 @@ int main_servers( void )
      * warnings about variables being used before they are set.
      */
 
+    printf("prvMiscInitialisation\n");
+
     /* Miscellaneous initialisation including preparing the logging and seeding
      * the random number generator. */
     prvMiscInitialisation();
+    printf("prvMiscInitialisation done\n");
 
     /* Initialise the network interface.
      *
