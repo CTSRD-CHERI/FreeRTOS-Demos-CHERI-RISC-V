@@ -435,48 +435,63 @@ class FreeRTOSBspDE10Toooba(FreeRTOSBsp):
     def configure(ctx):
         ctx.define('PLATFORM_DE10TOOOBA', 1)
 
+        # based on https://github.com/CTSRD-CHERI/DE10Pro-softcore-devicetree/blob/89347e33114d0786a80743952c2f60921951760d/devicetree.dts
+
+
         # TODO what is this
         # ctx.define('configPORT_HAS_HPM_COUNTERS', 1)
 
         # "Near_Mem_IO (including CLINT, the core-local interruptor)""
         # TODO this is deprecated and we should set configMTIME_BASE_ADDRESS and configMTIMECMP_BASE_ADDRESS directly instead
         ctx.define('configCLINT_BASE_ADDRESS', 0x1000_0000)
-        # TODO don't have a source for this but I assume it's right
         ctx.define('CLINT_CTRL_ADDR', 0x1000_0000)
 
+        # Configure it to use UART0
         ctx.define('configUART16550_BASE', 0x6230_0000)
         # See Bluestuff/AXI4_Fake_16550.bsv
-        ctx.define('configUART16550_BAUD', 9600)
-        # ctx.define('configUART16550_BAUD', 115200)
+        ctx.define('configUART16550_BAUD', 115200)
         # "regshift" = the amount the REGister indices on the uart are SHIFTed.
         # The fake 16550 looks at (address[4:2] => bottom two bits don't matter)
         ctx.define('configUART16550_REGSHIFT', 2)
 
+        # see DTS for the PLIC attributes, and below for a commented out version that I think maps 1:1.
+        # some of the devices FreeRTOS expects (e.g. DMA_MM2S) aren't specified in the DTS, so I just reordered the 
+        # old PLIC config to ensure the UARTs are at the top.
         ctx.define('PLIC_BASE_ADDR', 0x0C00_0000)
         ctx.define('PLIC_BASE_SIZE', 0x0040_0000)
-        # TODO haven't checked these
         ctx.define('PLIC_NUM_SOURCES', 16)
         ctx.define('PLIC_NUM_PRIORITIES', 16)
+
         ctx.define('PLIC_SOURCE_UART0', 0x1)
-        ctx.define('PLIC_SOURCE_ETH', 0x2)
-        ctx.define('PLIC_SOURCE_DMA_MM2S', 0x3)
-        ctx.define('PLIC_SOURCE_DMA_S2MM', 0x4)
-        ctx.define('PLIC_SOURCE_SPI0', 0x5)
-        ctx.define('PLIC_SOURCE_UART1', 0x6)
-        ctx.define('PLIC_SOURCE_IIC0', 0x7)
-        ctx.define('PLIC_SOURCE_SPI1', 0x8)
+        ctx.define('PLIC_SOURCE_UART1', 0x2)
+        ctx.define('PLIC_SOURCE_DMA_MM2S', 0x3) # actually virtio net
+        ctx.define('PLIC_SOURCE_DMA_S2MM', 0x4) # actually virtio entropy
+        ctx.define('PLIC_SOURCE_SPI0', 0x5) # actually virtio block device
+        ctx.define('PLIC_SOURCE_ETH', 0x6)  # actually nothing
+        ctx.define('PLIC_SOURCE_IIC0', 0x7) # actually nothing
+        ctx.define('PLIC_SOURCE_SPI1', 0x8) # actually nothing
+
         ctx.define('PLIC_PRIORITY_UART0', 0x1)
-        ctx.define('PLIC_PRIORITY_ETH', 0x2)
-        ctx.define('PLIC_PRIORITY_DMA_MM2S', 0x3)
-        ctx.define('PLIC_PRIORITY_DMA_S2MM', 0x3)
-        ctx.define('PLIC_PRIORITY_SPI0', 0x3)
         ctx.define('PLIC_PRIORITY_UART1', 0x1)
-        ctx.define('PLIC_PRIORITY_IIC0', 0x3)
-        ctx.define('PLIC_PRIORITY_SPI1', 0x2)
+        ctx.define('PLIC_PRIORITY_DMA_MM2S', 0x3) # actually virtio net
+        ctx.define('PLIC_PRIORITY_DMA_S2MM', 0x3) # actually virtio entropy
+        ctx.define('PLIC_PRIORITY_SPI0', 0x3) # actually virtio block device
+        ctx.define('PLIC_PRIORITY_ETH', 0x2)  # actually nothing
+        ctx.define('PLIC_PRIORITY_IIC0', 0x3) # actually nothing
+        ctx.define('PLIC_PRIORITY_SPI1', 0x2) # actually nothing
+
+        # ctx.define('PLIC_NUM_PRIORITIES', 8)
+        # ctx.define('PLIC_SOURCE_UART0', 0x1)
+        # ctx.define('PLIC_SOURCE_UART1', 0x2)
+        # ctx.define('PLIC_SOURCE_ETH', 0x3)
+        # ctx.define('PLIC_PRIORITY_UART0', 0x1)
+        # ctx.define('PLIC_PRIORITY_UART1', 0x2)
+        # ctx.define('PLIC_PRIORITY_ETH', 0x3)
 
         ctx.define('configCPU_CLOCK_HZ', 50_000_000)
         # This is used to compute the UART baud rate,
         # defined in de10pro-cheri-bgas/bluespec/CHERI_BGAS_System.bsv
+        # and noted in the dts linked above as the clock rate for the uarts
         ctx.define('configPERIPH_CLOCK_HZ', 50_000_000)
         ctx.define('configMTIME_HZ', 250_000)
 
@@ -507,6 +522,7 @@ class FreeRTOSBspDE10Toooba(FreeRTOSBsp):
         ctx.env.configSRAM_START     = 0xC200_0000
         ctx.env.configSRAM_SIZE      = 0x3E00_0000
 
+        # These are debug configs that TODO should be turned off.
         ctx.define('DEBUG', 1)
         ctx.define('ipconfigHAS_DEBUG_PRINTF', 1)
         ctx.define('configFF_FORMATTED_DISK_IMAGE', 1)
@@ -515,10 +531,10 @@ class FreeRTOSBspDE10Toooba(FreeRTOSBsp):
         # See <https://github.com/CTSRD-CHERI/tinyemu-virtio>.
         # This starts at 0x4000_0000 (see de10pro-cheri-bgas/bluespec/SoC_Map.bsv)
         # and has the following devices mapped at successive 0x1000 addresses:
-        # - 0x4000_0000, irq=BASE   = network
-        # - 0x4000_1000, irq=BASE+1 = entropy
-        # - 0x4000_2000, irq=BASE+2 = block (if created, else console (if created))
-        # - 0x4000_3000, irq=BASE+3 = console (if block and console are both present)
+        # - 0x4000_0000, irq=BASE   = network (plic 3)
+        # - 0x4000_1000, irq=BASE+1 = entropy (plic 4)
+        # - 0x4000_2000, irq=BASE+2 = block (if created, else console (if created)) (plic 5)
+        # - 0x4000_3000, irq=BASE+3 = console (if block and console are both present) (no plic)
         # (see tinyemu-virtio/virtiodevices.cpp)
         # Technically the order of block and console can be swapped depending on the order of creation
         # in tinyemu-virtio/main.cpp. Having the addresses be control-flow dependent is bad, and I want to fix this,
