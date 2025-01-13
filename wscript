@@ -558,8 +558,11 @@ class FreeRTOSBspDE10Toooba(FreeRTOSBsp):
         ctx.define('VIRTIO_BLK_MMIO_SIZE',         0x1000)
 
         # Include iocaps
-        # TODO put behind if ctx.env.VIRTIO_IOCAPS or similar
+        # TODO put these behind if ctx.env.VIRTIO_IOCAPS or similar
         ctx.define('VIRTIO_USE_IOCAPS', 1)
+        # iocaps require AES, which libmbedtls provides
+        ctx.env.append_value('LIB_DEPS', ['freertos_libmbedtls'])
+
         ctx.define('VIRTIO_IOCAP_KEYMNGR_ADDRESS', 0x5000_0000)
 
         if ctx.env.RISCV_XLEN == '64':
@@ -810,8 +813,9 @@ class FreeRTOSLibVirtIO(FreeRTOSLib):
             self.libvirtio_dir + 'virtio.c',
             self.libvirtio_dir + 'virtio-net.c',
             self.libvirtio_dir + 'helpers.c',
-            # TODO put behind if ctx.env.VIRTIO_IOCAPS or similar
-            self.libvirtio_dir + 'iocap/librust_caps_c_panic.c',
+            # TODO put these behind if ctx.env.VIRTIO_IOCAPS or similar
+            self.libvirtio_dir + 'iocap/libccap.c',
+            self.libvirtio_dir + 'iocap/libccap_platform.c',
         ]
 
         if ctx.env.VIRTIO_BLK:
@@ -1159,6 +1163,10 @@ class FreeRTOSLibMbedTLS(FreeRTOSLib):
             self.libmbedtls_dir,
             '../../../FreeRTOS-Plus/ThirdParty/mbedtls/include/'
         ]
+
+        # Make sure all the mbedtls headers use the config file I have added inside libmbedtls_dir
+        config_file = os.path.join(ctx.path.abspath(), self.libmbedtls_dir, "mbedtls_config.h")
+        ctx.define("MBEDTLS_CONFIG_FILE", f'{config_file}')
 
         FreeRTOSLib.__init__(self, ctx)
 
@@ -1871,12 +1879,6 @@ def build(bld):
     use_libs = []
     if not (bld.env.COMPARTMENTALIZE and bld.env.DYN_LOAD_APP):
         use_libs = [bld.env.PROG]
-
-    # TODO put behind if ctx.env.VIRTIO_IOCAPS or similar
-    bld.env.LIB_IOCAPS = ["rust_caps_c"]
-    bld.env.LIBPATH_IOCAPS = [os.path.join(os.getcwd(), "../../../FreeRTOS-Labs/FreeRTOS-Labs/Source/FreeRTOS-libvirtio/iocap")]
-    bld.env.INCLUDES_IOCAPS = []
-    use_libs.append("IOCAPS")
 
     if bld.env.PROG not in use_libs:
         main_libs += [bld.env.PROG]
