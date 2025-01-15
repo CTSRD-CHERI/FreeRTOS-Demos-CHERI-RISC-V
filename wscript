@@ -153,6 +153,17 @@ class FreeRTOSBspQemuVirt(FreeRTOSBsp):
         if ctx.env.VIRTIO_BLK:
             ctx.define('configHAS_VIRTIO_BLK', 1)
 
+        if ctx.env.VIRTIO_IOCAPS:
+            ctx.define('VIRTIO_USE_IOCAPS', 1)
+            # iocaps require AES, which libmbedtls provides
+            ctx.env.append_value('LIB_DEPS', ['freertos_libmbedtls'])
+            ctx.define('VIRTIO_IOCAP_KEYMNGR_ADDRESS', 0x5000_0000)
+
+            # These are debug configs that TODO should be turned off.
+            ctx.define('DEBUG', 1)
+            ctx.define('ipconfigHAS_DEBUG_PRINTF', 1)
+            ctx.define('configFF_FORMATTED_DISK_IMAGE', 1)
+
 class FreeRTOSBspSpike(FreeRTOSBsp):
     def __init__(self, ctx):
         self.platform = "spike"
@@ -558,12 +569,11 @@ class FreeRTOSBspDE10Toooba(FreeRTOSBsp):
         ctx.define('VIRTIO_BLK_MMIO_SIZE',         0x1000)
 
         # Include iocaps
-        # TODO put these behind if ctx.env.VIRTIO_IOCAPS or similar
-        ctx.define('VIRTIO_USE_IOCAPS', 1)
-        # iocaps require AES, which libmbedtls provides
-        ctx.env.append_value('LIB_DEPS', ['freertos_libmbedtls'])
-
-        ctx.define('VIRTIO_IOCAP_KEYMNGR_ADDRESS', 0x5000_0000)
+        if ctx.env.VIRTIO_IOCAPS:
+            ctx.define('VIRTIO_USE_IOCAPS', 1)
+            # iocaps require AES, which libmbedtls provides
+            ctx.env.append_value('LIB_DEPS', ['freertos_libmbedtls'])
+            ctx.define('VIRTIO_IOCAP_KEYMNGR_ADDRESS', 0x5000_0000)
 
         if ctx.env.RISCV_XLEN == '64':
             ctx.define('MCAUSE_EXTERNAL_INTERRUPT', '0x800000000000000b', False)
@@ -813,13 +823,16 @@ class FreeRTOSLibVirtIO(FreeRTOSLib):
             self.libvirtio_dir + 'virtio.c',
             self.libvirtio_dir + 'virtio-net.c',
             self.libvirtio_dir + 'helpers.c',
-            # TODO put these behind if ctx.env.VIRTIO_IOCAPS or similar
-            self.libvirtio_dir + 'iocap/libccap.c',
-            self.libvirtio_dir + 'iocap/libccap_platform.c',
         ]
 
         if ctx.env.VIRTIO_BLK:
             self.srcs += [self.libvirtio_dir + 'virtio-blk.c']
+
+        if ctx.env.VIRTIO_IOCAPS:
+            self.srcs += [
+                self.libvirtio_dir + 'iocap/libccap.c',
+                self.libvirtio_dir + 'iocap/libccap_platform.c',
+            ]
 
         self.includes = [self.libvirtio_dir]
         self.export_includes = [self.libvirtio_dir]
@@ -1391,6 +1404,11 @@ def options(ctx):
                    action='store_true',
                    default=False,
                    help='Use VirtIO Block Device for the file system')
+    
+    ctx.add_option('--use-virtio-iocaps',
+                action='store_true',
+                default=False,
+                help='Enable VirtIO devices to use IOcaps as descriptors where negotiated')
 
     ctx.add_option('--create-disk-image',
                    action='store_true',
@@ -1491,6 +1509,7 @@ def configure(ctx):
     ctx.env.MEMSTART = ctx.options.mem_start
     ctx.env.UNCACHED_MEMSTART = ctx.options.uncached_mem_start
     ctx.env.VIRTIO_BLK = ctx.options.use_virtio_blk
+    ctx.env.VIRTIO_IOCAPS = ctx.options.use_virtio_iocaps
     ctx.env.CREATE_DISK_IMAGE = ctx.options.create_disk_image
     ctx.env.PROGRAM_PATH = ctx.options.program_path
     ctx.env.PROGRAM_ENTRY = ctx.env.PROG
