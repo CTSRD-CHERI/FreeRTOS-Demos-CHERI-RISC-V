@@ -157,7 +157,7 @@ class FreeRTOSBspQemuVirt(FreeRTOSBsp):
             ctx.define('VIRTIO_USE_IOCAPS', 1)
             # iocaps require AES, which libmbedtls provides
             ctx.env.append_value('LIB_DEPS', ['freertos_libmbedtls'])
-            ctx.define('VIRTIO_IOCAP_KEYMNGR_ADDRESS', 0x5000_0000)
+            ctx.define('VIRTIO_IOCAP_KEYMNGR_ADDRESS', 0x102000)
 
             # These are debug configs that TODO should be turned off.
             ctx.define('DEBUG', 1)
