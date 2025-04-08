@@ -365,7 +365,7 @@ static TaskHandle_t xServerWorkTaskHandle = NULL;
             for( int i = 0; i < 35; i++ )
             {
                 printf( "x%i ", i );
-                cheri_print_cap( *( exception_frame + i ) );
+                cheri_print_cap( ( void * ) *( exception_frame + i ) );
             }
 
             printf( "mepc = 0x%lx\n", epc );
