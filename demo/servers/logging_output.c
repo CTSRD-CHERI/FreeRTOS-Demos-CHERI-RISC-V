@@ -39,6 +39,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdarg.h>
+#include <ctype.h>
 
 /* FreeRTOS includes. */
 #include <FreeRTOS.h>
