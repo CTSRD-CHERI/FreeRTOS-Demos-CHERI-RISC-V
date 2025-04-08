@@ -193,7 +193,8 @@ init_stack:
 #if __CHERI_PURE_CAPABILITY__
     # From now on, do purecap ABI but in hybrid mode.
     la              sp, _stack_end
-    cfromptr        csp, ddc, sp # Get DDC.
+    cspecialr       ct2, ddc
+    csetaddr        csp, ct2, sp
     la              t2, _stack
     sub             t2, t2, sp # length of the stack
     csetbounds      csp, csp, t2
