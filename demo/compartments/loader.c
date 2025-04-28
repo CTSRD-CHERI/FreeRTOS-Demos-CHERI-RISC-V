@@ -178,7 +178,7 @@ void vCompartmentsLoad( void )
         cheri_print_cap( call );
         printf( "CCalling captable -> " );
         cheri_print_cap( data_cap );
-        asm volatile ( ".balign 4\nccall %0, %1" : : "C" ( call ), "C" ( data_cap ) : );
+        __asm__ volatile ( ".balign 4\nccall %0, %1" : : "C" ( call ), "C" ( data_cap ) : );
     #else
         call();
     #endif

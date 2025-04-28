@@ -62,7 +62,7 @@ void externFunc( void * pvParameters ) {
 void externFault( void * pvParameters ) {
     start_hpms.counters[COUNTER_INSTRET] = portCounterGet(COUNTER_INSTRET);
     start_hpms.counters[COUNTER_CYCLE] = portCounterGet(COUNTER_CYCLE);
-    asm volatile ("li a7, -1; ecall");
+    __asm__ volatile ("li a7, -1; ecall");
     //*((volatile int *) 0) = 0;
 }
 

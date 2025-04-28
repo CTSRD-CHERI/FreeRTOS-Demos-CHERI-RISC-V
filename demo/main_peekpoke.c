@@ -153,11 +153,11 @@ static UBaseType_t cheri_exception_handler( uintptr_t * exception_frame )
         size_t epc = 0;
         size_t cheri_cause;
 
-        asm volatile ( "csrr %0, mcause" : "=r" ( cause )::);
-        asm volatile ( "csrr %0, mepc" : "=r" ( epc )::);
+        __asm__ volatile ( "csrr %0, mcause" : "=r" ( cause )::);
+        __asm__ volatile ( "csrr %0, mepc" : "=r" ( epc )::);
 
         size_t ccsr = 0;
-        asm volatile ( "csrr %0, mccsr" : "=r" ( ccsr )::);
+        __asm__ volatile ( "csrr %0, mccsr" : "=r" ( ccsr )::);
 
         uint8_t reg_num = ( uint8_t ) ( ( ccsr >> 10 ) & 0x1f );
         bool is_scr = ( ( ccsr >> 15 ) & 0x1 );
@@ -186,8 +186,8 @@ static UBaseType_t default_exception_handler( uintptr_t * exception_frame )
     size_t cause = 0;
     size_t epc = 0;
 
-    asm volatile ( "csrr %0, mcause" : "=r" ( cause )::);
-    asm volatile ( "csrr %0, mepc" : "=r" ( epc )::);
+    __asm__ volatile ( "csrr %0, mcause" : "=r" ( cause )::);
+    __asm__ volatile ( "csrr %0, mepc" : "=r" ( epc )::);
     printf( "mcause = %u\n", cause );
     printf( "mepc = %llx\n", epc );
 
