@@ -92,14 +92,14 @@ void ecall( void ) {
     for( int i = 0; i < DISCARD_RUNS; i++ ) {
         start_hpms.counters[COUNTER_INSTRET] = portCounterGet(COUNTER_INSTRET);
         start_hpms.counters[COUNTER_CYCLE] = portCounterGet(COUNTER_CYCLE);
-        asm volatile("li a7, 1; ecall");
+        __asm__ volatile("li a7, 1; ecall");
         end_hpms.counters[COUNTER_INSTRET] = portCounterGet(COUNTER_INSTRET);
         end_hpms.counters[COUNTER_CYCLE] = portCounterGet(COUNTER_CYCLE);
     }
 
     start_hpms.counters[COUNTER_CYCLE] = portCounterGet(COUNTER_CYCLE);
     start_hpms.counters[COUNTER_INSTRET] = portCounterGet(COUNTER_INSTRET);
-    asm volatile("li a7, 1; ecall");
+    __asm__ volatile("li a7, 1; ecall");
     end_hpms.counters[COUNTER_INSTRET] = portCounterGet(COUNTER_INSTRET);
     end_hpms.counters[COUNTER_CYCLE] = portCounterGet(COUNTER_CYCLE);
 

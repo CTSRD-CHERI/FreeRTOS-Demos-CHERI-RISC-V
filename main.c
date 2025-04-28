@@ -111,7 +111,7 @@ void vToggleLED( void );
 #if __riscv_xlen == 64
     #define read_csr( reg )                                  \
     ( { unsigned long __tmp;                                 \
-        asm volatile ( "csrr %0, " # reg : "=r" ( __tmp ) ); \
+        __asm__ volatile ( "csrr %0, " # reg : "=r" ( __tmp ) ); \
         __tmp; } )
 #endif
 
@@ -124,7 +124,7 @@ uint64_t get_cycle_count( void )
         return read_csr( cycle );
     #else
         uint32_t cycle_lo, cycle_hi;
-        asm volatile (
+        __asm__ volatile (
             "%=:\n\t"
             "csrr %1, cycleh\n\t"
             "csrr %0, cycle\n\t"
@@ -391,7 +391,7 @@ void vApplicationMallocFailedHook( void )
      * to query the size of free heap space that remains (although it does not
      * provide information on how the remaining heap might be fragmented). */
     taskDISABLE_INTERRUPTS();
-    __asm volatile ( "ebreak" );
+    __asm__ volatile ( "ebreak" );
 
     for( ; ; )
     {
@@ -423,7 +423,7 @@ void vApplicationStackOverflowHook( TaskHandle_t pxTask,
      * configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2.  This hook
      * function is called if a stack overflow is detected. */
     taskDISABLE_INTERRUPTS();
-    __asm volatile ( "ebreak" );
+    __asm__ volatile ( "ebreak" );
 
     for( ; ; )
     {

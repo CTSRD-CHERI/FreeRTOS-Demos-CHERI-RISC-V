@@ -131,12 +131,12 @@ plic_instance_t Plic;
                 rtems_rtl_obj * obj = NULL;
             #endif
 
-            asm volatile ( "csrr %0, mcause" : "=r" ( cause )::);
-            asm volatile ( "csrr %0, mepc" : "=r" ( epc )::);
-            asm volatile ( "cspecialr %0, mepcc" : "=C" ( mepcc )::);
+            __asm__ volatile ( "csrr %0, mcause" : "=r" ( cause )::);
+            __asm__ volatile ( "csrr %0, mepc" : "=r" ( epc )::);
+            __asm__ volatile ( "cspecialr %0, mepcc" : "=C" ( mepcc )::);
 
             size_t ccsr = 0;
-            asm volatile ( "csrr %0, mtval" : "=r" ( ccsr )::);
+            __asm__ volatile ( "csrr %0, mtval" : "=r" ( ccsr )::);
 
             uint8_t reg_num = ( uint8_t ) ( ( ccsr >> 5 ) & 0x1f );
             int is_scr = ( ( ccsr >> 10 ) & 0x1 );
@@ -242,9 +242,9 @@ plic_instance_t Plic;
                 rtems_rtl_obj * obj = NULL;
             #endif
 
-            asm volatile ( "csrr %0, mcause" : "=r" ( cause )::);
-            asm volatile ( "csrr %0, mepc" : "=r" ( epc )::);
-            asm volatile ( "csrr %0, mtval" : "=r" ( mtval )::);
+            __asm__ volatile ( "csrr %0, mcause" : "=r" ( cause )::);
+            __asm__ volatile ( "csrr %0, mepc" : "=r" ( epc )::);
+            __asm__ volatile ( "csrr %0, mtval" : "=r" ( mtval )::);
 
 
             #if (DEBUG)
