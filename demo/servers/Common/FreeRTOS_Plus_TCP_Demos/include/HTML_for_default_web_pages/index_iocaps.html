@@ -29,7 +29,7 @@
 		</style>
 	</head>
 	<body>
-		<table style="height:100%; width:1008px; background:white; border-right:solid 1px #e6e6e6; border-left:solid 1px #e6e6e6;" cellpadding="5" cellspacing="0" align="center">
+		<table style="height:100%; background:white; border-right:solid 1px #e6e6e6; border-left:solid 1px #e6e6e6;" cellpadding="5" cellspacing="0" align="center">
 			<tr valign="top">
 				<td style="width:100%; height:100px;"> <!-- Spans the left menu, blank line, and main content columns of the next row. -->
 					<font face="Arial, Helvetica">
@@ -61,19 +61,24 @@
 								<td>
 								</td>
 							</tr>
-							<tr style="height:19px;" bgcolor="#b6cffe"> <!-- Horizontal menu. -->
-								<td valign="middle" bgcolor="#b6cffe">
-								</td>
-							</tr>
 						</table>
 					</font>
 				</td>
 			</tr>
 			<tr valign="top"> <!-- Main content row with menu and content area columns. -->
-				<td style="padding: 20px 20px 20px 20px;">
-					<h1>
+				<td style="padding: 0px 20px 20px 20px;">
+					<!-- <h1>
 						CheriFreeRTOS+TCP+IOCaps Web Server
-					</h1>
+					</h1> -->
+					<div align="center">
+						<img src="ftp.png" style="width: 75%">
+						<small>
+							<br>
+							<b>
+								Served by IOCaps
+							</b>
+						</small>
+					</div>
 					This is the default page being served by the CheriFreeRTOS+TCP
 					web server over virtio-net, with files served from a disk implemented
 					using FreeRTOS+FAT over virtio-blk.
@@ -86,15 +91,6 @@
 					<p>
 					<b>NOTE:</b> Performance will be limited when using the
 					QEMU/Linux/virtio port.
-					<div align="center">
-						<img src="ftp.png" style="width: 75%">
-						<small>
-							<br>
-							<b>
-								Served by IOCaps
-							</b>
-						</small>
-					</div>
 				</td>
 			</tr>
 		</table>
