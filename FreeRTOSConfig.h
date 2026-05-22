@@ -200,11 +200,14 @@ extern uint64_t port_get_current_mtime( void );
 #define INCLUDE_xSemaphoreGetMutexHolder     1
 #define INCLUDE_xTaskGetSchedulerState       1
 
+#define configASSERT_str(s) #s
+
 /* Normal assert() semantics without relying on the provision of an assert.h
  * header file. */
 #define configASSERT( x )            \
     if( ( x ) == 0 )                 \
     {                                \
+        printf("assert fail: %s\n", configASSERT_str(x));   \
         taskDISABLE_INTERRUPTS();    \
         __asm volatile ( "ebreak" ); \
         for( ; ; )                   \
